@@ -1,0 +1,43 @@
+version: "3.5"
+services:
+  mlflow-client-jenkins:
+    image: docker.rep.msk.mts.ru/mlflow-client:${TAG:-test}
+    env_file: .env.jenkins
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      # for running local test, can be removed
+      - ./reports:/app/reports:rw
+      - ./docs/build:/app/docs/build:rw
+      - ./VERSION:/app/VERSION:rw
+      - ./setup.py:/app/setup.py:ro
+      - ./.coveragerc:/app/.coveragerc:ro
+      - ./.pylintrc:/app/.pylintrc:ro
+    depends_on:
+        - "mlflow-test"
+    networks:
+      - default
+      - mlflow
+    extra_hosts:
+      - rep.msk.mts.ru:10.73.8.86
+  mlflow-jenkins:
+    image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
+    env_file: .env.jenkins
+    restart: unless-stopped
+    depends_on:
+        - "mlflow-test-db"
+    networks:
+      - db
+      - mlflow
+  mlflow-jenkins-db:
+    image: postgres:11.8
+    env_file: .env.jenkins
+    restart: unless-stopped
+    networks:
+      - db
+networks:
+  mlflow:
+    internal: true
+  db:
+    internal: true
