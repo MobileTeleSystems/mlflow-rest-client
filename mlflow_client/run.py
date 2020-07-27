@@ -90,10 +90,11 @@ class Param(Tag):
 
 class Metric(object):
 
-    def __init__(self, key, value, timestamp=None):
+    def __init__(self, key, value, timestamp=None, step=0):
         self.key = key
         self.value = value
         self.timestamp = timestamp_2_time(timestamp)
+        self.step = step
 
 
     @classmethod
@@ -105,7 +106,8 @@ class Metric(object):
         return cls(
                     key=dct.get('key'),
                     value=dct.get('value'),
-                    timestamp=dct.get('timestamp')
+                    timestamp=dct.get('timestamp'),
+                    step=dct.get('step', 0)
                 )
 
     @classmethod
@@ -117,11 +119,11 @@ class Metric(object):
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
     def __repr__(self):
-        return "<Metric key={self.key} value={self.value} timestamp={self.timestamp}>"\
+        return "<Metric key={self.key} value={self.value} step={self.step} timestamp={self.timestamp}>"\
                 .format(self=self)
 
     def __str__(self):
-        return str("{self.key}: {self.value} at {self.timestamp}".format(self=self))
+        return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
 
 
     def __hash__(self):
@@ -134,8 +136,10 @@ class Metric(object):
                 other = self.from_dict(other)
             if isinstance(other, list):
                 other = self.from_list(other)
+            elif isinstance(other, tuple) and len(other) == 4:
+                other = self.__class__(key=other[0], value=other[1], step=other[2], timestamp=other[3])
             elif isinstance(other, tuple) and len(other) == 3:
-                other = self.__class__(key=other[0], value=other[1], timestamp=other[2])
+                other = self.__class__(key=other[0], value=other[1], step=other[2])
             elif isinstance(other, tuple) and len(other) == 2:
                 other = self.__class__(key=other[0], value=other[1])
             else:
