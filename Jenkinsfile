@@ -23,7 +23,6 @@ node('bdbuilder04') {
             Boolean isRelease = isMaster && env.GIT_TAG
 
             String testTag = isMaster ? 'test'   : 'dev-test'
-            String prodTag = isMaster ? 'latest' : 'dev'
 
             List pythonVersions = ['2.7', '3.6', '3.7']
 
