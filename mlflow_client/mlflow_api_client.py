@@ -156,7 +156,7 @@ class MLflowApiClient(object):
         :rtype: list[Run]
         """
         for run in self.search_runs_iterator(experiment_ids=[id]):
-            return run
+            yield run
 
 
     def get_run(self, id):
@@ -826,6 +826,7 @@ class MLflowApiClient(object):
         :rtype: dict
         """
         return self.transition_model_version_stage(name, version, stage=ModelVersionStage.archived, **params)
+
 
     def _handle_tags(self, tags):
         result = []
