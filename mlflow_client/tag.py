@@ -1,8 +1,8 @@
 class Tag(object):
 
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
+    def __init__(self, key, value=None):
+        self.key = str(key)
+        self.value = str(value)
 
 
     @classmethod
@@ -31,7 +31,7 @@ class Tag(object):
 
 
     def __str__(self):
-        return str("{self.key}: {self.value}".format(self=self))
+        return self.key
 
 
     def __hash__(self):
@@ -44,6 +44,8 @@ class Tag(object):
                 other = self.from_dict(other)
             elif isinstance(other, list):
                 other = self.from_list(other)
+            elif isinstance(other, str):
+                return other == self.__str__()
             elif isinstance(other, tuple) and len(other) == 2:
                 other = self.__class__(key=other[0], value=other[1])
             else:

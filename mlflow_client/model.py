@@ -9,11 +9,18 @@ class ModelVersionStage(Enum):
     prod = 'Production'
     archived = 'Archived'
 
+    def __hash__(self):
+        return hash(self.value)
+
 
 class ModelVersionState(Enum):
     pending = 'PENDING_REGISTRATION'
     failed = 'FAILED_REGISTRATION'
     ready = 'READY'
+
+    def __hash__(self):
+        return hash(self.value)
+
 
 class ModelVersionStatus(object):
 
@@ -38,7 +45,7 @@ class ModelVersionStatus(object):
     def __eq__(self, other):
         if other is not None and not isinstance(other, self.__class__):
             if isinstance(other, str):
-                other = self.__class__(other)
+                return other == self.__str__()
             elif isinstance(other, tuple) and len(other) == 2:
                 other = self.__class__(status=other[0], message=other[1])
         return repr(self) == repr(other)
@@ -60,26 +67,26 @@ class ModelVersion(object):
         version,
         creation_timestamp=None,
         last_updated_timestamp=None,
-        user_id=None,
-        current_stage=ModelVersionStage.unknown,
-        description="",
-        source="",
+        stage=ModelVersionStage.unknown,
+        description=None,
+        source=None,
         run_id=None,
         state=ModelVersionState.pending,
-        state_message="",
+        state_message=None,
         tags=None
     ):
-        self.name = name
-        self.version = version
+        self.name = str(name)
+        self.version = int(version)
         self.created_time = timestamp_2_time(creation_timestamp)
         self.updated_time = timestamp_2_time(last_updated_timestamp)
-        self.user_id = user_id
-        self.current_stage = ModelVersionStage(current_stage)
-        self.description = description
-        self.source = source
-        self.run_id = run_id
+        self.stage = ModelVersionStage(stage)
+        self.description = str(description) if description else ''
+        self.source = str(source) if source else ''
+        self.run_id = str(run_id) if run_id else None
         self.status = ModelVersionStatus(state, state_message)
-        self.tags = ModelVersionTag.from_list(tags or [])
+
+        _tags = ModelVersionTag.from_list(tags or [])
+        self.tags = {tag.key: tag for tag in _tags}
 
 
     @classmethod
@@ -93,13 +100,12 @@ class ModelVersion(object):
                     version=dct.get('version'),
                     creation_timestamp=dct.get('creation_timestamp'),
                     last_updated_timestamp=dct.get('last_updated_timestamp'),
-                    user_id=dct.get('user_id'),
-                    current_stage=dct.get('current_stage'),
-                    description=dct.get('description', ''),
-                    source=dct.get('source', ''),
+                    stage=dct.get('current_stage') or dct.get('stage'),
+                    description=dct.get('description'),
+                    source=dct.get('source'),
                     run_id=dct.get('run_id'),
                     state=dct.get('status', dct.get('state')).upper(),
-                    state_message=dct.get('status_message', dct.get('state_message', '')),
+                    state_message=dct.get('status_message') or dct.get('state_message'),
                     tags=dct.get('tags')
                 )
 
@@ -140,13 +146,17 @@ class ModelVersion(object):
 
 class Model(object):
 
-    def __init__(self, name, creation_timestamp=None, last_updated_timestamp=None, description='', versions=None, tags=None):
+    def __init__(self, name, creation_timestamp=None, last_updated_timestamp=None, description=None, versions=None, tags=None):
         self.name = name
         self.created_time = timestamp_2_time(creation_timestamp)
         self.updated_time = timestamp_2_time(last_updated_timestamp)
-        self.description = description
-        self.versions = ModelVersion.from_list(versions or [])
-        self.tags = ModelTag.from_list(tags or [])
+        self.description = str(description) if description else ''
+
+        _versions = ModelVersion.from_list(versions or [])
+        self.versions = {version.stage: version for version in _versions}
+
+        _tags = ModelTag.from_list(tags or [])
+        self.tags = {tag.key: tag for tag in _tags}
 
 
     @classmethod
@@ -191,10 +201,10 @@ class Model(object):
         if other is not None and not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 other = self.from_dict(other)
-            if isinstance(other, list):
+            elif isinstance(other, list):
                 other = self.from_list(other)
             elif isinstance(other, str):
-                other = self.__class__(name=other)
+                return other == self.__str__()
             else:
                 other = self.from_dict(vars(other))
         return repr(self) == repr(other)

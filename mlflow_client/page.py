@@ -7,7 +7,7 @@ class Page(object):
                 self.items = item_class.from_list(self.items, **kwargs)
             else:
                 self.items = [item_class(item, **kwargs) for item in self.items]
-        self.next_page_token = next_page_token
+        self.next_page_token = str(next_page_token) if next_page_token is not None else next_page_token
 
 
     @classmethod

@@ -2,10 +2,10 @@
 class FileInfo(object):
 
     def __init__(self, path, root=None, is_dir=False, file_size=None):
-        self.path = path
-        self.root = root
-        self.is_dir = is_dir
-        self.file_size = file_size
+        self.path = str(path)
+        self.root = str(root) if root else None
+        self.is_dir = bool(is_dir)
+        self.file_size = int(file_size) if file_size else 0
 
 
     @classmethod
@@ -57,7 +57,7 @@ class FileInfo(object):
             elif isinstance(other, list):
                 other = self.from_list(other)
             elif isinstance(other, str):
-                other = self.__class__(path=other)
+                return other == self.__str__()
             elif isinstance(other, tuple) and len(other) == 2:
                 other = self.__class__(root=other[0], path=other[1])
             else:

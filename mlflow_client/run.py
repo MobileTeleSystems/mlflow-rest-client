@@ -26,13 +26,14 @@ class RunViewType(Enum):
 
 class RunInfo(object):
 
-    def __init__(self, id, experiment_id=None, status=RunStatus.started, stage=RunStage.active, start_time=None, artifact_uri=''):
-        self.id = id
-        self.experiment_id = experiment_id
+    def __init__(self, id, experiment_id=None, status=RunStatus.started, stage=RunStage.active, start_time=None, end_time=None, artifact_uri=None):
+        self.id = str(id)
+        self.experiment_id = int(experiment_id)
         self.status = RunStatus(status)
         self.stage = RunStage(stage)
         self.start_time = timestamp_2_time(start_time)
-        self.artifact_uri = artifact_uri
+        self.end_time = timestamp_2_time(end_time)
+        self.artifact_uri = str(artifact_uri) if artifact_uri else ''
 
 
     @classmethod
@@ -42,12 +43,13 @@ class RunInfo(object):
         :type dct: dict
         """
         return cls(
-                    id=dct.get('run_id') or dct.get('run_uuid') or  dct.get('id'),
+                    id=dct.get('run_id') or dct.get('run_uuid') or dct.get('id'),
                     experiment_id=dct.get('experiment_id'),
                     status=dct.get('status'),
                     stage=(dct.get('lifecycle_stage') or dct.get('stage')).upper(),
                     start_time=dct.get('start_time'),
-                    artifact_uri=dct.get('artifact_uri', '')
+                    end_time=dct.get('end_time'),
+                    artifact_uri=dct.get('artifact_uri')
                 )
 
 
@@ -64,7 +66,7 @@ class RunInfo(object):
                 .format(self=self)
 
     def __str__(self):
-        return str(self.id)
+        return self.id
 
 
     def __hash__(self):
@@ -78,7 +80,7 @@ class RunInfo(object):
             elif isinstance(other, list):
                 other = self.from_list(other)
             elif isinstance(other, str):
-                other = self.__class__(other)
+                return other == self.__str__()
             else:
                 other = self.from_dict(vars(other))
         return repr(self) == repr(other)
@@ -90,11 +92,11 @@ class Param(Tag):
 
 class Metric(object):
 
-    def __init__(self, key, value, timestamp=None, step=0):
-        self.key = key
-        self.value = value
+    def __init__(self, key, value=None, timestamp=None, step=None):
+        self.key = str(key)
+        self.value = float(value) if value is not None else None
         self.timestamp = timestamp_2_time(timestamp)
-        self.step = step
+        self.step = int(step) if step else 0
 
 
     @classmethod
@@ -107,8 +109,9 @@ class Metric(object):
                     key=dct.get('key'),
                     value=dct.get('value'),
                     timestamp=dct.get('timestamp'),
-                    step=dct.get('step', 0)
+                    step=dct.get('step')
                 )
+
 
     @classmethod
     def from_list(cls, lst):
@@ -122,6 +125,7 @@ class Metric(object):
         return "<Metric key={self.key} value={self.value} step={self.step} timestamp={self.timestamp}>"\
                 .format(self=self)
 
+
     def __str__(self):
         return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
 
@@ -134,8 +138,10 @@ class Metric(object):
         if other is not None and not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 other = self.from_dict(other)
-            if isinstance(other, list):
+            elif isinstance(other, list):
                 other = self.from_list(other)
+            elif isinstance(other, str):
+                return other == self.__str__()
             elif isinstance(other, tuple) and len(other) == 4:
                 other = self.__class__(key=other[0], value=other[1], step=other[2], timestamp=other[3])
             elif isinstance(other, tuple) and len(other) == 3:
@@ -154,9 +160,14 @@ class RunTag(Tag):
 class RunData(object):
 
     def __init__(self, params=None, metrics=None, tags=None):
-        self.params = Param.from_list(params or [])
-        self.metrics = Metric.from_list(metrics or [])
-        self.tags = RunTag.from_list(tags or [])
+        _params = Param.from_list(params or [])
+        self.params = {param.key: param for param in _params}
+
+        _metrics = Metric.from_list(metrics or [])
+        self.metrics = {metric.key: metric for metric in _metrics}
+
+        _tags = RunTag.from_list(tags or [])
+        self.tags = {tag.key: tag for tag in _tags}
 
     @classmethod
     def from_dict(cls, dct):
@@ -187,7 +198,7 @@ class RunData(object):
         if other is not None and not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 other = self.from_dict(other)
-            if isinstance(other, list):
+            elif isinstance(other, list):
                 other = self.from_list(other)
             else:
                 other = self.from_dict(vars(other))
@@ -245,8 +256,10 @@ class Run(object):
         if other is not None and not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 other = self.from_dict(other)
-            if isinstance(other, list):
+            elif isinstance(other, list):
                 other = self.from_list(other)
+            elif isinstance(other, str):
+                return other == str(self.info)
             else:
                 other = self.from_dict(vars(other))
         return repr(self) == repr(other)

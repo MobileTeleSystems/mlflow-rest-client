@@ -18,7 +18,10 @@ def mlflow_timestamp(timestamp):
 
 def timestamp_2_time(timestamp):
     if timestamp:
-        return datetime.fromtimestamp(normalize_timestamp(timestamp))
+        if isinstance(timestamp, datetime):
+            return timestamp
+        else:
+            return datetime.fromtimestamp(normalize_timestamp(timestamp))
     return None
 
 def time_2_timestamp(time):
@@ -26,7 +29,10 @@ def time_2_timestamp(time):
         if isinstance(time, float) or isinstance(time, int):
             timestamp = normalize_timestamp(time)
         if isinstance(time, datetime):
-            utc_naive = datetime.replace(tzinfo=None) - datetime.utcoffset()
-            timestamp = (utc_naive - datetime(1970, 1, 1)).total_seconds()
+            if time.utcoffset() is not None:
+                time -= time.utcoffset()
+            if time.tzinfo is not None:
+                time = time.replace(tzinfo=datetime.timezone.utc)
+            timestamp = int(time.timestamp())
         return mlflow_timestamp(timestamp)
     return None
