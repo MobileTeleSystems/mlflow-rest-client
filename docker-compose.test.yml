@@ -14,8 +14,6 @@ services:
     networks:
       - default
       - mlflow
-    extra_hosts:
-      - rep.msk.mts.ru:10.73.8.86
   mlflow-test:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.test
@@ -29,10 +27,6 @@ services:
     image: postgres:11.8
     env_file: .env.test
     restart: unless-stopped
-    environment:
-      - PGDATABASE=$POSTGRES_DB
-      - PGUSER=$POSTGRES_USER
-      - PGPASSWORD=$POSTGRES_PASSWORD
     networks:
       - db
 networks:
