@@ -1,0 +1,18 @@
+ARG PYTHON_VERSION=3.7
+FROM docker.rep.msk.mts.ru/platform/python:${PYTHON_VERSION} as base
+
+RUN pip install -U pip --no-cache-dir
+
+WORKDIR /app
+COPY requirements.txt requirements-test.txt /app/
+RUN pip install -r requirements.txt -r requirements-test.txt --no-cache-dir
+
+ENV PYTHONPATH "/app:$PYTHONPATH"
+ENV PATH /app:$PATH
+
+COPY mlflow_client /app/mlflow_client
+COPY unit-tests.sh coverage.sh wait-for-it.sh __init__.py /app/
+COPY tests /app/tests
+
+SHELL ["/bin/bash", "-c"]
+CMD wait-for-it.sh -h $MLFLOW_HOST -p $MLFLOW_PORT -- unit-tests.sh

@@ -1,0 +1,13 @@
+.git
+venv
+test_venv
+**/*.pyc
+**/__pycache__
+.pytest_cache
+.env*
+.tox
+docker-compose*
+sonar*
+reports
+.scannerwork
+.postgresql
