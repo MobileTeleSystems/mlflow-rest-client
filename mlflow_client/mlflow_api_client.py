@@ -9,6 +9,7 @@ from .log import get_logger
 from .model import Model, ModelVersion, ModelVersionStage
 from .page import Page
 from .run import Run, RunInfo, RunViewType, RunStatus, Metric
+from .time import time_2_timestamp
 
 class MLflowApiClient(object):
     """ HTTP Client for MLflow API """
@@ -180,7 +181,7 @@ class MLflowApiClient(object):
         """
         if not start_time:
             start_time = self._now
-        return Run.from_dict(self._post('runs/create', experiment_id=experiment_id, start_time=start_time, tags=self._handle_tags(tags))['run'])
+        return Run.from_dict(self._post('runs/create', experiment_id=experiment_id, start_time=time_2_timestamp(start_time), tags=self._handle_tags(tags))['run'])
 
 
     def set_run_status(self, id, status=None, end_time=None):
@@ -198,7 +199,7 @@ class MLflowApiClient(object):
         if status:
             params['status'] = status.value
         if end_time:
-            params['end_time'] = end_time
+            params['end_time'] = time_2_timestamp(end_time)
         return RunInfo.from_dict(self._post('runs/update', run_id=id, **params)['run_info'])
 
 
@@ -222,34 +223,40 @@ class MLflowApiClient(object):
         return self.set_run_status(id, RunStatus.scheduled)
 
 
-    def finish_run(self, id):
+    def finish_run(self, id, end_time=None):
         """
         :param id: run ID
         :type id: str
         :returns: run info
         :rtype: dict
         """
-        return self.set_run_status(id, RunStatus.finished)
+        if not end_time:
+            end_time = self._now
+        return self.set_run_status(id, RunStatus.finished, end_time=time_2_timestamp(end_time))
 
 
-    def fail_run(self, id):
+    def fail_run(self, id, end_time=None):
         """
         :param id: run ID
         :type id: str
         :returns: run info
         :rtype: dict
         """
-        return self.set_run_status(id, RunStatus.failed, end_time=self._now)
+        if not end_time:
+            end_time = self._now
+        return self.set_run_status(id, RunStatus.failed, end_time=time_2_timestamp(end_time))
 
 
-    def kill_run(self, id):
+    def kill_run(self, id, end_time=None):
         """
         :param id: run ID
         :type id: str
         :returns: run info
         :rtype: dict
         """
-        return self.set_run_status(id, RunStatus.killed, end_time=self._now)
+        if not end_time:
+            end_time = self._now
+        return self.set_run_status(id, RunStatus.killed, end_time=time_2_timestamp(end_time))
 
 
     def delete_run(self, id):
@@ -280,7 +287,7 @@ class MLflowApiClient(object):
         return self._post('runs/log-parameter', run_id=id, key=key, value=value)
 
 
-    def log_run_metric(self, id, key, value, timestamp=None):
+    def log_run_metric(self, id, key, value, step=0, timestamp=None):
         """
         :param id: run ID
         :type id: str
@@ -293,7 +300,7 @@ class MLflowApiClient(object):
         """
         if not timestamp:
             timestamp = self._now
-        dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value}, timestamp)
+        dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value, 'step': step}, time_2_timestamp(timestamp))
         return self._post('runs/log-metric', **dct)
 
 
@@ -317,7 +324,7 @@ class MLflowApiClient(object):
         if not timestamp:
             timestamp = self._now
 
-        metrics = [self._add_timestamp(metric, timestamp) for metric in metrics]
+        metrics = [self._add_timestamp(metric, time_2_timestamp(timestamp)) for metric in metrics]
 
         return self._post('runs/log-batch', run_id=id, params=params, metrics=metrics, tags=self._handle_tags(tags))
 
