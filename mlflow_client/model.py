@@ -4,6 +4,7 @@ from .tag import Tag
 from .time import timestamp_2_time
 
 class ModelVersionStage(Enum):
+    """ Model version stage """
     unknown = 'None'
     test = 'Staging'
     prod = 'Production'
@@ -14,6 +15,7 @@ class ModelVersionStage(Enum):
 
 
 class ModelVersionState(Enum):
+    """ Model version stage """
     pending = 'PENDING_REGISTRATION'
     failed = 'FAILED_REGISTRATION'
     ready = 'READY'
@@ -23,23 +25,37 @@ class ModelVersionState(Enum):
 
 
 class ModelVersionStatus(object):
+    """ Model version state with message
 
-    def __init__(self, status, message=""):
-        self.status = ModelVersionState(status)
+        :param state: Model version state
+        :type state: str
+
+        :ivar state: Model version state
+        :vartype state: ModelVersionState
+
+        :param message: Model version state message
+        :type message: str, optional
+
+        :ivar message: Model version state message
+        :vartype message: str
+    """
+
+    def __init__(self, state, message=""):
+        self.state = ModelVersionState(state)
         self.message = message
 
 
     def __repr__(self):
-        return "<{self.__class__.__name__} status={self.status} message={self.message}>"\
+        return "<{self.__class__.__name__} state={self.state} message={self.message}>"\
                 .format(self=self)
 
 
     def __str__(self):
-        return str(self.status.name) + (" because of '{}'".format(self.message) if self.message else "")
+        return str(self.state.name) + (" because of '{}'".format(self.message) if self.message else "")
 
 
     def __hash__(self):
-        return hash(self.status.value)
+        return hash(self.state.value)
 
 
     def __eq__(self, other):
@@ -47,18 +63,85 @@ class ModelVersionStatus(object):
             if isinstance(other, str):
                 return other == self.__str__()
             elif isinstance(other, tuple) and len(other) == 2:
-                other = self.__class__(status=other[0], message=other[1])
+                other = self.__class__(state=other[0], message=other[1])
         return repr(self) == repr(other)
 
 
 class ModelVersionTag(Tag):
+    """ Model version tag """
     pass
 
 class ModelTag(Tag):
+    """ Model tag """
     pass
 
 
 class ModelVersion(object):
+    """ Model version
+
+        :param name: Model name
+        :type name: str
+
+        :ivar name: Model name
+        :vartype name: str
+
+        :param version: Version number
+        :type version: int
+
+        :ivar version: Version number
+        :vartype version: int
+
+        :param creation_timestamp: Version creation timestamp
+        :type creation_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar creation_timestamp: Version creation timestamp
+        :vartype creation_timestamp: :obj:`datetime.datetime`
+
+        :param last_updated_timestamp: Version last update timestamp
+        :type last_updated_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar last_updated_timestamp: Version last update timestamp
+        :vartype last_updated_timestamp: :obj:`datetime.datetime`
+
+        :param stage: Version stage
+        :type stage: str, optional
+
+        :ivar stage:  Version stage
+        :vartype stage: :obj:`ModelVersionStage`
+
+        :param description: Version description
+        :type description: str, optional
+
+        :ivar description:  Version description
+        :vartype description: str
+
+        :param source: Version source path
+        :type source: str, optional
+
+        :ivar source: Version source path
+        :vartype source: str
+
+        :param run_id: Run ID used for generating version
+        :type run_id: str, optional
+
+        :ivar run_id: Run ID used for generating version
+        :vartype run_id: str
+
+        :param state: Version state
+        :type state: str, optional
+
+        :param state_message: Version stage message
+        :type state_message: str, optional
+
+        :ivar status: Version status
+        :vartype status: :obj:`ModelVersionStatus`
+
+        :param tags: Tags list
+        :type tags: :obj:`list` of :obj:`dict`, optional
+
+        :ivar tags: Tags list
+        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
+    """
 
     def __init__(
         self,
@@ -91,8 +174,13 @@ class ModelVersion(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: ModelVersion
+        :rtype: ModelVersion
         """
         return cls(
                     name=dct.get('name'),
@@ -112,8 +200,13 @@ class ModelVersion(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: ModelVersion
+        :rtype: :obj:`list` of :obj:`ModelVersion`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
@@ -144,6 +237,44 @@ class ModelVersion(object):
         return repr(self) == repr(other)
 
 class Model(object):
+    """ Model
+
+        :param name: Model name
+        :type name: str
+
+        :ivar name: Model name
+        :vartype name: str
+
+        :param creation_timestamp: Model creation timestamp
+        :type creation_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar creation_timestamp: Model creation timestamp
+        :vartype creation_timestamp: :obj:`datetime.datetime`
+
+        :param last_updated_timestamp: Model last update timestamp
+        :type last_updated_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar last_updated_timestamp: Model last update timestamp
+        :vartype last_updated_timestamp: :obj:`datetime.datetime`
+
+        :param description: Model description
+        :type description: str, optional
+
+        :ivar description: Model description
+        :vartype description: str
+
+        :param versions: Model latest versions
+        :type versions: :obj:`list` of :obj:`ModelVersion`, optional
+
+        :ivar versions: Model latest versions
+        :vartype versions: :obj:`dict` of :obj:`ModelVersionStage`::obj:`ModelVersion`, optional
+
+        :param tags: Tags list
+        :type tags: :obj:`list` of :obj:`ModelTag`, optional
+
+        :ivar tags: Tags list
+        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelTag`, optional
+    """
 
     def __init__(self, name, creation_timestamp=None, last_updated_timestamp=None, description=None, versions=None, tags=None):
         self.name = name
@@ -161,8 +292,13 @@ class Model(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Model
+        :rtype: Model
         """
         return cls(
                     name=dct.get('name'),
@@ -177,8 +313,13 @@ class Model(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Model
+        :rtype: :obj:`list` of :obj:`Model`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 

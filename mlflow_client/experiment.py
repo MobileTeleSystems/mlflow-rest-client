@@ -3,14 +3,61 @@ from enum import Enum
 from .tag import Tag
 
 class ExperimentStage(Enum):
+    """ Experiment stage """
     active = 'ACTIVE'
     deleted = 'DELETED'
 
 class ExperimentTag(Tag):
+    """ Experiment tag
+
+        :param key: Tag name
+        :type key: str
+
+        :ivar name: Tag name
+        :vartype name: str
+
+        :param value: Tag value
+        :type value: str
+
+        :ivar value: Tag value
+        :vartype value: str
+    """
     pass
 
 
 class Experiment(object):
+    """ Experiment
+
+        :param id: Experiment ID
+        :type id: int
+
+        :ivar id: Experiment ID
+        :vartype id: int
+
+        :param name: Experiment name
+        :type name: str
+
+        :ivar name: Experiment name
+        :vartype name: str
+
+        :param artifact_location: Experiment artifact location
+        :type artifact_location: str, optional
+
+        :ivar artifact_location: Experiment artifact location
+        :vartype artifact_location: str
+
+        :param stage: Experiment stage
+        :type stage: str, optional
+
+        :ivar stage: Experiment stage
+        :vartype stage: :obj:`ExperimentStage`
+
+        :param tags: Tags list
+        :type tags: :obj:`list` of :obj:`dict`, optional
+
+        :ivar tags: Tags list
+        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
+    """
 
     def __init__(self, id, name, artifact_location=None, stage=ExperimentStage.active, tags=None):
         self.id = int(id)
@@ -25,8 +72,13 @@ class Experiment(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Experiment
+        :rtype: Experiment
         """
         return cls(
                     id=dct.get('experiment_id') or dct.get('id'),
@@ -40,8 +92,13 @@ class Experiment(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Experiment
+        :rtype: :obj:`list` of :obj:`Experiment`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 

@@ -6,11 +6,15 @@ from .tag import Tag
 from .time import timestamp_2_time
 
 class RunStage(Enum):
+    """ Run stage """
+
     active = 'ACTIVE'
     deleted = 'DELETED'
 
 
 class RunStatus(Enum):
+    """ Run status """
+
     started = 'RUNNING'
     scheduled = 'SCHEDULED'
     finished = 'FINISHED'
@@ -19,12 +23,58 @@ class RunStatus(Enum):
 
 
 class RunViewType(Enum):
+    """ Run view type """
+
     active = 'ACTIVE_ONLY'
     deleted = 'DELETED_ONLY'
     all = 'ALL'
 
 
 class RunInfo(object):
+    """ Run information
+
+        :param id: Run ID
+        :type id: str
+
+        :ivar id: Run ID
+        :vartype id: str
+
+        :param experiment_id: Experiment ID
+        :type experiment_id: int
+
+        :ivar experiment_id: Experiment ID
+        :vartype experiment_id: int
+
+        :param status: Run status
+        :type status: str, optional
+
+        :ivar status: Run status
+        :vartype status: :obj:`RunStatus`
+
+        :param stage: Run stage
+        :type stage: str, optional
+
+        :ivar stage: Run stage
+        :vartype stage: :obj:`RunStage`
+
+        :param start_time: Run start time
+        :type start_time: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar start_time: Run start time
+        :vartype start_time: :obj:`datetime.datetime`
+
+        :param end_time: Run end time
+        :type end_time: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar end_time: Run end time
+        :vartype end_time: :obj:`datetime.datetime`
+
+        :param artifact_uri: Artifact URL
+        :type artifact_uri: str, optional
+
+        :ivar artifact_uri: Artifact URL
+        :vartype artifact_uri: str
+    """
 
     def __init__(self, id, experiment_id=None, status=RunStatus.started, stage=RunStage.active, start_time=None, end_time=None, artifact_uri=None):
         self.id = str(id)
@@ -39,8 +89,13 @@ class RunInfo(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Run info
+        :rtype: RunInfo
         """
         return cls(
                     id=dct.get('run_id') or dct.get('run_uuid') or dct.get('id'),
@@ -56,8 +111,13 @@ class RunInfo(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Runs info
+        :rtype: :obj:`list` of :obj:`RunInfo`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
@@ -87,10 +147,50 @@ class RunInfo(object):
 
 
 class Param(Tag):
+    """ Run param
+
+        :param key: Param name
+        :type key: str
+
+        :ivar name: Param name
+        :vartype name: str
+
+        :param value: Param value
+        :type value: str
+
+        :ivar value: Param value
+        :vartype value: str
+    """
     pass
 
 
 class Metric(object):
+    """ Run metric
+
+        :param key: Metric name
+        :type key: str
+
+        :ivar key: Metric name
+        :vartype key: str
+
+        :param value: Metric value
+        :type value: float
+
+        :ivar value: Metric value
+        :vartype value: float
+
+        :param timestamp: Metric timestamp
+        :type timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+
+        :ivar timestamp: Metric timestamp
+        :vartype timestamp: :obj:`datetime.datetime`
+
+        :param step: Metric step
+        :type step: int, optional
+
+        :ivar step: Metric step
+        :vartype step: int
+    """
 
     def __init__(self, key, value=None, timestamp=None, step=None):
         self.key = str(key)
@@ -102,8 +202,13 @@ class Metric(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Metric
+        :rtype: Metric
         """
         return cls(
                     key=dct.get('key'),
@@ -116,8 +221,13 @@ class Metric(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Metrics
+        :rtype: :obj:`list` of :obj:`Metric`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
@@ -154,10 +264,44 @@ class Metric(object):
 
 
 class RunTag(Tag):
+    """ Run tag
+
+        :param key: Tag name
+        :type key: str
+
+        :ivar name: Tag name
+        :vartype name: str
+
+        :param value: Tag value
+        :type value: str
+
+        :ivar value: Tag value
+        :vartype value: str
+    """
     pass
 
 
 class RunData(object):
+    """ Run params, metrics and tags
+
+        :param params: Params list
+        :type params: :obj:`list` of :obj:`dict`, optional
+
+        :ivar params: Params list
+        :vartype params: :obj:`dict` of :obj:`str`::obj:`Param`, optional
+
+        :param metrics: Metrics list
+        :type metrics: :obj:`list` of :obj:`dict`, optional
+
+        :ivar metrics: Metrics list
+        :vartype metrics: :obj:`dict` of :obj:`str`::obj:`Metric`, optional
+
+        :param tags: Tags list
+        :type tags: :obj:`list` of :obj:`dict`, optional
+
+        :ivar tags: Tags list
+        :vartype tags: :obj:`dict` of :obj:`str`::obj:`RunTag`, optional
+    """
 
     def __init__(self, params=None, metrics=None, tags=None):
         _params = Param.from_list(params or [])
@@ -172,8 +316,13 @@ class RunData(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Run data
+        :rtype: RunData
         """
         return cls(
                     params=dct.get('params'),
@@ -184,8 +333,13 @@ class RunData(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Runs data
+        :rtype: :obj:`list` of :obj:`RunData`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
@@ -205,6 +359,20 @@ class RunData(object):
         return repr(self) == repr(other)
 
 class Run(object):
+    """ Run
+
+        :param info: Run info
+        :type info: dict, optional
+
+        :ivar info: Run info
+        :vartype info: RunInfo
+
+        :param data: Run data
+        :type data: dict, optional
+
+        :ivar data: Run data
+        :vartype data: RunData
+    """
 
     def __init__(self, info=None, data=None):
         self.info = RunInfo.from_dict(info or {})
@@ -214,8 +382,13 @@ class Run(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Run
+        :rtype: Run
         """
         return cls(
                     info=dct.get('info'),
@@ -226,8 +399,13 @@ class Run(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Runs
+        :rtype: :obj:`list` of :obj:`Run`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
