@@ -12,12 +12,14 @@ class ExperimentTag(Tag):
 
 class Experiment(object):
 
-    def __init__(self, name=None, id=None, artifact_location=None, stage=ExperimentStage.active, tags=None):
-        self.name = name
-        self.id = id
-        self.artifact_location = artifact_location
+    def __init__(self, id, name, artifact_location=None, stage=ExperimentStage.active, tags=None):
+        self.id = int(id)
+        self.name = str(name)
+        self.artifact_location = str(artifact_location) if artifact_location else ''
         self.stage = ExperimentStage(stage)
-        self.tags = ExperimentTag.from_list(tags or [])
+
+        _tags = ExperimentTag.from_list(tags or [])
+        self.tags = {tag.key: tag for tag in _tags}
 
 
     @classmethod
@@ -64,9 +66,9 @@ class Experiment(object):
             elif isinstance(other, list):
                 other = self.from_list(other)
             elif isinstance(other, str):
-                other = self.__class__(name=other)
+                return other == self.__str__()
             elif isinstance(other, int):
-                other = self.__class__(id=id)
+                return other == self.id
             else:
                 other = self.from_dict(vars(other))
         return repr(self) == repr(other)

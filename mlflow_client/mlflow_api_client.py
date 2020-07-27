@@ -113,7 +113,7 @@ class MLflowApiClient(object):
         :param new_name: New experiment name
         :type new_name: str
         """
-        return self._post('experiments/update', experiment_id=id, new_name=new_name)
+        self._post('experiments/update', experiment_id=id, new_name=new_name)
 
 
     def delete_experiment(self, id):
@@ -122,7 +122,7 @@ class MLflowApiClient(object):
         :param id: Experiment ID
         :type id: str
         """
-        return self._post('experiments/delete', experiment_id=id)
+        self._post('experiments/delete', experiment_id=id)
 
 
     def restore_experiment(self, id):
@@ -131,7 +131,7 @@ class MLflowApiClient(object):
         :param id: Experiment ID
         :type id: str
         """
-        return self._post('experiments/restore', experiment_id=id)
+        self._post('experiments/restore', experiment_id=id)
 
 
     def set_experiment_tag(self, id, key, value):
@@ -144,7 +144,7 @@ class MLflowApiClient(object):
         :param value: Tag value
         :type value: str
         """
-        return self._post('experiments/set-experiment-tag', experiment_id=id, key=key, value=value)
+        self._post('experiments/set-experiment-tag', experiment_id=id, key=key, value=value)
 
 
     def get_experiment_id(self, name):
@@ -212,7 +212,7 @@ class MLflowApiClient(object):
         return Run.from_dict(self._get('runs/get', run_id=id)['run'])
 
 
-    def create_run(self, experiment_id, start_time=None, **tags):
+    def create_run(self, experiment_id, start_time=None, tags=None):
         """
         Create run
         :param experiment_id: Experiment ID
@@ -220,13 +220,21 @@ class MLflowApiClient(object):
         :param start_time: Start time
         :type start_time: Optional[Union[int, datetime]]
         :param tags: Tags
-        :type tags: dict
+        :type tags: Optional[Union[dict, List[dict]]]
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
         :returns: Run
         :rtype: Run
         """
         if not start_time:
             start_time = self._now
-        return Run.from_dict(self._post('runs/create', experiment_id=experiment_id, start_time=time_2_timestamp(start_time), tags=self._handle_tags(tags))['run'])
+
+        if not tags:
+            tags = []
+        if isinstance(tags, dict):
+            tags = self._handle_tags(tags)
+
+        return Run.from_dict(self._post('runs/create', experiment_id=experiment_id, start_time=time_2_timestamp(start_time), tags=tags)['run'])
 
 
     def set_run_status(self, id, status, end_time=None):
@@ -322,7 +330,7 @@ class MLflowApiClient(object):
         :param id: Run ID
         :type id: str
         """
-        return self._post('runs/delete', run_id=id)
+        self._post('runs/delete', run_id=id)
 
 
     def restore_run(self, id):
@@ -331,7 +339,7 @@ class MLflowApiClient(object):
         :param id: Run ID
         :type id: str
         """
-        return self._post('runs/restore', run_id=id)
+        self._post('runs/restore', run_id=id)
 
 
     def log_run_parameter(self, id, key, value):
@@ -344,7 +352,24 @@ class MLflowApiClient(object):
         :param value: Parameter value
         :type value: str
         """
-        return self._post('runs/log-parameter', run_id=id, key=key, value=value)
+        self._post('runs/log-parameter', run_id=id, key=key, value=value)
+
+
+    def log_run_parameters(self, id, params):
+        """
+        Add or update run parameters
+        :param id: Run ID
+        :type id: str
+        :param params: Parameters
+        :type params: Union[dict, List[dict]]
+            Example:
+                `{'some': 'param'}` or `[{'key': 'some', 'value': 'param'}]`
+        """
+
+        if isinstance(params, dict):
+            params = self._handle_tags(params)
+
+        self.log_run_batch(id=id, params=params)
 
 
     def log_run_metric(self, id, key, value, step=0, timestamp=None):
@@ -363,34 +388,67 @@ class MLflowApiClient(object):
         """
         if not timestamp:
             timestamp = self._now
-        dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value, 'step': step}, time_2_timestamp(timestamp))
-        return self._post('runs/log-metric', **dct)
+        dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value, 'step': int(step)}, time_2_timestamp(timestamp))
+        self._post('runs/log-metric', **dct)
 
 
-    def log_run_batch(self, id, params=None, metrics=None, timestamp=None, **tags):
+    def log_run_metrics(self, id, metrics):
+        """
+        Add or update run parameters
+        :param id: Run ID
+        :type id: str
+        :param metrics: Metrics
+        :type metrics: Union[dict, List[dict]]
+            Example:
+                `{'some': 0.1}` or `[{'key': 'some', 'value': 0.1, 'step': 0, 'timestamp':...}]`
+        """
+        timestamp = time_2_timestamp(self._now)
+
+        if isinstance(metrics, dict):
+            metrics = self._handle_tags(metrics)
+
+        metrics = [self._add_timestamp(metric, timestamp) for metric in metrics]
+
+        self.log_run_batch(id=id, metrics=metrics)
+
+
+    def log_run_batch(self, id, params=None, metrics=None, timestamp=None, tags=None):
         """
         Add or update run parameters, mertics or tags withit one request
         :param id: Run ID
         :type id: str
         :param params: List of params dict like {'key':..., 'value':...}
-        :type params: Optional[List[dict]]
+        :type params: Optional[Union[List[dict],dict]]
         :param metrics: List of metric dict like {'key':..., 'value':...,'timestamp':...,'step':...}
-        :type metrics: Optional[List[dict]]
+        :type metrics: Optional[Union[List[dict],dict]]
         :param timestamp: Default timestamp for metric
         :type timestamp: Optional[Union[int, datetime]]
         :param tags: Tags
-        :type tags: dict
+        :type tags: Optional[Union[dict, List[dict]]]
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
         """
-        if not params:
-            params = []
-        if not metrics:
-            metrics = []
+
         if not timestamp:
             timestamp = self._now
 
+        if not params:
+            params = []
+        if isinstance(params, dict):
+            params = self._handle_tags(params)
+
+        if not metrics:
+            metrics = []
+        if isinstance(metrics, dict):
+            metrics = self._handle_tags(metrics)
         metrics = [self._add_timestamp(metric, time_2_timestamp(timestamp)) for metric in metrics]
 
-        return self._post('runs/log-batch', run_id=id, params=params, metrics=metrics, tags=self._handle_tags(tags))
+        if not tags:
+            tags = []
+        if isinstance(metrics, dict):
+            tags = self._handle_tags(tags)
+
+        self._post('runs/log-batch', run_id=id, params=params, metrics=metrics, tags=tags)
 
 
     def log_run_model(self, id, model):
@@ -401,7 +459,7 @@ class MLflowApiClient(object):
         :param model: MLmodel JSON description
         :type model: dict
         """
-        return self._post('runs/log-model', run_id=id, model_json=model)
+        self._post('runs/log-model', run_id=id, model_json=model)
 
 
     def set_run_tag(self, id, key, value):
@@ -414,7 +472,24 @@ class MLflowApiClient(object):
         :param value: Tag value
         :type value: str
         """
-        return self._post('runs/set-tag', run_id=id, key=key, value=value)
+        self._post('runs/set-tag', run_id=id, key=key, value=value)
+
+
+    def set_run_tags(self, id, tags):
+        """
+        Set run tags
+        :param id: Run ID
+        :type id: str
+        :param tags: Tags
+        :type tags: Optional[Union[dict, List[dict]]]
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
+        """
+
+        if isinstance(tags, dict):
+            tags = self._handle_tags(tags)
+
+        self.log_run_batch(id=id, tags=tags)
 
 
     def delete_run_tag(self, id, key):
@@ -425,7 +500,28 @@ class MLflowApiClient(object):
         :param key: Tag name
         :type key: str
         """
-        return self._post('runs/delete-tag', run_id=id, key=key)
+        self._post('runs/delete-tag', run_id=id, key=key)
+
+
+    def delete_run_tags(self, id, keys):
+        """
+        Delete run tags
+        :param id: Experiment ID
+        :type id: str
+        :param keys: Tag keys or tags
+        :type keys: Optinal[Union[dict, List[dict]], List[str]]
+            Example:
+                `['some'] or [{'key': 'some', 'value': 'tag']` or `{'some': 'tag}`
+        """
+        if isinstance(keys, dict):
+            for tag in keys:
+                self.delete_run_tag(id, tag)
+        elif isinstance(keys, list):
+            for tag in keys:
+                if isinstance(tag, str):
+                    self.delete_run_tag(id, tag)
+                elif isinstance(tag, dict) and 'key' in tag:
+                    self.delete_run_tag(id, tag['key'])
 
 
     def _add_timestamp(self, item, timestamp):
@@ -436,9 +532,9 @@ class MLflowApiClient(object):
         return item
 
 
-    def get_run_metric_history(self, id, key):
+    def list_run_metric_history(self, id, key):
         """
-        Get metric history
+        LIst metric history
         :param id: Run ID
         :type id: str
         :param key: Metric name
@@ -447,6 +543,20 @@ class MLflowApiClient(object):
         :rtype: List[Metric]
         """
         return Metric.from_list(self._get('metrics/get-history', run_id=id, metric_key=key)['metrics'])
+
+
+    def list_run_metric_history_iterator(self, id, key):
+        """
+        Iterate by metric history
+        :param id: Run ID
+        :type id: str
+        :param key: Metric name
+        :type key: str
+        :returns: Metrics
+        :rtype: List[Metric]
+        """
+        for metric in self.list_run_metric_history(id, key):
+            yield metric
 
 
     def list_run_artifacts(self, id, path=None, page_token=None):
@@ -577,17 +687,24 @@ class MLflowApiClient(object):
         """
         return self._post('registered-models/set-tag', name=name, key=tag_name, value=tag_value)
 
-    def create_model(self, name, **tags):
+    def create_model(self, name, tags=None):
         """
         Create model
         :param name: Model name
         :type name: str
         :param tags: Tags
-        :type tags: dict
+        :type tags: Optional[Union[dict, List[dict]]]
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
         :returns: Model
         :rtype: Model
         """
-        return Model.from_dict(self._post('registered-models/create', name=name, tags=self._handle_tags(tags))['registered_model'])
+
+        if not tags:
+            tags = []
+        if isinstance(tags, dict):
+            tags = self._handle_tags(tags)
+        return Model.from_dict(self._post('registered-models/create', name=name, tags=tags)['registered_model'])
 
     def delete_model_tag(self, name, tag_name):
         """
@@ -606,7 +723,7 @@ class MLflowApiClient(object):
         :returns: Model
         :rtype: Model
         """
-        return Model.from_dict(self._post('registered-models/get', name=name)['registered_model'])
+        return Model.from_dict(self._get('registered-models/get', name=name)['registered_model'])
 
     def list_model_versions(self, name, stages=None):
         """
@@ -667,7 +784,7 @@ class MLflowApiClient(object):
         :param name: Model name
         :type name: str
         """
-        return self._post('registered-models/delete', name=name)
+        self._delete('registered-models/delete', name=name)
 
 
     def list_models(self, max_results=MAX_RESULTS, page_token=None):
@@ -779,7 +896,7 @@ class MLflowApiClient(object):
         :param value: Tag value
         :type value: str
         """
-        return self._post('registered-models/set-tag', name=name, key=key, value=value)
+        self._post('registered-models/set-tag', name=name, key=key, value=value)
 
 
     def delete_model_tag(self, name, key):
@@ -790,7 +907,7 @@ class MLflowApiClient(object):
         :param key: Tag name
         :type key: str
         """
-        return self._post('registered-models/delete-tag', name=name, key=key)
+        self._delete('registered-models/delete-tag', name=name, key=key)
 
 
     def list_model_versions(self, name, stages=None):
@@ -830,15 +947,19 @@ class MLflowApiClient(object):
             yield version
 
 
-    def create_model_version(self, name, source=None, run_id=None, **tags):
+    def create_model_version(self, name, source=None, run_id=None, tags=None):
         """
         Create model version
-        :param name: MOdel name
+        :param name: Model name
         :type name: str
         :param source: Model source path
         :type source: str
         :param run_id: Run ID used for generating model
         :type run_id: str
+        :param tags: Tags
+        :type tags: Optional[Union[dict, List[dict]]]
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
         :returns: Model version
         :rtype: ModelVersion
         """
@@ -847,7 +968,12 @@ class MLflowApiClient(object):
             params['source'] = source
         if run_id:
             params['run_id'] = run_id
-        return ModelVersion.from_dict(self._post('model-versions/create', name=name, tags=self._handle_tags(tags), **params)['model_version'])
+
+        if not tags:
+            tags = []
+        if isinstance(tags, dict):
+            tags = self._handle_tags(tags)
+        return ModelVersion.from_dict(self._post('model-versions/create', name=name, tags=tags, **params)['model_version'])
 
 
     def get_model_version(self, name, version):
@@ -860,7 +986,7 @@ class MLflowApiClient(object):
         :returns: Model version
         :rtype: ModelVersion
         """
-        return ModelVersion.from_dict(self._post('model-versions/get', name=name, version=str(version))['model_version'])
+        return ModelVersion.from_dict(self._get('model-versions/get', name=name, version=str(version))['model_version'])
 
 
     def set_model_version_description(self, name, version, description):
@@ -890,10 +1016,10 @@ class MLflowApiClient(object):
         :param value: Tag value
         :type value: str
         """
-        return self._post('model-versions/set-tag', name=name, version=str(version), key=key, value=value)
+        self._post('model-versions/set-tag', name=name, version=str(version), key=key, value=value)
 
 
-    def delete_model_version_tag(self, name, version, key, value):
+    def delete_model_version_tag(self, name, version, key):
         """
         Delete model version tag
         :param name: Model name
@@ -903,7 +1029,7 @@ class MLflowApiClient(object):
         :param key: Tag name
         :type key: str
         """
-        return self._post('model-versions/delete-tag', name=name, version=str(version), key=key)
+        self._delete('model-versions/delete-tag', name=name, version=str(version), key=key)
 
 
     def delete_model_version(self, name, version):
@@ -914,7 +1040,7 @@ class MLflowApiClient(object):
         :param version: Model version
         :type version: int
         """
-        return self._post('model-versions/delete', name=name, version=str(version))
+        self._delete('model-versions/delete', name=name, version=str(version))
 
 
     def search_model_versions(self, query, max_results=None, order_by=None, page_token=None):
@@ -987,7 +1113,7 @@ class MLflowApiClient(object):
         :returns: Artifact URL
         :rtype: str
         """
-        return self._post('model-versions/get-download-uri', name=name, version=str(version)).get('artifact_uri')
+        return self._get('model-versions/get-download-uri', name=name, version=str(version)).get('artifact_uri')
 
 
     def transition_model_version_stage(self, name, version, stage, archive_existing=False):
@@ -1057,7 +1183,10 @@ class MLflowApiClient(object):
     def _handle_tags(self, tags):
         result = []
         for key, value in tags.items():
-            result.append({'key': key, 'value': value})
+            dct = {'key': key, 'value': value}
+            if hasattr(value, 'step'):
+                dct['step'] = value.step
+            result.append(dct)
 
         return result
 
@@ -1091,6 +1220,10 @@ class MLflowApiClient(object):
             return json.loads(rsp)
         else:
             return None
+
+
+    def _delete(self, url, **data):
+        self._request('delete', url, json=data)
 
 
     def _request(self, method, url, log_response=True, **params):
