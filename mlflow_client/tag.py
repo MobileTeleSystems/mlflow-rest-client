@@ -1,4 +1,18 @@
 class Tag(object):
+    """ Generic tag class
+
+        :param key: Tag name
+        :type key: str
+
+        :ivar name: Tag name
+        :vartype name: str
+
+        :param value: Tag value
+        :type value: str
+
+        :ivar value: Tag value
+        :vartype value: str
+    """
 
     def __init__(self, key, value=None):
         self.key = str(key)
@@ -8,8 +22,13 @@ class Tag(object):
     @classmethod
     def from_dict(cls, dct):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+
+        :param dct: Response item
+        :type dct: dict`
+
+        :returns: Tag
+        :rtype: Tag
         """
         return cls(
                     key=dct.get('key'),
@@ -20,8 +39,13 @@ class Tag(object):
     @classmethod
     def from_list(cls, lst):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :returns: Tag
+        :rtype: :obj:`list` of :obj:`Tag`
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 

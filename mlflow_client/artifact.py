@@ -1,5 +1,31 @@
 
-class FileInfo(object):
+class Artifact(object):
+    """ Artifact
+
+        :param path: Artifact path
+        :type path: str
+
+        :ivar path: Artifact path
+        :vartype path: str
+
+        :param root: Artifact root
+        :type root: str, optional
+
+        :ivar root: Artifact root
+        :vartype root: str
+
+        :param is_dir: Is artifact a dir
+        :type is_dir: bool, optional
+
+        :ivar is_dir: If `True`, artifact is dir
+        :vartype is_dir: bool
+
+        :param file_size: Artifact file size in bytes
+        :type file_size: int, optional
+
+        :ivar file_size: Artifact file size in bytes
+        :vartype file_size: int
+    """
 
     def __init__(self, path, root=None, is_dir=False, file_size=None):
         self.path = str(path)
@@ -11,8 +37,16 @@ class FileInfo(object):
     @classmethod
     def from_dict(cls, dct, **kwargs):
         """
-        :param dct: REST API response item
-        :type dct: dict
+        Generate object from REST API response
+        
+        :param dct: Response item
+        :type dct: dict`
+
+        :param `**kwargs`: Additional constructor params
+        :type dct: dict`
+
+        :returns: Artifact
+        :rtype: Artifact
         """
         return cls(
                     path=dct.get('path'),
@@ -25,8 +59,16 @@ class FileInfo(object):
     @classmethod
     def from_list(cls, lst, **kwargs):
         """
-        :param lst: REST API response list
-        :type lst: list[dict]
+        Generate objects list from REST API response
+
+        :param lst: Response items
+        :type lst: :obj:`list` of :obj:`dict`
+
+        :param `**kwargs`: Additional constructor params
+        :type dct: dict`
+
+        :returns: Artifacts
+        :rtype: :obj:`list` of :obj:`Artifact`
         """
         return [cls.from_dict(item, **kwargs) if isinstance(item, dict) else item for item in lst]
 
