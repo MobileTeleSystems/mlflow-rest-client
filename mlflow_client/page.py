@@ -17,7 +17,7 @@ class Page(object):
         :type dct: dict
         """
         return cls(
-                    items=dct.get(items_key),
+                    items=dct.get(items_key, []),
                     next_page_token=dct.get('next_page_token'),
                     item_class=item_class,
                     **kwargs
