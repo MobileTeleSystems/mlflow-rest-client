@@ -19,8 +19,6 @@ services:
     networks:
       - default
       - mlflow
-    extra_hosts:
-      - rep.msk.mts.ru:10.73.8.86
   mlflow-jenkins:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.jenkins
