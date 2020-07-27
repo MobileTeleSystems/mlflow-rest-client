@@ -43,6 +43,7 @@ class Experiment(object):
         """
         return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
+
     def __repr__(self):
         return "<{self.__class__.__name__} id={self.id} name={self.name}>"\
                 .format(self=self)
