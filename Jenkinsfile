@@ -98,7 +98,7 @@ node('bdbuilder04') {
                     withEnv(["TAG=${testTag}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'pylint .bin .util -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
                                 docker-compose -f docker-compose.jenkins.yml down
                             """
 
