@@ -165,6 +165,7 @@ node('bdbuilder04') {
 
             stage ('Building documentation') {
                 gitlabCommitStatus('Building documentation') {
+                    if (isRelease) {
                     def uploadSpec = '''{
                             "files": [
                                 {
@@ -178,9 +179,11 @@ node('bdbuilder04') {
                     server.publishBuildInfo buildInfo
                 }
             }
+            }
 
             stage('Publishing package to Artifactory') {
                 gitlabCommitStatus('Publishing package to Artifactory') {
+                    if (isRelease) {
                     def uploadSpec = '''{
                             "files": [
                                 {
@@ -195,6 +198,7 @@ node('bdbuilder04') {
                     server.publishBuildInfo buildInfo
                 }
             }
+        }
         }
     } finally {
         stage('Cleanup') {
