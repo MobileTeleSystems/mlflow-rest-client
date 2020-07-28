@@ -1,7 +1,7 @@
 from enum import Enum
 
 from .tag import Tag
-from .time import timestamp_2_time
+from .timestamp import timestamp_2_time
 
 class ModelVersionStage(Enum):
     """ Model version stage """

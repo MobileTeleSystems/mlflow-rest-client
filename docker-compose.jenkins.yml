@@ -15,7 +15,7 @@ services:
       - ./.coveragerc:/app/.coveragerc:ro
       - ./.pylintrc:/app/.pylintrc:ro
     depends_on:
-        - "mlflow-test"
+        - "mlflow-jenkins"
     networks:
       - default
       - mlflow
@@ -24,7 +24,7 @@ services:
     env_file: .env.jenkins
     restart: unless-stopped
     depends_on:
-        - "mlflow-test-db"
+        - "mlflow-jenkins-db"
     networks:
       - db
       - mlflow

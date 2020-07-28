@@ -30,14 +30,6 @@ node('bdbuilder04') {
 
             List pythonVersions = ['2.7', '3.6', '3.7']
 
-            //TODO: remove
-            withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                def cache = docker.image("docker.rep.msk.mts.ru/platform/python:3.7.7")
-                cache.push()
-                cache.pull('3.7')
-            }
-            //TODO
-
             List test_images = []
 
             stage('Build test images') {
@@ -47,8 +39,11 @@ node('bdbuilder04') {
 
                         ansiColor('xterm') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}")
-                                cache.pull()
+                                try {
+                                    def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}")
+                                    cache.pull()
+                                } catch (Exception e) {
+                                }
 
                                 test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${version} --force-rm -f Dockerfile.test .")
                             }
@@ -56,8 +51,11 @@ node('bdbuilder04') {
                     }
                     ansiColor('xterm') {
                         withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                            def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}")
-                            cache.pull()
+                            try {
+                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}")
+                                cache.pull()
+                            } catch (Exception e) {
+                            }
 
                             test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .")
                         }

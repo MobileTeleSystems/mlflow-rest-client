@@ -117,6 +117,10 @@ class Page(object):
         self._index = 0
         return self
 
+    def next(self):
+        # Python2 only
+        return self.__next__()
+
 
     def __next__(self):
         try:
