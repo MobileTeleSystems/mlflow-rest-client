@@ -15,7 +15,7 @@ class MLflowApiClient(object):
 
     MAX_RESULTS = 100
 
-    def __init__(self, api_url, user=None, password=None, logger=get_logger(), ignore_ssl_check=False):
+    def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
         """
 
         :param api_url: MLflow URL
@@ -24,23 +24,32 @@ class MLflowApiClient(object):
                 "http://some.domain:5000
         :type api_url: str
 
+        :ivar base_url: MLflow URL
+        :vartype base_url: str
+
         :param user: MLflow user name (if exist)
-        :type user: str
+        :type user: str, optional
+
+        :ivar user: MLflow user name
+        :vatype user: str
 
         :param password: MLflow user password (if exist)
-        :type password: str
+        :type password: str, optional
 
         :param logger: Logger to use
-        :type logger: logging.Logger
+        :type logger: logging.Logger, optional
+
+        :ivar logger: Used logger
+        :vartype logger: logging.Logger
 
         :param ignore_ssl_check: If `True`, skip SSL verify step
         :type ignore_ssl_check: bool
         """
         self.base_url = api_url
         self.user = user
-        self.password = password
+        self._password = password
         self._ignore_ssl_check = ignore_ssl_check
-        self.logger = logger
+        self.logger = logger if logger else get_logger()
 
 
     def list_experiments(self, view_type=RunViewType.active):
@@ -1476,7 +1485,7 @@ class MLflowApiClient(object):
 
     @property
     def _auth(self):
-        if self.user and self.password:
-            return (self.user, self.password)
+        if self.user and self._password:
+            return (self.user, self._password)
         else:
             return None
