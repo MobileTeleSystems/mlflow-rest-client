@@ -1,6 +1,5 @@
 
 import json
-import time
 import requests
 
 from .artifact import Artifact
@@ -9,7 +8,7 @@ from .log import get_logger
 from .model import Model, ModelVersion, ModelVersionStage
 from .page import Page
 from .run import Run, RunInfo, RunViewType, RunStatus, Metric
-from .time import time_2_timestamp
+from .timestamp import current_timestamp, time_2_timestamp
 
 class MLflowApiClient(object):
     """ HTTP Client for MLflow API """
@@ -266,7 +265,7 @@ class MLflowApiClient(object):
         :rtype: Run
         """
         if not start_time:
-            start_time = self._now
+            start_time = current_timestamp()
 
         if not tags:
             tags = []
@@ -340,7 +339,7 @@ class MLflowApiClient(object):
         :rtype: RunInfo
         """
         if not end_time:
-            end_time = self._now
+            end_time = current_timestamp()
         return self.set_run_status(id, RunStatus.finished, end_time=time_2_timestamp(end_time))
 
 
@@ -358,7 +357,7 @@ class MLflowApiClient(object):
         :rtype: RunInfo
         """
         if not end_time:
-            end_time = self._now
+            end_time = current_timestamp()
         return self.set_run_status(id, RunStatus.failed, end_time=time_2_timestamp(end_time))
 
 
@@ -376,7 +375,7 @@ class MLflowApiClient(object):
         :rtype: RunInfo
         """
         if not end_time:
-            end_time = self._now
+            end_time = current_timestamp()
         return self.set_run_status(id, RunStatus.killed, end_time=time_2_timestamp(end_time))
 
 
@@ -456,7 +455,7 @@ class MLflowApiClient(object):
         :type timestamp: int or :obj:`datetime.datetime`, optional
         """
         if not timestamp:
-            timestamp = self._now
+            timestamp = current_timestamp()
         dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value, 'step': int(step)}, time_2_timestamp(timestamp))
         self._post('runs/log-metric', **dct)
 
@@ -474,7 +473,7 @@ class MLflowApiClient(object):
                 `{'some': 0.1}` or `[{'key': 'some', 'value': 0.1, 'step': 0, 'timestamp':...}]`
         :type metrics: Union[dict, :obj:`list` of :obj:`dict`]
         """
-        timestamp = time_2_timestamp(self._now)
+        timestamp = time_2_timestamp(current_timestamp())
 
         if isinstance(metrics, dict):
             metrics = self._handle_tags(metrics)
@@ -514,7 +513,7 @@ class MLflowApiClient(object):
         """
 
         if not timestamp:
-            timestamp = self._now
+            timestamp = current_timestamp()
 
         if not params:
             params = []
@@ -1481,8 +1480,3 @@ class MLflowApiClient(object):
             return (self.user, self.password)
         else:
             return None
-
-
-    @property
-    def _now(self):
-        return int(time.time())

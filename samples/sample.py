@@ -2,6 +2,7 @@ import os, sys, time
 
 from mlflow_client import MLflowApiClient
 from mlflow_client.log import get_logger
+from mlflow_client.timestamp import current_timestamp
 
 logger = get_logger()
 
@@ -20,7 +21,7 @@ def process(client):
 
     logger.info("====== create_run")
     run_name = 'run_for_exp_' + experiment_name
-    start_time = client._now
+    start_time = current_timestamp()
     run = client.create_run(experiment_id=experiment.id, name=run_name, start_time=start_time)
     logger.info("  run id {}".format(run.id))
 

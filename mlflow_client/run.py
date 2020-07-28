@@ -3,7 +3,7 @@ import time
 from enum import Enum
 
 from .tag import Tag
-from .time import timestamp_2_time
+from .timestamp import timestamp_2_time
 
 class RunStage(Enum):
     """ Run stage """
