@@ -150,12 +150,12 @@ node('bdbuilder04') {
                 gitlabCommitStatus('Build pip package') {
                     if (isDev || isRelease) {
                         withEnv(["TAG=${testTag}"]) {
-                            writeFile('VERSION', env.GIT_TAG)
+                            def package_version = readFile('VERSION').trim()
 
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'cd docs && make html'
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'tar cvzf docs/html-${env.GIT_TAG}.tar.gz -C docs/build/html html'
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'python setup.py bdist_wheel sdist'
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'cd docs && make html'
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'tar cvzf docs/html-${package_version}.tar.gz -C docs/build/html html'
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python setup.py bdist_wheel sdist'
                                 docker-compose -f docker-compose.jenkins.yml down
                             """
                         }
