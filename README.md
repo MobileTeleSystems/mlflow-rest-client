@@ -1,4 +1,5 @@
 # MLflow Python Client
+[![Build Status](https://jenkins.bd.msk.mts.ru/job/Platform/job/DSX/job/mlflow-client/badge/icon)](https://jenkins.bd.msk.mts.ru/job/Platform/job/DSX/job/mlflow-client)
 
 A slightly opinionated Python client for [MLflow](https://mlflow.org) REST API that implements all REST operations.
 

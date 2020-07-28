@@ -9,8 +9,9 @@ services:
     volumes:
       - ./reports:/app/reports:rw
       - ./dist:/app/dist:rw
-      - ./docs/build:/app/docs/build:rw
+      - ./docs:/app/docs:rw
       - ./VERSION:/app/VERSION:rw
+      - ./README.md:/app/README.md:ro
       - ./setup.py:/app/setup.py:ro
       - ./.coveragerc:/app/.coveragerc:ro
       - ./.pylintrc:/app/.pylintrc:ro

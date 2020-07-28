@@ -154,7 +154,7 @@ node('bdbuilder04') {
 
                             sh script: """
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'cd docs && make html'
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'tar cvzf docs/html-${package_version}.tar.gz -C docs/build/html html'
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'tar cvzf docs/html-${package_version}.tar.gz -C docs/build/html .'
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python setup.py bdist_wheel sdist'
                                 docker-compose -f docker-compose.jenkins.yml down
                             """
