@@ -7,10 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile.test
     volumes:
-      # for running local test, can be removed
       - ./reports:/app/reports:rw
-      - ./_build:/app/_build:rw
-      - ./_dist:/app/_dist:rw
+      - ./dist:/app/dist:rw
       - ./docs/build:/app/docs/build:rw
       - ./VERSION:/app/VERSION:rw
       - ./setup.py:/app/setup.py:ro
