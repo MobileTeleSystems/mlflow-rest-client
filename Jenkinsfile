@@ -3,9 +3,13 @@
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
 
+Boolean isMaster = false
+Boolean isDev = true
+Boolean isRelease = false
+
 node('bdbuilder04') {
     try {
-        gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Publishing documentation", "Publishing package to Artifactory"]) {
+        gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
                 env.GIT_TAG = "${scmVars.GIT_TAG}".trim() != 'null' ? scmVars.GIT_TAG.trim() : null
@@ -18,9 +22,9 @@ node('bdbuilder04') {
                 """
             }
 
-            Boolean isMaster  = env.GIT_BRANCH == 'master'
-            Boolean isDev     = env.GIT_BRANCH == 'dev'
-            Boolean isRelease = isMaster && env.GIT_TAG
+            isMaster  = env.GIT_BRANCH == 'master'
+            isDev     = env.GIT_BRANCH == 'dev'
+            isRelease = isMaster && env.GIT_TAG
 
             String testTag = isMaster ? 'test'   : 'dev-test'
 
@@ -152,7 +156,7 @@ node('bdbuilder04') {
 
                             sh script: """
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'cd docs && make html'
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'tar cvzf docs/html-${env.GIT_TAG}.tar.gz -C doc/build html'
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'tar cvzf docs/html-${env.GIT_TAG}.tar.gz -C docs/build/html html'
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins 'python setup.py bdist_wheel sdist'
                                 docker-compose -f docker-compose.jenkins.yml down
                             """
@@ -161,8 +165,8 @@ node('bdbuilder04') {
                 }
             }
 
-            stage ('Publishing documentation') {
-                gitlabCommitStatus('Publishing documentation') {
+            stage ('Building documentation') {
+                gitlabCommitStatus('Building documentation') {
                     def uploadSpec = '''{
                             "files": [
                                 {
@@ -198,7 +202,7 @@ node('bdbuilder04') {
         stage('Cleanup') {
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
-            docker.image('platform/python:2.7').inside("-u root"){
+            docker.image('platform/python:2.7').inside("-u root") {
                 sh script: ''' \
                     rm -rf .[A-z0-9]*
                     rm -rf *
