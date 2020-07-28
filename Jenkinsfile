@@ -40,8 +40,8 @@ node('bdbuilder04') {
                         ansiColor('xterm') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                 try {
-                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}")
-                                cache.pull()
+                                    def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}")
+                                    cache.pull()
                                 } catch (Exception e) {
                                 }
 
@@ -52,8 +52,8 @@ node('bdbuilder04') {
                     ansiColor('xterm') {
                         withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                             try {
-                            def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}")
-                            cache.pull()
+                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}")
+                                cache.pull()
                             } catch (Exception e) {
                             }
 
