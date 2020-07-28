@@ -427,7 +427,8 @@ class Run(object):
             return getattr(self.info, attr)
         if hasattr(self.data, attr):
             return getattr(self.data, attr)
-        getattr(self, attr)
+        raise AttributeError("{} object has no attribute {}"\
+                                .format(self.__class__.__name__, attr))
 
 
     def __eq__(self, other):
