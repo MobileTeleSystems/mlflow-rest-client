@@ -1,6 +1,5 @@
 [run]
 omit =
     tests/*
-    .tox/*
 parallel = true
 data_file = reports/.coverage
