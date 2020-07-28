@@ -111,6 +111,7 @@ node('bdbuilder04') {
                     withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'SONAR_DB_PASSWD', variable: 'SONAR_DB_PASSWD')]) {
                         ansiColor('xterm') {
+                                //TODO: remove hardcoded URL after DEVOPSMISC-2353
                                 sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.host.url=http://10.72.20.32:9000"
                             }
                         }

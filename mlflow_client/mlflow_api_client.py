@@ -501,7 +501,7 @@ class MLflowApiClient(object):
 
             Example:
                 `[{'key':..., 'value':...,'timestamp':...,'step':...}]`
-        :type metrics::obj:`dict`, :obj:`list` of :obj:`dict`, optional
+        :type metrics: :obj:`dict`, :obj:`list` of :obj:`dict`, optional
 
         :param timestamp: Default timestamp for metric
         :type timestamp: int or :obj:`datetime.datetime`, optional
