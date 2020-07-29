@@ -31,6 +31,7 @@ node('bdbuilder04') {
             List pythonVersions = ['2.7', '3.6', '3.7']
 
             List test_images = []
+            def docs_images
 
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
@@ -199,6 +200,22 @@ node('bdbuilder04') {
                 }
             }
         }
+            stage('Build and push nginx docs images') {
+                gitlabCommitStatus('Build nginx and push docs images') {
+                   ansiColor('xterm') {
+                        withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                            try {
+                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client.nginx:${testTag}")
+                                cache.pull()
+                            } catch (Exception e) {
+                            }
+
+                            docs_images = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:${testTag}", "--force-rm -f ./nginx/Dockerfile_nginx .")
+                            docs_images.push()
+                        }
+                    }
+                }
+            }
         }
     } finally {
         stage('Cleanup') {

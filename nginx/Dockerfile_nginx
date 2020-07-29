@@ -1,0 +1,19 @@
+FROM docker.rep.msk.mts.ru/bigdata/platform/docker-images/nginx:latest
+
+COPY ./nginx/conf.d.mlflow-client.msk.bd-cloud.mts.ru/* /etc/nginx/conf.d/http/
+ 
+
+RUN chown -R nginx:nginx /etc/nginx/
+RUN mkdir -p /var/www/mlflow-client
+RUN chown -R nginx:nginx /var/www/mlflow-client
+
+WORKDIR /var/www/mlflow-client
+
+COPY ./VERSION ./
+
+RUN VERSION=$(cat ./VERSION) && \
+    curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/html-$VERSION.tar.gz && \
+    tar -xf html-* && \
+    rm -f  html-*.tar.gz
+
+EXPOSE 40001/TCP
