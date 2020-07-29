@@ -241,8 +241,17 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
 
     	    def package_version = readFile('VERSION').trim()
 
+            vault_token_cred = 'vault_token_hdp_pipe'
+            withCredentials([string(credentialsId: vault_token_cred, variable: 'token')]){
+                    ansibleKey = vault("${token}", "platform/ansible/ansible_ssh_key")
+                    writeFile file: "./ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
+                }
+
+            
 	        ansiblePlaybook(
 	            playbook: './ansible/docs_nginx_deployment.yml',
+                inventory: './ansible/inventory.ini',
+                credentialsId: 'ansible.key'
 		        extraVars: [
     		         target_host: "test_mlflow",
     	             docs_version: package_version
