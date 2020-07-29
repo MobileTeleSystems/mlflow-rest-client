@@ -12,8 +12,10 @@ WORKDIR /var/www/mlflow-client
 COPY ./VERSION ./
 
 RUN VERSION=$(cat ./VERSION) && \
+    mkdir ./$VERSION && \
     curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/html-$VERSION.tar.gz && \
-    tar -xf html-* && \
+    tar -xf html-* ./$VERSION && \
+    ln -sf ./$VERSION ./latest && \
     rm -f  html-*.tar.gz
 
 EXPOSE 40001/TCP
