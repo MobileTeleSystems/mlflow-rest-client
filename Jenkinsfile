@@ -204,13 +204,14 @@ node('bdbuilder04') {
                 gitlabCommitStatus('Build nginx and push docs images') {
                    ansiColor('xterm') {
                         withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                            def package_version = readFile('VERSION').trim()
                             try {
-                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client.nginx:${testTag}")
+                                def cache = docker.image("docker.rep.msk.mts.ru/mlflow-client.nginx:${package_version}")
                                 cache.pull()
                             } catch (Exception e) {
                             }
 
-                            docs_images = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:${testTag}", "--force-rm -f ./nginx/Dockerfile_nginx .")
+                            docs_images = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:${package_version}", "--force-rm -f ./nginx/Dockerfile_nginx .")
                             docs_images.push()
                         }
                     }
@@ -229,5 +230,27 @@ node('bdbuilder04') {
             }
             deleteDir()
         }
+    }
+}
+
+gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
+    node('bdcigate01'){
+        stage ('Deploying the documentation') {
+            deleteDir()
+            checkout scm
+
+    	    def package_version = readFile('VERSION').trim()
+
+	        ansiblePlaybook(
+	            playbook: './ansible/docs_nginx_deployment.yml',
+		        extraVars: [
+    		         target_host: "10.73.40.6",
+    	             docs_version: package_version
+           		],
+    		    extras: '-vv'
+	        )
+
+            deleteDir()
+	    }
     }
 }
