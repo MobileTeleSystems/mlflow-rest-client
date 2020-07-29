@@ -234,7 +234,7 @@ node('bdbuilder04') {
 }
 
 gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
-    node('bdcigate01'){
+    node('bdbuilder04'){
         stage ('Deploying the documentation') {
             deleteDir()
             checkout scm
