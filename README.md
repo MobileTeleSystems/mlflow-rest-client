@@ -5,6 +5,8 @@ A slightly opinionated Python client for [MLflow](https://mlflow.org) REST API t
 
 See [mlflow_api_client.py](mlflow_client/mlflow_api_client.py) for client implementation.
 
+Docs - https://mlflow-client.msk.bd-cloud.mts.ru/
+
 ## Installation
 Basic
 ```bash
