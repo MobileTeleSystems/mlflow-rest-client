@@ -244,7 +244,7 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
 	        ansiblePlaybook(
 	            playbook: './ansible/docs_nginx_deployment.yml',
 		        extraVars: [
-    		         target_host: "10.73.40.6",
+    		         target_host: "test_mlflow",
     	             docs_version: package_version
            		],
     		    extras: '-vv'
