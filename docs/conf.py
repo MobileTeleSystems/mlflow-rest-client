@@ -10,7 +10,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sys, os
+import sys, os, re
+
+from collections import OrderedDict
+from setuptools_git_versioning import get_tag, get_tags, get_sha, DEFAULT_STARTING_VERSION
+
+VERSION_FORMAT = re.compile('\d+\.\d+(\.\d+)?')
+
 sys.path.insert(0, os.path.abspath('..'))
 extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx.ext.autosummary', 'sphinx_rtd_theme']
 numpydoc_show_class_members = False
@@ -38,7 +44,7 @@ author = 'msmarty4'
 #
 # The short X.Y version.
 CURRENT_DIR = os.path.dirname(__file__)
-version=open(os.path.join(CURRENT_DIR, '../VERSION')).read().strip()
+version = get_tag() or DEFAULT_STARTING_VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -135,3 +141,38 @@ texinfo_documents = [
      author, 'mlflow-client', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+tags = [version]
+tags.extend([tag for tag in get_tags() if VERSION_FORMAT.match(tag) and tag != version])
+tags = list(OrderedDict.fromkeys(tags))
+
+versions = [("latest", "/latest")]
+versions.extend([(tag, "/{}".format(tag)) for tag in tags])
+
+tag = get_tag()
+tag_sha = get_sha(tag)
+head_sha = get_sha('HEAD')
+on_tag = tag and head_sha == tag_sha
+
+context = {
+    'current_version': version,
+    'version_slug': version,
+    'versions': versions,
+    'downloads': [
+        ("html", "http://rep.msk.mts.ru/artifactory/files/mlflow-client-docs/html-{version}.tar.gz".format(version=version))
+    ],
+    'single_version': False,
+    'gitlab_host': 'git.bd.msk.mts.ru',
+    'gitlab_user': 'bigdata/platform/dsx',
+    'gitlab_repo': 'mlflow-client',
+    'gitlab_version': version if on_tag else 'master',
+    'conf_py_path': '/docs/',
+    'display_gitlab': True,
+    'commit': head_sha[:8]
+}
+
+if 'html_context' in globals():
+    html_context.update(context)
+
+else:
+    html_context = context

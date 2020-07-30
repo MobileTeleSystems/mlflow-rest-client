@@ -7,7 +7,7 @@ Welcome to mlflow-client's documentation!
 =========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    mlflow_client

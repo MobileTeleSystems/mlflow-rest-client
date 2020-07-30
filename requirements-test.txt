@@ -7,5 +7,7 @@ pytest==5.4.3; python_version >= "3"
 pytest-logger==0.5.1
 pytest-rerunfailures==8.0; python_version == "2.7"
 pytest-rerunfailures==9.0; python_version >= "3"
+setuptools-git-versioning
 sphinx
 sphinx_rtd_theme
+sphinx-multiversion
