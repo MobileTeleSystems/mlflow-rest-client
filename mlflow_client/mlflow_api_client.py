@@ -26,7 +26,7 @@ class MLflowApiClient(object):
         :type user: str, optional
 
         :ivar user: MLflow user name
-        :vatype user: str
+        :vartype user: str
 
         :param password: MLflow user password (if exist)
         :type password: str, optional
