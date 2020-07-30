@@ -10,6 +10,10 @@
   tasks:
     - name: "Pull docker nginx"
       shell: "docker pull docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
+    - name: "Stop docker nginx"
+      shell: "docker stop mlflow-client-docs || echo 'Not found docker container mlflow-client-docs'" 
+    - name: "Delete docker nginx"
+      shell: "docker rm mlflow-client-docs || echo 'Not found docker container mlflow-client-docs'"
     - name: "Deploy docker nginx"
-      shell: "docker stop mlflow-client-docs && docker rm mlflow-client && docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
 

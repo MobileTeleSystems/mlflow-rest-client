@@ -281,18 +281,18 @@ node('bdbuilder04') {
 gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
     node('bdbuilder04'){
         stage ('Deploying the documentation') {
-            deleteDir()
+            // deleteDir()
             checkout scm
 
-            vault_token_cred = 'vault_token_hdp_pipe'
-            withCredentials([string(credentialsId: vault_token_cred, variable: 'token')]) {
-                ansibleKey = vault("${token}", "platform/ansible/ansible_ssh_key")
-                writeFile file: "./docs/ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
+            // vault_token_cred = 'vault_token_hdp_pipe'
+            // withCredentials([string(credentialsId: vault_token_cred, variable: 'token')]) {
+            //     ansibleKey = vault("${token}", "platform/ansible/ansible_ssh_key")
+            //     writeFile file: "./docs/ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
 
                 ansiblePlaybook(
                     playbook: './docs/ansible/nginx_deployment.yml',
                     inventory: './docs/ansible/inventory.ini',
-                    credentialsId: './docs/ansible.key',
+                    // credentialsId: './docs/ansible.key',
                     extraVars: [
                         target_host: "test_mlflow",
                         docs_version: 'latest'
@@ -304,4 +304,3 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
             deleteDir()
         }
     }
-}
