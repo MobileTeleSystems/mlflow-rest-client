@@ -1,0 +1,13 @@
+FROM docker.rep.msk.mts.ru/bigdata/platform/docker-images/nginx:latest
+
+COPY ./docs/nginx/conf.d.mlflow-client.msk.bd-cloud.mts.ru/* /etc/nginx/conf.d/http/
+
+RUN chown -R nginx:nginx /etc/nginx/
+RUN mkdir -p /var/www/mlflow-client
+RUN chown -R nginx:nginx /var/www/mlflow-client
+
+WORKDIR /var/www/mlflow-client
+
+COPY ./docs/build/ ./
+
+EXPOSE 40001/TCP

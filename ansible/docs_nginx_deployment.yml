@@ -8,6 +8,8 @@
       prompt: "Enter version of ds-tools which documentation should be installed"
 
   tasks:
+    - name: "Pull docker nginx"
+      shell: "docker pull docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
     - name: "Deploy docker nginx"
       shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
-  
+
