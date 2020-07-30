@@ -14,9 +14,14 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
-                env.GIT_TAG = "${scmVars.GIT_TAG}".trim() != 'null' && "${scmVars.GIT_TAG}".trim() != '' ? scmVars.GIT_TAG.trim() : null
+                env.GIT_TAG = "${scmVars.GIT_TAG}".trim().replace('null', '') != '' ? scmVars.GIT_TAG.trim() : null
                 env.GIT_BRANCH = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
                 env.GIT_COMMIT = scmVars.GIT_COMMIT
+
+                println(env.GIT_TAG)
+                println(env.GIT_TAG == 'null')
+                println(env.GIT_BRANCH)
+                println(env.GIT_COMMIT)
 
                 sh script: """
                     mkdir -p ./reports/junit
@@ -166,9 +171,7 @@ node('bdbuilder04') {
                         try {
                             version = sh script: "python setup.py --version", returnStdout: true
                             version = version.trim()
-                        } catch (Exception e) {
-                            version = env.GIT
-                        }
+                        } catch (Exception e) {}
                     }
 
                     if (isMaster) {
