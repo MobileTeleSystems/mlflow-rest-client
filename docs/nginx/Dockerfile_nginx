@@ -1,5 +1,7 @@
 FROM docker.rep.msk.mts.ru/bigdata/platform/docker-images/nginx:latest
 
+RUN apt-get update && apt-get install -yq --no-install-recommends jq
+
 COPY ./docs/nginx/conf.d.mlflow-client.msk.bd-cloud.mts.ru/* /etc/nginx/conf.d/http/
 
 RUN chown -R nginx:nginx /etc/nginx/
@@ -8,6 +10,11 @@ RUN chown -R nginx:nginx /var/www/mlflow-client
 
 WORKDIR /var/www/mlflow-client
 
-COPY ./docs/build/ ./
+RUN cd /tmp && \
+    curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/mlflow-client-docs" \
+    | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/{} && \
+    find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \; && \
+    rm -f  html-*.tar.gz && \
+    ls .
 
 EXPOSE 40001/TCP
