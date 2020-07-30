@@ -277,7 +277,7 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
                 ansiblePlaybook(
                     playbook: './ansible/docs_nginx_deployment.yml',
                     inventory: './ansible/inventory.ini',
-                    credentialsId: 'ansible.key'
+                    credentialsId: 'ansible.key',
                     extraVars: [
                         target_host: "test_mlflow",
                         docs_version: 'latest'
