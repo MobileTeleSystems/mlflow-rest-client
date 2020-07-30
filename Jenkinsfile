@@ -22,7 +22,7 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
-                git_tag = "${scmVars.GIT_TAG}".trim()
+                git_tag = sh(script: "git describe --tags --abbrev=0", returnStdout: true).trim()
                 if (git_tag == 'null' || git_tag == '') {
                     git_tag = null
                 }

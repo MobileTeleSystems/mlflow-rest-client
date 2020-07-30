@@ -146,8 +146,8 @@ tags = [version]
 tags.extend([tag for tag in get_tags() if VERSION_FORMAT.match(tag) and tag != version])
 tags = list(OrderedDict.fromkeys(tags))
 
-versions = [("latest", "/latest")]
-versions.extend([(tag, "/{}".format(tag)) for tag in tags])
+versions = [("latest", "/latest/")]
+versions.extend([(tag, "/{}/".format(tag)) for tag in tags])
 
 tag = get_tag()
 tag_sha = get_sha(tag)
