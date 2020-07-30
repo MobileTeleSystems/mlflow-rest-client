@@ -145,7 +145,7 @@ node('bdbuilder04') {
             }
 
             stage('Deploy test images') {
-                gitlabCommitStatus('Deploy test image') {
+                gitlabCommitStatus('Deploy test images') {
                     if (isDev || isRelease) {
                         test_images.each { def image ->
                             ansiColor('xterm') {
@@ -186,6 +186,16 @@ node('bdbuilder04') {
 
                     if (isMaster) {
                         docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                            /*
+                            ansiColor('xterm') {
+                                sh script: """
+                                    sphinx-multiversion docs docs/build
+                                    mv docs/build/master docs/build/latest
+                                    tar cvzf docs/html-latest.tar.gz -C docs/build/master .
+                                """
+                            }
+                            */
+                            // Uncomment block above and remove block below after fixing https://github.com/Holzhaus/sphinx-multiversion/issues/17
                             ansiColor('xterm') {
                                 sh script: """
                                     cd docs
@@ -240,7 +250,7 @@ node('bdbuilder04') {
             }
 
             stage('Build and push nginx docs images') {
-                gitlabCommitStatus('Build nginx and push docs images') {
+                gitlabCommitStatus('Build and push nginx docs images') {
                     if (isMaster) {
                         ansiColor('xterm') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
@@ -278,29 +288,28 @@ node('bdbuilder04') {
     }
 }
 
-gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
-    node('bdbuilder04'){
-        stage ('Deploying the documentation') {
-            // deleteDir()
-            checkout scm
+if (isMaster) {
+    gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
+        node('bdbuilder04'){
+            stage ('Deploying the documentation') {
+                checkout scm
 
-            // vault_token_cred = 'vault_token_hdp_pipe'
-            // withCredentials([string(credentialsId: vault_token_cred, variable: 'token')]) {
-            //     ansibleKey = vault("${token}", "platform/ansible/ansible_ssh_key")
-            //     writeFile file: "./docs/ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
-
-                ansiblePlaybook(
-                    playbook: './docs/ansible/nginx_deployment.yml',
-                    inventory: './docs/ansible/inventory.ini',
-                    // credentialsId: './docs/ansible.key',
-                    extraVars: [
-                        target_host: "test_mlflow",
-                        docs_version: 'latest'
-                    ],
-                    extras: '-vv'
-                )
+                try{
+                    ansiblePlaybook(
+                        playbook: './docs/ansible/nginx_deployment.yml',
+                        inventory: './docs/ansible/inventory.ini',
+                        extraVars: [
+                            target_host: "test_mlflow",
+                            docs_version: version
+                        ],
+                        extras: '-vv'
+                    )
+                } catch (Exception ex2 ) {
+                    addGitLabMRComment comment: "Deploying the documentation failed. Inspect Jenkins logs."
+                    deleteDir()
+                    throw ex2
+                }
             }
-
-            deleteDir()
         }
     }
+}

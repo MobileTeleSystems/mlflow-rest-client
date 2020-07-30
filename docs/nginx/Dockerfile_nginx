@@ -10,8 +10,9 @@ RUN chown -R nginx:nginx /var/www/mlflow-client
 
 WORKDIR /var/www/mlflow-client
 
-RUN cd /tmp && \
-    curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/mlflow-client-docs" \
+# COPY docs/build ./
+# Uncomment line above and remove lines below after fixing https://github.com/Holzhaus/sphinx-multiversion/issues/17
+RUN curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/mlflow-client-docs" \
     | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/{} && \
     find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \; && \
     rm -f  html-*.tar.gz && \
