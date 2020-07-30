@@ -22,7 +22,7 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
-                git_tag = sh(script: "git describe --tags --abbrev=0", returnStdout: true).trim()
+                git_tag = sh(script: "git describe --tags --abbrev=0 || exit 0", returnStdout: true).trim()
                 if (git_tag == 'null' || git_tag == '') {
                     git_tag = null
                 }
@@ -261,7 +261,10 @@ node('bdbuilder04') {
 
                                 def docs_image = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                 docs_image.push()
-                                docs_image.push(version)
+
+                                if (isRelease) {
+                                    docs_image.push(version)
+                                }
                             }
                         }
                     }
