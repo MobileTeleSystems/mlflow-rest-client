@@ -300,7 +300,7 @@ if (isMaster) {
                         inventory: './docs/ansible/inventory.ini',
                         extraVars: [
                             target_host: "test_mlflow",
-                            docs_version: version
+                            docs_version: 'latest'
                         ],
                         extras: '-vv'
                     )
