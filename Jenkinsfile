@@ -104,6 +104,7 @@ node('bdbuilder04') {
                             """
                         }
                     }
+                    
                     junit 'reports/junit/*.xml'
                 }
             }
