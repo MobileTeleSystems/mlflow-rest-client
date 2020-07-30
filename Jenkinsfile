@@ -3,6 +3,10 @@
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
 
+String git_tag
+String git_branch
+String git_commit
+
 Boolean isMaster = false
 Boolean isDev = true
 Boolean isRelease = false
@@ -14,14 +18,16 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
-                env.GIT_TAG = "${scmVars.GIT_TAG}".trim().replace('null', '') != '' ? scmVars.GIT_TAG.trim() : null
-                env.GIT_BRANCH = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
-                env.GIT_COMMIT = scmVars.GIT_COMMIT
+                git_tag = "${scmVars.GIT_TAG}".trim()
+                if (git_tag == 'null' || git_tag == '') {
+                    git_tag = null
+                }
+                git_branch = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
+                git_commit = scmVars.GIT_COMMIT
 
-                println(env.GIT_TAG)
-                println(env.GIT_TAG == 'null')
-                println(env.GIT_BRANCH)
-                println(env.GIT_COMMIT)
+                println(git_tag)
+                println(git_branch)
+                println(git_commit)
 
                 sh script: """
                     mkdir -p ./reports/junit
@@ -29,10 +35,10 @@ node('bdbuilder04') {
                 """
             }
 
-            isMaster  = env.GIT_BRANCH == 'master'
-            isDev     = env.GIT_BRANCH == 'dev'
-            isRelease = isMaster && env.GIT_TAG
-            version   = env.GIT_TAG
+            isMaster  = git_branch == 'master'
+            isDev     = git_branch == 'dev'
+            isRelease = isMaster && git_tag
+            version   = git_tag
 
             String testTag = isMaster ? 'test' : 'dev-test'
 
