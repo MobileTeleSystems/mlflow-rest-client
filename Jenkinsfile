@@ -261,10 +261,7 @@ node('bdbuilder04') {
 
                                 def docs_image = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                 docs_image.push()
-
-                                if (isRelease){
-                                    docs_image.push(version)
-                                }
+                                docs_image.push(version)
                             }
                         }
                     }
