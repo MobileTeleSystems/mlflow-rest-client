@@ -44,8 +44,8 @@ node('bdbuilder04') {
 
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
-                    pythonVersions.each{ def version ->
-                        def testTagVersioned = "${testTag}-python${version}"
+                    pythonVersions.each{ def pythonVersion ->
+                        def testTagVersioned = "${testTag}-python${pythonVersion}"
 
                         ansiColor('xterm') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
@@ -54,7 +54,7 @@ node('bdbuilder04') {
                                     cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}").pull()
                                 } catch (Exception e) {}
 
-                                test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${version} --force-rm -f Dockerfile.test .")
+                                test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
                             }
                         }
                     }
@@ -73,8 +73,8 @@ node('bdbuilder04') {
 
             stage('Run unit tests') {
                 gitlabCommitStatus('Run unit tests') {
-                    pythonVersions.each{ def version ->
-                        withEnv(["TAG=${testTag}-python${version}"]) {
+                    pythonVersions.each{ def pythonVersion ->
+                        withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
                             ansiColor('xterm') {
                                 sh script: """
                                     docker-compose -f docker-compose.jenkins.yml run --rm mlflow-client-jenkins
@@ -156,8 +156,8 @@ node('bdbuilder04') {
                 gitlabCommitStatus('Build pip package') {
                     if (isDev || isRelease) {
                         //Build wheels for each version
-                        pythonVersions.each{ def version ->
-                            withEnv(["TAG=${testTag}-python${version}"]) {
+                        pythonVersions.each{ def pythonVersion ->
+                            withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python setup.py bdist_wheel sdist'
@@ -277,7 +277,7 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
                 ansiblePlaybook(
                     playbook: './ansible/docs_nginx_deployment.yml',
                     inventory: './ansible/inventory.ini',
-                    credentialsId: 'ansible.key'
+                    credentialsId: 'ansible.key',
                     extraVars: [
                         target_host: "test_mlflow",
                         docs_version: 'latest'
