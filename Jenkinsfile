@@ -96,24 +96,25 @@ node('bdbuilder04') {
 
             stage('Check coverage') {
                 gitlabCommitStatus('Check coverage') {
-                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                    withEnv(["TAG=${testTag}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                coverage.sh
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins coverage.sh
+                                docker-compose -f docker-compose.jenkins.yml down
                             """
                         }
                     }
-
                     junit 'reports/junit/*.xml'
                 }
             }
 
             stage('Pylint') {
                 gitlabCommitStatus('Pylint') {
-                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                    withEnv(["TAG=${testTag}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > reports/pylint.txt
+                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
+                                docker-compose -f docker-compose.jenkins.yml down
                             """
                         }
                     }
