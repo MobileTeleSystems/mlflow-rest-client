@@ -14,6 +14,10 @@ Boolean isRelease = false
 String version
 
 node('bdbuilder04') {
+    environment {
+        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
+    }
+
     try {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
