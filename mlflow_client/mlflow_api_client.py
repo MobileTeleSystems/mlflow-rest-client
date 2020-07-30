@@ -11,12 +11,7 @@ from .run import Run, RunInfo, RunViewType, RunStatus, Metric
 from .timestamp import current_timestamp, time_2_timestamp
 
 class MLflowApiClient(object):
-    """ HTTP Client for MLflow API """
-
-    MAX_RESULTS = 100
-
-    def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
-        """
+    """ HTTP Client for MLflow API
 
         :param api_url: MLflow URL
 
@@ -44,7 +39,11 @@ class MLflowApiClient(object):
 
         :param ignore_ssl_check: If `True`, skip SSL verify step
         :type ignore_ssl_check: bool
-        """
+    """
+
+    MAX_RESULTS = 100
+
+    def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
         self.base_url = api_url
         self.user = user
         self._password = password
