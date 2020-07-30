@@ -1,7 +1,8 @@
 ARG PYTHON_VERSION=3.7
-FROM docker.rep.msk.mts.ru/platform/python:${PYTHON_VERSION} as base
+FROM python:${PYTHON_VERSION} as base
 
-RUN pip install -U pip --no-cache-dir
+COPY docker/pip.conf /etc/pip.conf
+RUN pip install -U pip typing --no-cache-dir
 
 WORKDIR /app
 COPY requirements.txt requirements-test.txt /app/

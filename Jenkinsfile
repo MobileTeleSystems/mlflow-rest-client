@@ -3,6 +3,10 @@
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
 
+String git_tag
+String git_branch
+String git_commit
+
 Boolean isMaster = false
 Boolean isDev = true
 Boolean isRelease = false
@@ -14,9 +18,16 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
-                env.GIT_TAG = "${scmVars.GIT_TAG}".trim() != 'null' ? scmVars.GIT_TAG.trim() : null
-                env.GIT_BRANCH = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
-                env.GIT_COMMIT = scmVars.GIT_COMMIT
+                git_tag = "${scmVars.GIT_TAG}".trim()
+                if (git_tag == 'null' || git_tag == '') {
+                    git_tag = null
+                }
+                git_branch = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
+                git_commit = scmVars.GIT_COMMIT
+
+                println(git_tag)
+                println(git_branch)
+                println(git_commit)
 
                 sh script: """
                     mkdir -p ./reports/junit
@@ -24,17 +35,10 @@ node('bdbuilder04') {
                 """
             }
 
-            isMaster  = env.GIT_BRANCH == 'master'
-            isDev     = env.GIT_BRANCH == 'dev'
-            isRelease = isMaster && env.GIT_TAG
-
-            docker.image('platform/python:3.7').inside("-u root") {
-                try {
-                    version = sh script: 'python setup.py --version', returnStdout: true
-                } catch (Exception e) {
-                    version = env.GIT
-                }
-            }
+            isMaster  = git_branch == 'master'
+            isDev     = git_branch == 'dev'
+            isRelease = isMaster && git_tag
+            version   = git_tag
 
             String testTag = isMaster ? 'test' : 'dev-test'
 
@@ -88,26 +92,24 @@ node('bdbuilder04') {
 
             stage('Check coverage') {
                 gitlabCommitStatus('Check coverage') {
-                    withEnv(["TAG=${testTag}"]) {
+                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins coverage.sh
-                                docker-compose -f docker-compose.jenkins.yml down
+                                coverage.sh
                             """
-
-                            junit 'reports/junit/*.xml'
                         }
                     }
+
+                    junit 'reports/junit/*.xml'
                 }
             }
 
             stage('Pylint') {
                 gitlabCommitStatus('Pylint') {
-                    withEnv(["TAG=${testTag}"]) {
+                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
-                                docker-compose -f docker-compose.jenkins.yml down
+                                python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > reports/pylint.txt
                             """
                         }
                     }
@@ -157,11 +159,10 @@ node('bdbuilder04') {
                     if (isDev || isRelease) {
                         //Build wheels for each version
                         pythonVersions.each{ def pythonVersion ->
-                            withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
+                            docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}-python${pythonVersion}").inside() {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python setup.py bdist_wheel sdist'
-                                        docker-compose -f docker-compose.jenkins.yml down
+                                        python setup.py bdist_wheel sdist
                                     """
                                 }
                             }
@@ -172,16 +173,26 @@ node('bdbuilder04') {
 
             stage ('Building documentation') {
                 gitlabCommitStatus('Building documentation') {
+                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                        try {
+                            version = sh script: "python setup.py --version", returnStdout: true
+                            version = version.trim()
+                        } catch (Exception e) {}
+                    }
+
                     if (isMaster) {
-                        ansiColor('xterm') {
-                            sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'sphinx-multiversion docs docs/build && mv docs/build/master docs/build/latest && tar cvzf docs/html-latest.tar.gz -C docs/build/latest .'
-                                docker-compose -f docker-compose.jenkins.yml down
-                            """
+                        docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                            ansiColor('xterm') {
+                                sh script: """
+                                    cd docs
+                                    make html
+                                    tar cvzf html-latest.tar.gz -C build/html .
+                                """
+                            }
                         }
 
                         if (isRelease) {
-                            docker.image('platform/python:3.7').inside("-u root") {
+                            docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
                                 ansiColor('xterm') {
                                     sh script: """
                                         cp docs/html-latest.tar.gz docs/html-${version}.tar.gz
@@ -250,7 +261,7 @@ node('bdbuilder04') {
         stage('Cleanup') {
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
-            docker.image('platform/python:3.7').inside("-u root") {
+            docker.image('platform/python:2.7').inside("-u root") {
                 ansiColor('xterm') {
                     sh script: ''' \
                         rm -rf .[A-z0-9]*
@@ -272,12 +283,12 @@ gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
             vault_token_cred = 'vault_token_hdp_pipe'
             withCredentials([string(credentialsId: vault_token_cred, variable: 'token')]) {
                 ansibleKey = vault("${token}", "platform/ansible/ansible_ssh_key")
-                writeFile file: "./ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
+                writeFile file: "./docs/ansible.key", text: "${ansibleKey['ansible_ssh_key']}"
 
                 ansiblePlaybook(
-                    playbook: './ansible/docs_nginx_deployment.yml',
-                    inventory: './ansible/inventory.ini',
-                    credentialsId: 'ansible.key',
+                    playbook: './docs/ansible/nginx_deployment.yml',
+                    inventory: './docs/ansible/inventory.ini',
+                    credentialsId: './docs/ansible.key',
                     extraVars: [
                         target_host: "test_mlflow",
                         docs_version: 'latest'

@@ -8,13 +8,7 @@ services:
       dockerfile: Dockerfile.test
     volumes:
       - ./reports:/app/reports:rw
-      - ./dist:/app/dist:rw
-      - ./docs:/app/docs:rw
-      - ./VERSION:/app/VERSION:rw
-      - ./README.md:/app/README.md:ro
-      - ./setup.py:/app/setup.py:ro
       - ./.coveragerc:/app/.coveragerc:ro
-      - ./.pylintrc:/app/.pylintrc:ro
     depends_on:
         - "mlflow-jenkins"
     networks:

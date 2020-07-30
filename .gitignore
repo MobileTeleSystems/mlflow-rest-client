@@ -188,6 +188,7 @@ instance/
 docs/_build/
 docs/build
 docs/*.tar.gz
+docs/*.key
 
 # PyBuilder
 target/
