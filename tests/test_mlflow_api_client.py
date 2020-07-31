@@ -696,6 +696,16 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    def test_get_or_create_model(self):
+        model_name = create_model_name()
+
+        model = client.get_or_create_model(model_name)
+        model2 = client.get_or_create_model(model_name)
+        assert model == model2
+
+        client.delete_model(model_name)
+
+
     def test_rename_model(self):
         model_name = create_model_name()
         client.create_model(model_name)

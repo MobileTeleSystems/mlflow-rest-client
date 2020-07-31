@@ -197,7 +197,7 @@ class MLflowApiClient(object):
 
     def get_or_create_experiment(self, name, artifact_location=None):
         """
-        Get existing experiment by nabe or create new one
+        Get existing experiment by name or create new one
 
         :param name: Experiment name
         :type name: str
@@ -876,6 +876,28 @@ class MLflowApiClient(object):
         if stages:
             params['stages'] = stages
         return ModelVersion.from_list(self._post('registered-models/get-latest-versions', name=name, **params)['model_versions'])
+
+    def get_or_create_model(self, name, tags=None):
+        """
+        Get existing model by name or create new one
+
+        :param name: Model name
+        :type name: str
+
+        :param tags: List of tags
+
+            Example:
+                `{'some': 'tag}` or `[{'key': 'some', 'value': 'tag']`
+        :type tags: :obj:`dict`, :obj:`list` of :obj:`dict`, optional
+
+        :returns: Model
+        :rtype: Model
+        """
+
+        for model in self.search_models_iterator("name='{name}'".format(name=name), max_results=1):
+            return model
+        return self.create_model(name, tags=tags)
+
 
     def rename_model(self, name, new_name):
         """
