@@ -16,7 +16,7 @@ class MLflowApiClient(object):
         :param api_url: MLflow URL
 
             Example:
-                "http://some.domain:5000
+                "http://some.domain:5000"
         :type api_url: str
 
         :ivar base_url: MLflow URL
@@ -186,7 +186,7 @@ class MLflowApiClient(object):
         :type name: str
 
         :returns: Experiment ID
-        :rtype: Union[str]
+        :rtype: str, optional
         """
         exps = self.list_experiments()
         for exp in exps:
@@ -434,7 +434,7 @@ class MLflowApiClient(object):
 
             Example:
                 `{'some': 'param'}` or `[{'key': 'some', 'value': 'param'}]`
-        :type params: Union[dict, :obj:`list` of :obj:`dict`]
+        :type params: :obj:`dict` or :obj:`list` of :obj:`dict`
         """
 
         if isinstance(params, dict):
@@ -479,7 +479,7 @@ class MLflowApiClient(object):
 
             Example:
                 `{'some': 0.1}` or `[{'key': 'some', 'value': 0.1, 'step': 0, 'timestamp':...}]`
-        :type metrics: Union[dict, :obj:`list` of :obj:`dict`]
+        :type metrics: :obj:`dict` or :obj:`list` of :obj:`dict`
         """
         timestamp = time_2_timestamp(current_timestamp())
 
