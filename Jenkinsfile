@@ -19,7 +19,7 @@ node('bdbuilder04') {
     }
 
     try {
-        gitlabBuilds(builds: ["Build test images", "Run unit tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
+        gitlabBuilds(builds: ["Build test images", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
                 git_tag = sh(script: "git describe --tags --abbrev=0 --exact-match || exit 0", returnStdout: true).trim()
@@ -79,8 +79,8 @@ node('bdbuilder04') {
                 }
             }
 
-            stage('Run unit tests') {
-                gitlabCommitStatus('Run unit tests') {
+            stage('Run integration tests') {
+                gitlabCommitStatus('Run integration tests') {
                     pythonVersions.each{ def pythonVersion ->
                         withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
                             ansiColor('xterm') {
