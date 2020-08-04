@@ -20,6 +20,8 @@ port = os.environ['MLFLOW_PORT'] or '5000'
 api_url = "http://{host}:{port}".format(host=host, port=port)
 client = MLflowApiClient(api_url)
 
+DEFAULT_TIMEOUT = 60
+
 def rand_str():
     return uuid.uuid4().hex
 
@@ -33,6 +35,7 @@ def now():
     return datetime.now().replace(microsecond=0)
 
 class ApiTest(unittest.TestCase):
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_experiments(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -43,6 +46,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_experiments_iterator(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -56,6 +60,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_experiment(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -69,6 +74,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_experiment_by_name(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -82,6 +88,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_rename_experiment(self):
         exp_name = create_exp_name()
         exp_name2 = create_exp_name()
@@ -98,6 +105,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_create_experiment(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -109,6 +117,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_experiment(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -125,6 +134,7 @@ class ApiTest(unittest.TestCase):
             client.create_experiment(exp_name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_restore_experiment(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -142,6 +152,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_experiment_tag(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -161,6 +172,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_experiment_id(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -174,6 +186,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_or_create_experiment(self):
         exp_name = create_exp_name()
         exp = client.get_or_create_experiment(exp_name)
@@ -183,6 +196,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_experiment_runs(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -198,6 +212,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_experiment_runs_iterator(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -221,6 +236,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -237,6 +253,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_create_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -258,6 +275,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_start_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -273,6 +291,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_schedule_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -288,6 +307,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_finish_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -304,6 +324,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_fail_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -320,6 +341,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_kill_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -336,6 +358,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -354,6 +377,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_restore_run(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -371,6 +395,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_log_run_parameter(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -395,6 +420,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_log_run_parameters(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -418,6 +444,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_log_run_metric(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -449,6 +476,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_log_run_metrics(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -475,6 +503,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_run_tag(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -493,6 +522,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_run_tags(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -516,6 +546,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_run_tag(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -536,6 +567,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_run_tags(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -559,6 +591,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_run_metric_history(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -586,6 +619,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_run_metric_history_iterator(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -613,6 +647,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_run_artifacts(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -625,6 +660,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_runs(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -645,6 +681,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_runs_iterator(self):
         exp_name = create_exp_name()
         exp = client.create_experiment(exp_name)
@@ -668,6 +705,7 @@ class ApiTest(unittest.TestCase):
         client.delete_experiment(exp.id)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_create_model(self):
         model_name = create_model_name()
 
@@ -686,6 +724,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_model(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -696,6 +735,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_or_create_model(self):
         model_name = create_model_name()
 
@@ -706,6 +746,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model_name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_rename_model(self):
         model_name = create_model_name()
         client.create_model(model_name)
@@ -722,6 +763,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model2.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_model_description(self):
         model_name = create_model_name()
 
@@ -736,6 +778,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model2.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_model(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -746,6 +789,7 @@ class ApiTest(unittest.TestCase):
             client.get_model(model_name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_models(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -756,6 +800,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_models_iterator(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -769,6 +814,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_models(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -780,6 +826,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_models_iterator(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -794,6 +841,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_model_tag(self):
         model_name = create_model_name()
 
@@ -812,6 +860,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_model_tag(self):
         model_name = create_model_name()
 
@@ -829,6 +878,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_model_versions(self):
         model_name = create_model_name()
 
@@ -846,6 +896,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_list_model_versions_iterator(self):
         model_name = create_model_name()
 
@@ -865,6 +916,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_create_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -892,6 +944,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -904,6 +957,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_model_version_description(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -919,6 +973,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_set_model_version_tag(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -939,6 +994,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_model_version_tag(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -956,6 +1012,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_delete_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -970,6 +1027,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_model_versions(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -983,6 +1041,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_search_model_versions_iterator(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -999,6 +1058,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_get_model_version_download_url(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -1012,6 +1072,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_test_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -1042,6 +1103,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_promote_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
@@ -1072,6 +1134,7 @@ class ApiTest(unittest.TestCase):
         client.delete_model(model.name)
 
 
+    @pytest.mark.timeout(DEFAULT_TIMEOUT)
     def test_archive_model_version(self):
         model_name = create_model_name()
         model = client.create_model(model_name)
