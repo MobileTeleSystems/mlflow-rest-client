@@ -1489,9 +1489,7 @@ class MLflowApiClient(object):
 
         if self._auth:
             params['auth'] = self._auth
-
-        if self._ignore_ssl_check:
-            params['verify'] = self._ignore_ssl_check
+        params['verify'] = not self._ignore_ssl_check
 
         self.logger.debug("api_client.{}: req: {}".format(method.upper(), params))
         self.logger.debug("api_client.{}: url: {}".format(method.upper(), url))
