@@ -894,7 +894,7 @@ class MLflowApiClient(object):
         :rtype: Model
         """
 
-        for model in self.search_models_iterator("name='{name}'".format(name=name), max_results=1):
+        for model in self.search_models_iterator("name LIKE '{name}'".format(name=name), max_results=1):
             return model
         return self.create_model(name, tags=tags)
 
