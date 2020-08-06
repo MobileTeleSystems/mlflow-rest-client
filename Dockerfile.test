@@ -1,6 +1,8 @@
 ARG PYTHON_VERSION=3.7
 FROM python:${PYTHON_VERSION}-slim as base
-RUN apt-get update && apt-get install make --no-install-recommends
+
+ADD http://bdreposdev01.msk.mts.ru/artifactory/files/repofiles/debian_sources.list /etc/apt/sources.list
+RUN apt-get update && apt-get install make git -fy --no-install-recommends
 
 COPY docker/pip.conf /etc/pip.conf
 RUN pip install -U pip --no-cache-dir
