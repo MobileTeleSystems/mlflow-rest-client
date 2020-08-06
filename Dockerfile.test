@@ -1,5 +1,6 @@
 ARG PYTHON_VERSION=3.7
 FROM python:${PYTHON_VERSION}-slim as base
+RUN apt-get update && apt-get install make --no-install-recommends
 
 COPY docker/pip.conf /etc/pip.conf
 RUN pip install -U pip --no-cache-dir
