@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+import sys
 
 def init(level):
     # Setup logging
@@ -14,7 +15,7 @@ def get_logger(level=logging.INFO):
 
 
 def stdout_logger(level):
-    console = logging.StreamHandler()
+    console = logging.StreamHandler(sys.stdout)
     if isinstance(level, str):
         level = level.upper()
     console.setLevel(level)
