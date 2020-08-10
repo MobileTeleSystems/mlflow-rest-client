@@ -9,15 +9,15 @@
 
   tasks:
     - name: "Pull docker nginx"
-      shell: "docker pull docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
     - name: "Stop docker nginx"
       shell: "docker stop mlflow-client-docs || exit 0"
     - name: "Delete docker nginx"
       shell: "docker rm mlflow-client-docs || exit 0"
     - name: "Delete docker nginx image"
-      shell: "docker rmi docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }} || exit 0"
+      shell: "docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }} || exit 0"
     - name: "Pull docker nginx"
-      shell: "docker pull docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
     - name: "Deploy docker nginx"
-      shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
 
