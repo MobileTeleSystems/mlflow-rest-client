@@ -59,10 +59,10 @@ node('bdbuilder04') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                 try {
                                     // Fetch cache
-                                    cache = docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}").pull()
+                                    cache = docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").pull()
                                 } catch (Exception e) {}
 
-                                test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                                test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
                             }
                         }
                     }
@@ -70,10 +70,10 @@ node('bdbuilder04') {
                         withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                             try {
                                 // Fetch cache
-                                docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").pull()
+                                docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").pull()
                             } catch (Exception e) {}
 
-                            test_images << docker.build("docker.rep.msk.mts.ru/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .")
+                            test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .")
                         }
                     }
                 }
@@ -165,7 +165,7 @@ node('bdbuilder04') {
                     if (isDev || isRelease) {
                         //Build wheels for each version
                         pythonVersions.each{ def pythonVersion ->
-                            docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}-python${pythonVersion}").inside() {
+                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-python${pythonVersion}").inside() {
                                 ansiColor('xterm') {
                                     sh script: """
                                         python setup.py bdist_wheel sdist
@@ -179,7 +179,7 @@ node('bdbuilder04') {
 
             stage ('Building documentation') {
                 gitlabCommitStatus('Building documentation') {
-                    docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                    docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
                         try {
                             version = sh script: "python setup.py --version", returnStdout: true
                             version = version.trim()
@@ -187,7 +187,7 @@ node('bdbuilder04') {
                     }
 
                     if (isMaster) {
-                        docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                        docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
                             /*
                             ansiColor('xterm') {
                                 sh script: """
@@ -208,7 +208,7 @@ node('bdbuilder04') {
                         }
 
                         if (isRelease) {
-                            docker.image("docker.rep.msk.mts.ru/mlflow-client:${testTag}").inside() {
+                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
                                 ansiColor('xterm') {
                                     sh script: """
                                         cp docs/html-latest.tar.gz docs/html-${version}.tar.gz
@@ -258,10 +258,10 @@ node('bdbuilder04') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                 try {
                                     // Fetch cache
-                                    docker.image("docker.rep.msk.mts.ru/mlflow-client.nginx:latest").pull()
+                                    docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:latest").pull()
                                 } catch (Exception e) {}
 
-                                def docs_image = docker.build("docker.rep.msk.mts.ru/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                def docs_image = docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                 docs_image.push()
 
                                 if (isRelease) {
