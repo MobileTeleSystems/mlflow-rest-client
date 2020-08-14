@@ -1,0 +1,11 @@
+include README.md requirements.txt requirements-test.txt
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc
+recursive-exclude * *.pyo
+recursive-exclude * *.orig
+recursive-exclude docs *
+recursive-exclude samples *
+recursive-exclude tests *
+prune docs*
+prune samples*
+prune tests*

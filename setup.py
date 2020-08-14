@@ -1,6 +1,6 @@
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -38,11 +38,11 @@ setup(
         'Programming Language :: Python :: 3.7'
     ],
     keywords='MLflow REST API',
-    packages=['mlflow_client'],
+    packages=find_packages(exclude=['*.docs.*', '*.tests.*']),
     install_requires=requirements,
     tests_require=test_requirements,
     setup_requires=['setuptools-git-versioning'],
     test_suite='tests',
-    include_package_data=False,
+    include_package_data=True,
     zip_safe=False
 )
