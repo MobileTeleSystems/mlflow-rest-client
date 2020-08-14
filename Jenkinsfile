@@ -186,7 +186,7 @@ node('bdbuilder04') {
                         } catch (Exception e) {}
                     }
 
-                    if (isMaster) {
+                    if (isRelease) {
                         docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
                             /*
                             ansiColor('xterm') {
@@ -203,17 +203,8 @@ node('bdbuilder04') {
                                     cd docs
                                     make html
                                     tar cvzf html-latest.tar.gz -C build/html .
+                                    cp html-latest.tar.gz html-${version}.tar.gz
                                 """
-                            }
-                        }
-
-                        if (isRelease) {
-                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
-                                ansiColor('xterm') {
-                                    sh script: """
-                                        cp docs/html-latest.tar.gz docs/html-${version}.tar.gz
-                                    """
-                                }
                             }
                         }
 
@@ -253,7 +244,7 @@ node('bdbuilder04') {
 
             stage('Build and push nginx docs images') {
                 gitlabCommitStatus('Build and push nginx docs images') {
-                    if (isMaster) {
+                    if (isRelease) {
                         ansiColor('xterm') {
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                 try {
@@ -263,10 +254,7 @@ node('bdbuilder04') {
 
                                 def docs_image = docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                 docs_image.push()
-
-                                if (isRelease) {
-                                    docs_image.push(version)
-                                }
+                                docs_image.push(version)
                             }
                         }
                     }
@@ -290,27 +278,21 @@ node('bdbuilder04') {
     }
 }
 
-if (isMaster) {
+if (isRelease) {
     gitlabCommitStatus(name: 'Deploying the documentation to the nginx server') {
         node('bdbuilder04'){
             stage ('Deploying the documentation') {
                 checkout scm
 
-                try{
-                    ansiblePlaybook(
-                        playbook: './docs/ansible/nginx_deployment.yml',
-                        inventory: './docs/ansible/inventory.ini',
-                        extraVars: [
-                            target_host: "test_mlflow",
-                            docs_version: 'latest'
-                        ],
-                        extras: '-vv'
-                    )
-                } catch (Exception ex2 ) {
-                    addGitLabMRComment comment: "Deploying the documentation failed. Inspect Jenkins logs."
-                    deleteDir()
-                    throw ex2
-                }
+                ansiblePlaybook(
+                    playbook: './docs/ansible/nginx_deployment.yml',
+                    inventory: './docs/ansible/inventory.ini',
+                    extraVars: [
+                        target_host: "test_mlflow",
+                    image_version: version
+                    ],
+                    extras: '-vv'
+                )
             }
         }
     }

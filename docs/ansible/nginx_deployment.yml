@@ -1,23 +1,23 @@
-- name: dsx-mlflow-client documentation deployment
+- name: mlflow-client documentation deployment
   hosts: "{{ target_host }}"
   vars_prompt:
     - name: "target_host"
       prompt: "Enter a target host name or a group name where documentation should be installed"
       private: no
-    - name: "docs_version"
-      prompt: "Enter version of ds-tools which documentation should be installed"
+    - name: "image_version"
+      prompt: "Enter version of mlflow-client which documentation should be installed"
 
   tasks:
     - name: "Pull docker nginx"
-      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ image_version }}"
     - name: "Stop docker nginx"
       shell: "docker stop mlflow-client-docs || exit 0"
     - name: "Delete docker nginx"
       shell: "docker rm mlflow-client-docs || exit 0"
     - name: "Delete docker nginx image"
-      shell: "docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }} || exit 0"
+      shell: "docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ image_version }} || exit 0"
     - name: "Pull docker nginx"
-      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker pull docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ image_version }}"
     - name: "Deploy docker nginx"
-      shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ docs_version }}"
+      shell: "docker run --init --name mlflow-client-docs --network=mlflow_default -d docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:{{ image_version }}"
 
