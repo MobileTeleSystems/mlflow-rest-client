@@ -15,7 +15,7 @@ String version
 
 node('bdbuilder04') {
     environment {
-        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${env.BUILD_ID}"
+        COMPOSE_PROJECT_NAME = env.BUILD_TAG
     }
 
     try {
@@ -92,11 +92,11 @@ node('bdbuilder04') {
                     ]
                     pythonVersions.each{ def pythonVersion ->
                         build[pythonVersion] = {
-                            withEnv(["TAG=${testTag}-python${pythonVersion}", "COMPOSE_PROJECT_NAME=${env.JOB_NAME}-${env.BUILD_ID}-${pythonVersion}"]) {
+                            withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins.yml run --rm mlflow-client-jenkins
-                                        docker-compose -f docker-compose.jenkins.yml down
+                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins
+                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down
                                     """
                                 }
                             }
