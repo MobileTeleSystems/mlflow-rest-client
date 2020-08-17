@@ -52,22 +52,28 @@ node('bdbuilder04') {
 
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
-                    pythonVersions.each{ def pythonVersion ->
-                        def testTagVersioned = "${testTag}-python${pythonVersion}"
+                    def build = [
+                        failFast: true
+                    ]
 
-                        ansiColor('xterm') {
-                            withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                try {
-                                    // Fetch cache
-                                    cache = docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").pull()
-                                } catch (Exception e) {}
+                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                        pythonVersions.each{ def pythonVersion ->
+                            def testTagVersioned = "${testTag}-python${pythonVersion}"
 
-                                test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                            build[pythonVersion] = {
+                                ansiColor('xterm') {
+                                    try {
+                                        // Fetch cache
+                                        cache = docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").pull()
+                                    } catch (Exception e) {}
+
+                                    test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                                }
                             }
                         }
-                    }
-                    ansiColor('xterm') {
-                        withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                        parallel build
+
+                        ansiColor('xterm') {
                             try {
                                 // Fetch cache
                                 docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").pull()
@@ -81,16 +87,22 @@ node('bdbuilder04') {
 
             stage('Run integration tests') {
                 gitlabCommitStatus('Run integration tests') {
+                    def build = [
+                        failFast: true
+                    ]
                     pythonVersions.each{ def pythonVersion ->
-                        withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
-                            ansiColor('xterm') {
-                                sh script: """
-                                    docker-compose -f docker-compose.jenkins.yml run --rm mlflow-client-jenkins
-                                    docker-compose -f docker-compose.jenkins.yml down
-                                """
+                        build[pythonVersion] = {
+                            withEnv(["TAG=${testTag}-python${pythonVersion}", "COMPOSE_PROJECT_NAME=${env.JOB_NAME}-${env.BUILD_ID}-${pythonVersion}"]) {
+                                ansiColor('xterm') {
+                                    sh script: """
+                                        docker-compose -f docker-compose.jenkins.yml run --rm mlflow-client-jenkins
+                                        docker-compose -f docker-compose.jenkins.yml down
+                                    """
+                                }
                             }
                         }
                     }
+                    parallel build
                 }
             }
 
@@ -149,9 +161,9 @@ node('bdbuilder04') {
             stage('Deploy test images') {
                 gitlabCommitStatus('Deploy test images') {
                     if (isDev || isRelease) {
-                        test_images.each { def image ->
-                            ansiColor('xterm') {
-                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                        withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                            test_images.each { def image ->
+                                ansiColor('xterm') {
                                     image.push()
                                 }
                             }
