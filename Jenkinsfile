@@ -11,7 +11,10 @@ Boolean isMaster = false
 Boolean isDev = true
 Boolean isRelease = false
 
+String testTag
 String version
+
+List pythonVersions = ['2.7', '3.6', '3.7']
 
 node('bdbuilder04') {
     environment {
@@ -44,9 +47,7 @@ node('bdbuilder04') {
             isRelease = isMaster && git_tag
             version   = git_tag
 
-            String testTag = isMaster ? 'test' : 'dev-test'
-
-            List pythonVersions = ['2.7', '3.6', '3.7']
+            testTag = isMaster ? 'test' : 'dev-test'
 
             List test_images = []
 
@@ -139,8 +140,7 @@ node('bdbuilder04') {
                     withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'SONAR_DB_PASSWD', variable: 'SONAR_DB_PASSWD')]) {
                             ansiColor('xterm') {
-                                //TODO: remove hardcoded URL after DEVOPSMISC-2353
-                                sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.host.url=http://10.72.20.32:9000"
+                                sh "/data/sonar-scanner/bin/sonar-scanner"
                             }
                         }
                     }
@@ -275,6 +275,22 @@ node('bdbuilder04') {
         }
     } finally {
         stage('Cleanup') {
+            pythonVersions.each{ def pythonVersion ->
+                withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
+                    ansiColor('xterm') {
+                        sh script: """
+                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || exit 0
+                        """
+                    }
+                }
+            }
+
+            ansiColor('xterm') {
+                sh script: """
+                    docker-compose -f docker-compose.jenkins.yml down || exit 0
+                """
+            }
+
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
             docker.image('platform/python:2.7').inside("-u root") {
