@@ -17,10 +17,6 @@ String version
 List pythonVersions = ['2.7', '3.6', '3.7']
 
 node('bdbuilder04') {
-    environment {
-        COMPOSE_PROJECT_NAME = env.BUILD_TAG
-    }
-
     try {
         gitlabBuilds(builds: ["Build test images", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images"]) {
             stage('Checkout') {
@@ -110,8 +106,8 @@ node('bdbuilder04') {
                     withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins coverage.sh
-                                docker-compose -f docker-compose.jenkins.yml down
+                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins coverage.sh
+                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down
                             """
                         }
                     }
@@ -125,8 +121,8 @@ node('bdbuilder04') {
                     withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
-                                docker-compose -f docker-compose.jenkins.yml down
+                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
+                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down
                             """
                         }
                     }
@@ -283,7 +279,8 @@ node('bdbuilder04') {
                 withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
                     ansiColor('xterm') {
                         sh script: """
-                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || exit 0
+                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || true
+                            docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:\$TAG
                         """
                     }
                 }
@@ -292,7 +289,8 @@ node('bdbuilder04') {
             ansiColor('xterm') {
                 withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                     sh script: """
-                        docker-compose -f docker-compose.jenkins.yml down || exit 0
+                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down || true
+                        docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:\$TAG
                     """
                 }
             }
