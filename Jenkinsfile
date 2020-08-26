@@ -191,7 +191,7 @@ node('bdbuilder04') {
 
             stage ('Building documentation') {
                 gitlabCommitStatus('Building documentation') {
-                    docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
+                    docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}").inside() {
                         try {
                             version = sh script: "python setup.py --version", returnStdout: true
                             version = version.trim()
@@ -199,7 +199,7 @@ node('bdbuilder04') {
                     }
 
                     if (isRelease) {
-                        docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").inside() {
+                        docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}").inside() {
                             /*
                             ansiColor('xterm') {
                                 sh script: """
