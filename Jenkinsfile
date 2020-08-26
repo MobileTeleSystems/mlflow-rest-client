@@ -49,8 +49,6 @@ node('bdbuilder04') {
 
             testTag = isMaster ? 'test' : 'dev-test'
 
-            List test_images = []
-
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
                     def build = [
@@ -68,7 +66,7 @@ node('bdbuilder04') {
                                         cache = docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").pull()
                                     } catch (Exception e) {}
 
-                                    test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                                    docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
                                 }
                             }
                         }
@@ -80,7 +78,7 @@ node('bdbuilder04') {
                                 docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").pull()
                             } catch (Exception e) {}
 
-                            test_images << docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .")
+                            docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}", "--force-rm -f Dockerfile.test .")
                         }
                     }
                 }
@@ -93,7 +91,7 @@ node('bdbuilder04') {
                     ]
                     pythonVersions.each{ def pythonVersion ->
                         build[pythonVersion] = {
-                            withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
+                            withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins
@@ -109,7 +107,7 @@ node('bdbuilder04') {
 
             stage('Check coverage') {
                 gitlabCommitStatus('Check coverage') {
-                    withEnv(["TAG=${testTag}"]) {
+                    withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins coverage.sh
@@ -124,7 +122,7 @@ node('bdbuilder04') {
 
             stage('Pylint') {
                 gitlabCommitStatus('Pylint') {
-                    withEnv(["TAG=${testTag}"]) {
+                    withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins.yml run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
@@ -162,10 +160,14 @@ node('bdbuilder04') {
                 gitlabCommitStatus('Deploy test images') {
                     if (isDev || isRelease) {
                         withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                            test_images.each { def image ->
-                                ansiColor('xterm') {
-                                    image.push()
+                            ansiColor('xterm') {
+                                pythonVersions.each{ def pythonVersion ->
+                                    def testTagVersioned = "${testTag}-python${pythonVersion}"
+
+                                    docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .").push()
                                 }
+
+                                docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .").push()
                             }
                         }
                     }
@@ -177,7 +179,9 @@ node('bdbuilder04') {
                     if (isDev || isRelease) {
                         //Build wheels for each version
                         pythonVersions.each{ def pythonVersion ->
-                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-python${pythonVersion}").inside() {
+                            def testTagVersioned = "${testTag}-python${pythonVersion}-${env.BUILD_TAG}"
+
+                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").inside() {
                                 ansiColor('xterm') {
                                     sh script: """
                                         python setup.py bdist_wheel sdist
@@ -276,7 +280,7 @@ node('bdbuilder04') {
     } finally {
         stage('Cleanup') {
             pythonVersions.each{ def pythonVersion ->
-                withEnv(["TAG=${testTag}-python${pythonVersion}"]) {
+                withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
                     ansiColor('xterm') {
                         sh script: """
                             docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || exit 0
@@ -286,9 +290,11 @@ node('bdbuilder04') {
             }
 
             ansiColor('xterm') {
-                sh script: """
-                    docker-compose -f docker-compose.jenkins.yml down || exit 0
-                """
+                withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
+                    sh script: """
+                        docker-compose -f docker-compose.jenkins.yml down || exit 0
+                    """
+                }
             }
 
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
