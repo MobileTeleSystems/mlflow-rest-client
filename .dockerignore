@@ -11,3 +11,5 @@ sonar*
 reports
 .scannerwork
 .postgresql
+
+ansible/ssh*

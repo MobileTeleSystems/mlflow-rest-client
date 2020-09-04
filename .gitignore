@@ -231,3 +231,5 @@ report.xml
 !/tests/bin/
 
 *.pyc
+
+ansible/ssh*
