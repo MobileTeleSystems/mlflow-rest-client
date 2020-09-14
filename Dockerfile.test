@@ -15,7 +15,7 @@ ENV PYTHONPATH "/app:$PYTHONPATH"
 ENV PATH /app:$PATH
 
 COPY mlflow_client /app/mlflow_client
-COPY integration-tests.sh coverage.sh wait-for-it.sh __init__.py /app/
+COPY integration-tests.sh coverage.sh wait-for-it.sh __init__.py VERSION /app/
 COPY tests /app/tests
 
 SHELL ["/bin/bash", "-c"]

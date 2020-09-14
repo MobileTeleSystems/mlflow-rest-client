@@ -19,7 +19,8 @@ setup(
         "template": "{tag}",
         "dev_template": "{tag}.dev{ccount}",
         "dirty_template": "{tag}",
-        "starting_version": "0.0.1"
+        "version_file": os.path.join(here, 'VERSION'),
+        "count_commits_from_version_file": True
     },
     description='Low-level Python client for MLflow API',
     long_description=long_description,

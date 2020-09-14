@@ -250,7 +250,7 @@ node('bdbuilder04') {
 
                     stage('Publishing package to Artifactory') {
                         gitlabCommitStatus('Publishing package to Artifactory') {
-                            if (isRelease) {
+                            if (isDev || isRelease) {
                                 def uploadSpec = '''{
                                         "files": [
                                             {
