@@ -1,5 +1,6 @@
 coverage==5.1
-numpydoc
+numpydoc==0.9.2; python_version == "2.7"
+numpydoc==1.1.0; python_version >= "3"
 pylint==2.5.3; python_version >= "3.5"
 pylint==1.9.5; python_version == "2.7"
 pytest==4.6.11; python_version == "2.7"
@@ -7,8 +8,9 @@ pytest==5.4.3; python_version >= "3"
 pytest-logger==0.5.1
 pytest-rerunfailures==8.0; python_version == "2.7"
 pytest-rerunfailures==9.0; python_version >= "3"
-pytest-timeout
-setuptools-git-versioning
-sphinx
-sphinx_rtd_theme
-sphinx-multiversion
+pytest-timeout==1.4.2
+setuptools-git-versioning>=1.2.1
+sphinx==1.8.5; python_version == "2.7"
+sphinx==3.2.1; python_version >= "3"
+sphinx_rtd_theme==0.5.0
+sphinx-multiversion==0.2.4

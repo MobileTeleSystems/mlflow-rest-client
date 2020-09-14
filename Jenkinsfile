@@ -2,6 +2,9 @@
 
 @Library('jenkins_lib') _
 
+def docker_registry = 'docker.rep.msk.mts.ru'
+def docker_image = 'bigdata/platform/dsx/mlflow-client'
+
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
 
@@ -45,7 +48,7 @@ node('bdbuilder04') {
             isMaster  = git_branch == 'master'
             isDev     = git_branch == 'dev'
             isRelease = isMaster && git_tag
-            version   = git_tag
+            version   = git_tag ? git_tag.replace('v', '') : null
 
             testTag = isMaster ? 'test' : 'dev-test'
 
@@ -53,7 +56,7 @@ node('bdbuilder04') {
                 withEnv([
                     "HTTP_PROXY=http://${env.HTTP_PROXY_CREDS}@bproxy.msk.mts.ru:3128",
                     "HTTPS_PROXY=http://${env.HTTP_PROXY_CREDS}@bproxy.msk.mts.ru:3128",
-                    "NO_PROXY=${env.no_proxy},localhost,127.0.0.1,*.msk.mts.ru,*.msk.bd-cloud.mts.ru"
+                    "NO_PROXY=${env.no_proxy},mlflow-jenkins,localhost,127.0.0.1,*.msk.mts.ru,*.msk.bd-cloud.mts.ru"
                 ]) {
                     stage('Build test images') {
                         gitlabCommitStatus('Build test images') {
@@ -69,10 +72,10 @@ node('bdbuilder04') {
                                         ansiColor('xterm') {
                                             try {
                                                 // Fetch cache
-                                                cache = docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").pull()
+                                                cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
                                             } catch (Exception e) {}
 
-                                            docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                                            docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
                                         }
                                     }
                                 }
@@ -81,10 +84,10 @@ node('bdbuilder04') {
                                 ansiColor('xterm') {
                                     try {
                                         // Fetch cache
-                                        docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}").pull()
+                                        docker.image("${docker_registry}/${docker_image}:${testTag}").pull()
                                     } catch (Exception e) {}
 
-                                    docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}", "--force-rm -f Dockerfile.test .")
+                                    docker.build("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.test .")
                                 }
                             }
                         }
@@ -170,10 +173,10 @@ node('bdbuilder04') {
                                         pythonVersions.each{ def pythonVersion ->
                                             def testTagVersioned = "${testTag}-python${pythonVersion}"
 
-                                            docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}", "--build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .").push()
+                                            docker.build("${docker_registry}/${docker_image}:${testTagVersioned}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .").push()
                                         }
 
-                                        docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}", "--force-rm -f Dockerfile.test .").push()
+                                        docker.build("${docker_registry}/${docker_image}:${testTag}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.test .").push()
                                     }
                                 }
                             }
@@ -187,7 +190,7 @@ node('bdbuilder04') {
                                 pythonVersions.each{ def pythonVersion ->
                                     def testTagVersioned = "${testTag}-python${pythonVersion}-${env.BUILD_TAG}"
 
-                                    docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTagVersioned}").inside() {
+                                    docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
                                         ansiColor('xterm') {
                                             sh script: """
                                                 python setup.py bdist_wheel sdist
@@ -201,7 +204,7 @@ node('bdbuilder04') {
 
                     stage ('Building documentation') {
                         gitlabCommitStatus('Building documentation') {
-                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}").inside() {
+                            docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
                                 try {
                                     version = sh script: "python setup.py --version", returnStdout: true
                                     version = version.trim()
@@ -209,7 +212,7 @@ node('bdbuilder04') {
                             }
 
                             if (isRelease) {
-                                docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${testTag}-${env.BUILD_TAG}").inside() {
+                                docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
                                     /*
                                     ansiColor('xterm') {
                                         sh script: """
@@ -271,10 +274,10 @@ node('bdbuilder04') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                         try {
                                             // Fetch cache
-                                            docker.image("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:latest").pull()
+                                            docker.image("${docker_registry}/${docker_image}.nginx:latest").pull()
                                         } catch (Exception e) {}
 
-                                        def docs_image = docker.build("docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_image.push()
                                         docs_image.push(version)
                                     }
@@ -328,7 +331,7 @@ node('bdbuilder04') {
                     ansiColor('xterm') {
                         sh script: """
                             docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || true
-                            docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:\$TAG
+                            docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
                         """
                     }
                 }
@@ -338,7 +341,7 @@ node('bdbuilder04') {
                 withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                     sh script: """
                         docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down || true
-                        docker rmi docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:\$TAG
+                        docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
                     """
                 }
             }

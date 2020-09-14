@@ -3,6 +3,10 @@ services:
   mlflow-client-test:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
     env_file: .env.test
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
       dockerfile: Dockerfile.test
@@ -17,6 +21,10 @@ services:
   mlflow-test:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.test
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
     restart: unless-stopped
     depends_on:
         - "mlflow-test-db"
@@ -26,6 +34,10 @@ services:
   mlflow-test-db:
     image: postgres:11.8
     env_file: .env.test
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
     restart: unless-stopped
     networks:
       - db
