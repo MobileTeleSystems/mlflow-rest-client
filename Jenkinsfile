@@ -52,6 +52,11 @@ node('bdbuilder04') {
 
             testTag = isMaster ? 'test' : 'dev-test'
 
+            withCredentials([string(credentialsId: 'vault_token_hdp_pipe', variable: 'vault_token')]) {
+                ansibleKey = vault("${env.vault_token}", "platform/ansible/ansible_ssh_key")
+                writeFile file: "${env.WORKSPACE}/ansible/ssh.key", text: "${ansibleKey['ansible_ssh_key']}"
+            }
+
             withCredentials([usernameColonPassword(credentialsId: 'sa0000dsscorertest', variable: 'HTTP_PROXY_CREDS')]) {
                 withEnv([
                     "HTTP_PROXY=http://${env.HTTP_PROXY_CREDS}@bproxy.msk.mts.ru:3128",
@@ -286,36 +291,31 @@ node('bdbuilder04') {
                         }
                     }
 
-                    withCredentials([string(credentialsId: 'vault_token_hdp_pipe', variable: 'vault_token')]) {
-                        ansibleKey = vault("${env.vault_token}", "platform/ansible/ansible_ssh_key")
-                        writeFile file: "${env.WORKSPACE}/ansible/ssh.key", text: "${ansibleKey['ansible_ssh_key']}"
-
-                        docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
-                            stage ('Check ansible pipeline') {
-                                gitlabCommitStatus(name: 'Check ansible pipeline') {
-                                    sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
-                                    ansiColor('xterm') {
-                                        sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${target_host} -e image_version=${version} -e token=${env.vault_token} --syntax-check --list-tasks -vv"
-                                    }
+                    docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
+                        stage ('Check ansible pipeline') {
+                            gitlabCommitStatus(name: 'Check ansible pipeline') {
+                                sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
+                                ansiColor('xterm') {
+                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${target_host} -e image_version=${version} --syntax-check --list-tasks -vv"
                                 }
                             }
+                        }
 
-                            stage ('Deploy documentation') {
-                                gitlabCommitStatus(name: 'Deploy documentation') {
-                                    if (isRelease) {
-                                        ansiColor('xterm') {
-                                            ansiblePlaybook(
-                                                colorized: true,
-                                                installation: 'ansible',
-                                                playbook: '/app/docs/ansible/nginx_deployment.yml',
-                                                inventory: '/app/docs/ansible/inventory.ini',
-                                                extraVars: [
-                                                    target_host: target_host,
-                                                    image_version: version
-                                                ],
-                                                extras: '-vv'
-                                            )
-                                        }
+                        stage ('Deploy documentation') {
+                            gitlabCommitStatus(name: 'Deploy documentation') {
+                                if (isRelease) {
+                                    ansiColor('xterm') {
+                                        ansiblePlaybook(
+                                            colorized: true,
+                                            installation: 'ansible',
+                                            playbook: '/app/docs/ansible/nginx_deployment.yml',
+                                            inventory: '/app/docs/ansible/inventory.ini',
+                                            extraVars: [
+                                                target_host: target_host,
+                                                image_version: version
+                                            ],
+                                            extras: '-vv'
+                                        )
                                     }
                                 }
                             }
@@ -326,25 +326,36 @@ node('bdbuilder04') {
         }
     } finally {
         stage('Cleanup') {
+            def build = [
+                failFast: false
+            ]
+
             pythonVersions.each{ def pythonVersion ->
-                withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                build[pythonVersion] = {
+                    withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                        ansiColor('xterm') {
+                            sh script: """
+                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || true
+                                docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
+                            """
+                        }
+                    }
+                }
+            }
+
+
+            build['main'] = {
+                withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
                     ansiColor('xterm') {
                         sh script: """
-                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || true
+                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down || true
                             docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
                         """
                     }
                 }
             }
 
-            ansiColor('xterm') {
-                withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
-                    sh script: """
-                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down || true
-                        docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
-                    """
-                }
-            }
+            parallel build
 
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
