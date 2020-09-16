@@ -9,8 +9,7 @@ pytest-logger==0.5.1
 pytest-rerunfailures==8.0; python_version == "2.7"
 pytest-rerunfailures==9.0; python_version >= "3"
 pytest-timeout==1.4.2
-setuptools-git-versioning>=1.2.2
+setuptools-git-versioning>=1.2.3
 sphinx==1.8.5; python_version == "2.7"
 sphinx==3.2.1; python_version >= "3"
 sphinx_rtd_theme==0.5.0
-sphinx-multiversion==0.2.4

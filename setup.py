@@ -39,7 +39,7 @@ setup(
         'Programming Language :: Python :: 3.7'
     ],
     keywords='MLflow REST API',
-    packages=find_packages(exclude=['*.docs.*', '*.tests.*']),
+    packages=find_packages(exclude=['docs', 'docs.*', 'tests', 'tests.*']),
     install_requires=requirements,
     tests_require=test_requirements,
     setup_requires=['setuptools-git-versioning'],
