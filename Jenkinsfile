@@ -19,7 +19,6 @@ Boolean isRelease = false
 String testTag
 String prodTag
 String version
-Boolean is_merge_commit
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
@@ -30,19 +29,14 @@ node('bdbuilder04') {
         gitlabBuilds(builds: ["Build test images", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images", "Check ansible pipeline", "Deploy documentation"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
+                git_commit = scmVars.GIT_COMMIT
+
                 git_tag = sh(script: "git describe --tags --abbrev=0 --exact-match || exit 0", returnStdout: true).trim()
                 if (git_tag == 'null' || git_tag == '') {
                     git_tag = null
                 }
 
-                is_merge_commit = sh(script: "git rev-list --parents -n 1 \$(git rev-parse HEAD) | wc -w || exit 0", returnStdout: true).trim() == '3'
-
-                if (is_merge_commit) {
-                    git_branch = scmVars.CHANGE_BRANCH
-                } else {
-                    git_branch = scmVars.GIT_BRANCH
-                }
-
+                git_branch = scmVars.CHANGE_BRANCH ?: env.BRANCH_NAME ?: scmVars.GIT_BRANCH
                 git_branch = git_branch.replace('origin/', '').replace('feature/', '').trim()
 
                 println(git_tag)
