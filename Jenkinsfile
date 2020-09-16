@@ -17,11 +17,12 @@ Boolean isDev = true
 Boolean isRelease = false
 
 String testTag
+String prodTag
 String version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
-String target_host = 'test_mlflow'
+String docs_target_host = 'test_mlflow'
 
 node('bdbuilder04') {
     try {
@@ -51,6 +52,7 @@ node('bdbuilder04') {
             version   = git_tag ? git_tag.replace('v', '') : null
 
             testTag = isMaster ? 'test' : 'dev-test'
+            prodTag = isMaster ? 'latest' : 'dev'
 
             withCredentials([string(credentialsId: 'vault_token_hdp_pipe', variable: 'vault_token')]) {
                 ansibleKey = vault("${env.vault_token}", "platform/ansible/ansible_ssh_key")
@@ -212,29 +214,27 @@ node('bdbuilder04') {
                             docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
                                 try {
                                     version = sh script: "python setup.py --version", returnStdout: true
-                                    version = version.trim()
+                                    version = version.trim().replace('v', '').replace('.de', '-dev')
                                 } catch (Exception e) {}
                             }
 
-                            if (isRelease) {
+                            if (isDev || isRelease) {
                                 docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
-                                    /*
-                                    ansiColor('xterm') {
-                                        sh script: """
-                                            sphinx-multiversion docs docs/build
-                                            mv docs/build/master docs/build/latest
-                                            tar cvzf docs/html-latest.tar.gz -C docs/build/master .
-                                        """
-                                    }
-                                    */
-                                    // Uncomment block above and remove block below after fixing https://github.com/Holzhaus/sphinx-multiversion/issues/17
                                     ansiColor('xterm') {
                                         sh script: """
                                             cd docs
                                             make html
-                                            tar cvzf html-latest.tar.gz -C build/html .
-                                            cp html-latest.tar.gz html-${version}.tar.gz
+                                            tar cvzf html-${version}.tar.gz -C build/html .
                                         """
+                                    }
+
+                                    if (isRelease) {
+                                        ansiColor('xterm') {
+                                            sh script: """
+                                                cd docs
+                                                cp html-${version}.tar.gz html-latest.tar.gz
+                                            """
+                                        }
                                     }
                                 }
 
@@ -274,7 +274,7 @@ node('bdbuilder04') {
 
                     stage('Build and push nginx docs images') {
                         gitlabCommitStatus('Build and push nginx docs images') {
-                            if (isRelease) {
+                            if (isDev || isRelease) {
                                 ansiColor('xterm') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                         try {
@@ -282,9 +282,9 @@ node('bdbuilder04') {
                                             docker.image("${docker_registry}/${docker_image}.nginx:latest").pull()
                                         } catch (Exception e) {}
 
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:latest", "--force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${version}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_image.push()
-                                        docs_image.push(version)
+                                        docs_image.push(prodTag)
                                     }
                                 }
                             }
@@ -296,14 +296,14 @@ node('bdbuilder04') {
                             gitlabCommitStatus(name: 'Check ansible pipeline') {
                                 sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
                                 ansiColor('xterm') {
-                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${target_host} -e image_version=${version} --syntax-check --list-tasks -vv"
+                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${version} --syntax-check --list-tasks -vv"
                                 }
                             }
                         }
 
                         stage ('Deploy documentation') {
                             gitlabCommitStatus(name: 'Deploy documentation') {
-                                if (isRelease) {
+                                if (isDev || isRelease) {
                                     ansiColor('xterm') {
                                         ansiblePlaybook(
                                             colorized: true,
@@ -311,7 +311,7 @@ node('bdbuilder04') {
                                             playbook: '/app/docs/ansible/nginx_deployment.yml',
                                             inventory: '/app/docs/ansible/inventory.ini',
                                             extraVars: [
-                                                target_host: target_host,
+                                                target_host: docs_target_host,
                                                 image_version: version
                                             ],
                                             extras: '-vv'

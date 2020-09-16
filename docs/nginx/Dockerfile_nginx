@@ -1,22 +1,43 @@
-FROM docker.rep.msk.mts.ru/bigdata/platform/docker-images/nginx:0.0.2
+ARG PROJECT=mlflow-client
+ARG REPO=mlflow-client-docs
+FROM docker.rep.msk.mts.ru/bigdata/platform/docker-images/nginx:0.0.2 as base
+ARG PROJECT
+ARG REPO
 
 RUN apt-get update && apt-get install -yq --no-install-recommends jq
 
-COPY ./docs/nginx/conf.d.mlflow-client.msk.bd-cloud.mts.ru/* /etc/nginx/conf.d/http/
+COPY ./docs/nginx/conf.d/* /etc/nginx/conf.d/http/
 
 RUN chown -R nginx:nginx /etc/nginx/
-RUN mkdir -p /var/www/mlflow-client
-RUN chown -R nginx:nginx /var/www/mlflow-client
+RUN mkdir -p /var/www/$PROJECT
+RUN chown -R nginx:nginx /var/www/$PROJECT
 
-WORKDIR /var/www/mlflow-client
+WORKDIR /var/www/$PROJECT
 
-# COPY docs/build ./
-# Uncomment line above and remove lines below after fixing https://github.com/Holzhaus/sphinx-multiversion/issues/17
-ADD http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/html-latest.tar.gz ./
-RUN curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/mlflow-client-docs" \
-    | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client-docs/{} && \
+FROM base as build
+ARG PROJECT
+ARG REPO
+
+COPY ./docs/nginx/docker/pip.conf /etc/pip.conf
+RUN apt-get install -yq --no-install-recommends python python-pip python-setuptools
+
+COPY ./docs/nginx/requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
+
+COPY ./docs/nginx/replace_versions.py /tmp/
+RUN chmod +x /tmp/replace_versions.py
+
+ARG VERSION=latest
+ADD http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/html-latest.tar.gz ./
+RUN curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/$REPO" \
+    | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/{} && \
     find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \; && \
     rm -f  html-*.tar.gz && \
     ls .
+
+RUN /tmp/replace_versions.py /var/www/$PROJECT
+
+FROM base
+COPY --from=build /var/www/$PROJECT /var/www/$PROJECT
 
 EXPOSE 40001/TCP
