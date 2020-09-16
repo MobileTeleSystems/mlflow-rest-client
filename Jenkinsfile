@@ -19,6 +19,7 @@ Boolean isRelease = false
 String testTag
 String prodTag
 String version
+Boolean is_merge_commit
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
@@ -33,8 +34,16 @@ node('bdbuilder04') {
                 if (git_tag == 'null' || git_tag == '') {
                     git_tag = null
                 }
-                git_branch = scmVars.GIT_BRANCH.replace('origin/', '').replace('feature/', '').trim()
-                git_commit = scmVars.GIT_COMMIT
+
+                is_merge_commit = sh(script: "git rev-list --parents -n 1 \$(git rev-parse HEAD) | wc -w || exit 0", returnStdout: true).trim() == '3'
+
+                if (is_merge_commit) {
+                    git_branch = scmVars.CHANGE_BRANCH
+                } else {
+                    git_branch = scmVars.GIT_BRANCH
+                }
+
+                git_branch = git_branch.replace('origin/', '').replace('feature/', '').trim()
 
                 println(git_tag)
                 println(git_branch)
@@ -214,7 +223,7 @@ node('bdbuilder04') {
                             docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
                                 try {
                                     version = sh script: "python setup.py --version", returnStdout: true
-                                    version = version.trim().replace('v', '').replace('.de', '-dev')
+                                    version = version.trim()
                                 } catch (Exception e) {}
                             }
 
@@ -282,7 +291,7 @@ node('bdbuilder04') {
                                             docker.image("${docker_registry}/${docker_image}.nginx:latest").pull()
                                         } catch (Exception e) {}
 
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${version}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${version.replace('.dev', '-dev')}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_image.push()
                                         docs_image.push(prodTag)
                                     }
@@ -296,7 +305,7 @@ node('bdbuilder04') {
                             gitlabCommitStatus(name: 'Check ansible pipeline') {
                                 sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
                                 ansiColor('xterm') {
-                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${version} --syntax-check --list-tasks -vv"
+                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${version.replace('.dev', '-dev')} --syntax-check --list-tasks -vv"
                                 }
                             }
                         }
@@ -312,7 +321,7 @@ node('bdbuilder04') {
                                             inventory: '/app/docs/ansible/inventory.ini',
                                             extraVars: [
                                                 target_host: docs_target_host,
-                                                image_version: version
+                                                image_version: version.replace('.dev', '-dev')
                                             ],
                                             extras: '-vv'
                                         )
