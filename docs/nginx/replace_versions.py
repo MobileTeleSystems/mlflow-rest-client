@@ -123,7 +123,7 @@ def write_versions(versions, target, file):
     logger.info('Writing target file {path}'.format(path=file))
 
     container = get_container_tag(target)
-    header = copy.copy(get_header_tag(target))
+    header = copy.copy(get_header_tag(container))
 
     versions_tags = []
     for version in versions:
