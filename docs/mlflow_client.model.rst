@@ -1,13 +1,9 @@
 Model
 =================================================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 .. autoclass:: mlflow_client.model.ModelVersionStage
    :members:
-   
+
 .. autoclass:: mlflow_client.model.ModelVersionState
    :members:
 

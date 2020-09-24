@@ -10,7 +10,7 @@ with open(os.path.join(here, 'requirements.txt'), 'r') as f:
 with open(os.path.join(here, 'requirements-test.txt'), 'r') as f:
     test_requirements = f.readlines()
 
-with open(os.path.join(here, 'README.md'), 'r') as f:
+with open(os.path.join(here, 'README.rst'), 'r') as f:
     long_description = f.read()
 
 setup(
@@ -24,7 +24,7 @@ setup(
     },
     description='Low-level Python client for MLflow API',
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     url='https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-python-client',
     author='msmarty4', author_email="msmarty4@mts.ru",
     classifiers=[

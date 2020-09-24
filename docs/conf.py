@@ -18,7 +18,7 @@ from setuptools_git_versioning import get_tag, get_all_tags, get_sha
 from packaging import version as Version
 
 sys.path.insert(0, os.path.abspath('..'))
-extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx.ext.autosummary', 'sphinx_rtd_theme']
+extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx.ext.autosummary', 'sphinx_rtd_theme', 'changelog']
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
@@ -142,6 +142,19 @@ texinfo_documents = [
      author, 'mlflow-client', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+changelog_sections = ["general", "client", "artifact", "experiment", "model", "page", "run", "tag", "docs", "samples", "ci", "tests"]
+
+changelog_inner_tag_sort = ["feature", "bug", "deprecated"]
+
+changelog_hide_sections_from_tags = True
+
+# how to render changelog links - these are plain
+# python string templates, ticket/pullreq/changeset number goes
+# in "%s"
+changelog_render_ticket = "https://jira.bd.msk.mts.ru/browse/%s"
+changelog_render_pullreq = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/merge_requests/%s"
+changelog_render_changeset = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/commit/%s"
 
 tags = set([ver])
 tags.update(Version.parse(tag) for tag in get_all_tags())

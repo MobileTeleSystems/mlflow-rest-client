@@ -1,16 +1,28 @@
-.. mlflow-client documentation master file, created by
-   sphinx-quickstart on Mon Jul 27 22:13:42 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to mlflow-client's documentation!
-=========================================
+.. include:: ../README.rst
+   :end-before: documentation
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: MLFlow Client
+   :name: mlflow_client
+   :hidden:
 
-   mlflow_client
+   self
+
+.. toctree::
+   :maxdepth: 2
+   :caption: How to
+   :name: howto
+
+   install
+   usage
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+   :name: mastertoc
+
+   mlflow_client.client
    mlflow_client.artifact
    mlflow_client.experiment
    mlflow_client.model
@@ -18,8 +30,18 @@ Welcome to mlflow-client's documentation!
    mlflow_client.run
    mlflow_client.tag
 
-Indices and tables
-==================
+.. toctree::
+   :maxdepth: 3
+   :caption: Changelog
+   :name: changelog
 
-* :ref:`genindex`
-* :ref:`search`
+   changelog
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Links
+   :name: links
+
+   references
+   Index <genindex.html#https://>
+   Search page <search.html#https://>
