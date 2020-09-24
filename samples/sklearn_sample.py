@@ -18,43 +18,38 @@ def process(client):
 
     run = exp['runs'][0]
     print(">> run",run)
-    run_uuid = run['run_uuid']
-    print("run_uuid:",run_uuid)
+    print("run.id:",run.id)
 
     print("====== get_run")
-    run = client.get_run(run_uuid)
+    run = client.get_run(run.id)
     print("get_run rsp:",run)
 
     print("====== get_metric")
-    rsp = client.get_metric(run_uuid, metric_key)
+    rsp = client.get_metric(run.id, metric_key)
     print("get_metric rsp:",rsp)
 
     print("====== get_metric_history")
-    rsp = client.get_metric_history(run_uuid, metric_key)
+    rsp = client.get_metric_history(run.id, metric_key)
     print("get_metric_history rsp:",rsp)
 
     print("====== list_artifacts")
     path = ''
-    rsp = client.list_artifacts(run_uuid, path)
+    rsp = client.list_artifacts(run.id, path)
     print("list_artifacts rsp:",rsp)
 
     print("====== get_artifact - txt")
     path = 'confusion_matrix.txt'
-    rsp = client.get_artifact(run_uuid, path)
+    rsp = client.get_artifact(run.id, path)
     print("get_artifacts: path={} rsp={}".format(path,rsp))
 
     print("====== get_artifact - pkl")
     path = 'model/model.pkl'
-    rsp = client.get_artifact(run_uuid, path)
-    print("get_artifacts: path={} #rsp.bytes={}".format(path,len(rsp)))
+    rsp = client.get_artifact(run.id, path)
+    print("get_artifacts: path={} #rsp.bytes={}".format(path ,len(rsp)))
 
     print("====== Search")
-    expIds = [ experiment_id]
-    clauses = [
-        { 'type': 'parameter', 'comparator': '=', 'key': param_key, 'value': '3'},
-        { 'type': 'metric', 'comparator': '>=', 'key': metric_key, 'value': .99} ]
-    rsp = client.search2(expIds,clauses)
-    print("search2 rsp:",rsp)
+    rsp = client.search_runs(experiment_id, query="parameter.{param} = 3 and metric.{metric} >= 0.99".format(param=param_key, metric=metric_key))
+    print("search_runs rsp:", rsp)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
