@@ -6,6 +6,7 @@ Changelog
 
 .. changelog::
    :version: 1.0.8
+   :released: 24.09.2020 16:42
 
    .. change::
       :tags: general
@@ -24,12 +25,13 @@ Changelog
    .. change::
       :tags: general, bug
       :tickets: DSX-16
+      :changeset: 67b641f6
 
       Fixed VERSION file include into package
 
 .. changelog::
    :version: 1.0.7
-   :released: 16.09.2020 0:14
+   :released: 16.09.2020 12:14
 
    .. change::
       :tags: general
