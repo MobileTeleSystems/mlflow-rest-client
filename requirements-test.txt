@@ -1,3 +1,4 @@
+changelog==0.5.4; python_version >= "3"
 coverage==5.1
 numpydoc==0.9.2; python_version == "2.7"
 numpydoc==1.1.0; python_version >= "3"
