@@ -8,17 +8,24 @@ Changelog
    :version: 1.0.8
 
    .. change::
-      :tags: docs
-      :tickets: DSX-16
-
-      Added CHANGELOG.rst file
-
-   .. change::
       :tags: general
       :tickets: DSX-16
       :changeset: d5e57951
 
       Added `mlflow_client.__version__` attribute
+
+   .. change::
+      :tags: docs
+      :tickets: DSX-16
+      :changeset: 33121a8e
+
+      Added CHANGELOG.rst file
+
+   .. change::
+      :tags: general, bug
+      :tickets: DSX-16
+
+      Fixed VERSION file include into package
 
 .. changelog::
    :version: 1.0.7
