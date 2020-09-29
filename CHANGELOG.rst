@@ -43,6 +43,12 @@ Changelog
 
       Allow to get metric by key from `RunData` object
 
+   .. change::
+      :tags: docs
+      :tickets: DSX-46
+
+      Improve documentation
+
 1.0
 --------------------
 

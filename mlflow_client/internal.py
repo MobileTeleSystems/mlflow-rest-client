@@ -1,4 +1,7 @@
 import six
+import sys
+
+from textwrap import dedent
 
 
 class SearchableList(list):
@@ -22,6 +25,29 @@ class SearchableList(list):
 class Makeable(object):
     @classmethod
     def make(cls, inp, **kwargs):
+        """
+        Generate objects list from REST API response
+
+        Parameters
+        ----------
+        inp : :obj:`dict`
+            Response
+
+        **kwargs : dict
+            Additional constructor params
+
+        Returns
+        ----------
+        item : {klass}
+            Item with certain class
+
+        Examples
+        --------
+        .. code:: python
+
+            {var} = {klass}.make({{'some': 'input'}})
+        """.format(klass=cls.__name__, var=cls.__name__.lower())
+
         if isinstance(inp, cls):
             return inp
 
@@ -31,25 +57,28 @@ class Makeable(object):
         try:
             return cls.from_dict(vars(inp), **kwargs)
         except TypeError as e:
-            print(inp)
-            print(e)
             return None
 
 
     @classmethod
     def from_dict(cls, inp, **kwargs):
         """
-        Generate object from REST API response
+        Generate objects list from REST API response
 
-        :param inp: Response item
-        :type inp: `dict`
+        Parameters
+        ----------
+        inp : :obj:`list` of :obj:`dict`
+            Response
 
-        :param `**kwargs`: Additional constructor params
-        :type kwargs: `dict`
+        **kwargs : dict
+            Additional constructor params
 
-        :returns: Item
-        :rtype: :obj:`self.__class__`
-        """
+        Returns
+        ----------
+        item : {klass}
+            Item with certain class
+        """.format(klass=cls.__name__)
+
         dct = inp.copy()
         dct.update(kwargs)
 
@@ -62,17 +91,50 @@ class Makeable(object):
 
 
 class ListableMeta(type):
+    @staticmethod
+    def _class_doc(klass):
+        return dedent("""
+            List of :ref:`{klass}` with extended functions
+
+            Parameters
+            ----------
+            iterable : Iterable
+                Any iterable
+
+            Examples
+            --------
+            .. code:: python
+
+                name = 123 # depends on class itself
+                item = {klass}(id)
+
+                simple_list = [item]
+                this_list = {klass}.from_list([item]) # or {klass}List([item])
+
+                assert item in simple_list
+                assert item in this_list
+
+                assert name not in simple_list
+                assert name in this_list
+
+        """.format(klass=klass))
+
     def __new__(metacls, name, bases, attrs):
         list_class = attrs.get('list_class', None)
 
         if list_class is None:
             list_class_name = "{}List".format(name)
             list_class = type(list_class_name, (SearchableList, ), {})
+            list_class.__doc__ = metacls._class_doc(name)
 
         attrs['list_class'] = list_class
         result = type.__new__(metacls, name, bases, attrs)
 
+        list_class.__module__ = result.__module__
         list_class._compare_with_class = result
+
+        setattr(sys.modules[result.__module__], list_class.__name__, list_class)
+
         setattr(result, 'list_class', list_class)
         return result
 
@@ -84,15 +146,20 @@ class Listable(Makeable):
         """
         Generate objects list from REST API response
 
-        :param inp: Response items
-        :type inp: :obj:`list` of :obj:`dict`
+        Parameters
+        ----------
+        inp : :obj:`list` of :obj:`dict`
+            Response
 
-        :param `**kwargs`: Additional constructor params
-        :type kwargs: `dict`
+        **kwargs : dict
+            Additional constructor params
 
-        :returns: Item
-        :rtype: :obj:`list` of :obj:`self.__class__`
-        """
+        Returns
+        ----------
+        list : {klass}
+            Items class list
+        """.format(klass=cls.list_class)
+
         return cls.list_class(cls.make(item, **kwargs) for item in inp)
 
 
@@ -124,7 +191,6 @@ class MakeableFromStr(Makeable):
     @classmethod
     def make(cls, inp, **kwargs):
         if isinstance(inp, six.string_types):
-            print(inp)
             return cls(inp, **kwargs)
         return super(MakeableFromStr, cls).make(inp, **kwargs)
 

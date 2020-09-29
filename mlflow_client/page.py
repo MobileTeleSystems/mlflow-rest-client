@@ -1,23 +1,29 @@
 class Page(object):
     """ Page representation
 
-        :param items: Page items
-        :type items: list
+        Parameters
+        ----------
+        items : Iterable, optional
+            Page items
 
-        :ivar items: Page items
-        :vartype items: list
+        next_page_token : str, optional
+            Next page token
 
-        :param next_page_token: Next page token
-        :type next_page_token: str, optional
+        Attributes
+        ----------
+        items : Iterable
+            Page items
 
-        :ivar next_page_token: Next page token
-        :vartype next_page_token: str
+        next_page_token : str
+            Next page token
 
-        :param item_class: Item class to be called
-            Should implement `from_list` method, overwise constructor will be used
-        :type item_class: :obj:`class`, optional
+        Examples
+        --------
+        .. code:: python
 
-        :param `**kwargs`: Additional params for item constructor
+            model = Page(items=[Model(name='some_model')])
+
+            model = Page(items=[Model(name='some_model')], next_page_token='some_token')
     """
 
     def __init__(self, items=None, next_page_token=None):
@@ -28,16 +34,36 @@ class Page(object):
     @classmethod
     def make(cls, inp, items_key='items', item_class=None, **kwargs):
         """
-        Generate objects list from REST API response
+        Generate objects from REST API response
 
-        :param inp: Response items
-        :type inp: :obj:`list` or :obj:`dict`
+        Parameters
+        ----------
+        inp : :obj:`list` or :obj:`dict`
+            Page items
 
-        :param `**kwargs`: Additional params for item constructor
-        :type kwargs: `dict`
+        items_key : str, optional
+            Key name for fetching items from dict input
 
-        :returns: Page
-        :rtype: :obj:`Page` of `item_class`
+        item_class : class, optional
+            Item class to be called
+
+            Should implement `from_list` or `make` methods, overwise constructor will be used
+
+        **kwargs : dict, optional
+            Additional params for item constructor
+
+        Returns
+        ----------
+        page : obj:`Page` of `item_class`
+            Page of items
+
+        Examples
+        --------
+        .. code:: python
+
+            model = Page.make([Model(name='some_model')])
+
+            model = Page.make([ModelVersion(name='some_model', version=1)], name='another_model')
         """
 
         items = inp.copy()
@@ -80,8 +106,10 @@ class Page(object):
         """
         Checks whether this page is last or not
 
-        :returns: `True` if there is a next page, `False` if page is last one
-        :rtype: bool
+        Returns
+        ----------
+        has_next_page: bool
+            `True` if there is a next page, `False` if page is last one
         """
         return bool(self.next_page_token)
 

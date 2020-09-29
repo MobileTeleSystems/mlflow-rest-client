@@ -4,17 +4,27 @@ from .internal import Listable, MakeableFromTupleStr, ComparableByStr, HashableB
 class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     """ Generic tag class
 
-        :param key: Tag name
-        :type key: str
+        Parameters
+        ----------
+        key : str
+            Tag name
 
-        :ivar name: Tag name
-        :vartype name: str
+        value : str
+            Tag value
 
-        :param value: Tag value
-        :type value: str
+        Attributes
+        ----------
+        key : str
+            Tag name
 
-        :ivar value: Tag value
-        :vartype value: str
+        value : str
+            Tag value
+
+        Examples
+        --------
+        .. code:: python
+
+            tag = Tag('some.tag', 'some.val')
     """
 
     def __init__(self, key, value=None):
