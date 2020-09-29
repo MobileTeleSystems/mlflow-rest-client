@@ -1,4 +1,4 @@
-import syslog
+import sys
 
 from textwrap import dedent
 
