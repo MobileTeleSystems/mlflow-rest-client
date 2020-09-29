@@ -125,7 +125,10 @@ class ListableMeta(type):
         if list_class is None:
             list_class_name = "{}List".format(name)
             list_class = type(list_class_name, (SearchableList, ), {})
-            list_class.__doc__ = metacls._class_doc(name)
+            try:
+                list_class.__doc__ = metacls._class_doc(name)
+            except AttributeError:
+                pass
 
         attrs['list_class'] = list_class
         result = type.__new__(metacls, name, bases, attrs)
