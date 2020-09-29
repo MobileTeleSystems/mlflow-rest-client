@@ -1,15 +1,23 @@
-import time
-
 from enum import Enum
+
+import six
 
 from .tag import Tag
 from .timestamp import timestamp_2_time
+from .internal import \
+    SearchableList, \
+    Listable, \
+    Comparable, \
+    ComparableByStr, \
+    MakeableFromTuple, \
+    MakeableFromStr, \
+    HashableByStr
 
 class RunStage(Enum):
     """ Run stage """
 
-    active = 'ACTIVE'
-    deleted = 'DELETED'
+    active = 'active'
+    deleted = 'deleted'
 
 
 class RunStatus(Enum):
@@ -30,7 +38,7 @@ class RunViewType(Enum):
     all = 'ALL'
 
 
-class RunInfo(object):
+class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     """ Run information
 
         :param id: Run ID
@@ -76,74 +84,52 @@ class RunInfo(object):
         :vartype artifact_uri: str
     """
 
-    def __init__(self, id, experiment_id=None, status=RunStatus.started, stage=RunStage.active, start_time=None, end_time=None, artifact_uri=None):
+    def __init__(
+        self,
+        id,
+        experiment_id=None,
+        status=None,
+        stage=None,
+        start_time=None,
+        end_time=None,
+        artifact_uri=None
+    ):
         self.id = str(id)
-        self.experiment_id = int(experiment_id)
+        self.experiment_id = int(experiment_id) if experiment_id else None
+
+        if status is None:
+            status = RunStatus.started
         self.status = RunStatus(status)
+
+        if stage is None:
+            stage = RunStage.active
         self.stage = RunStage(stage)
+
         self.start_time = timestamp_2_time(start_time)
         self.end_time = timestamp_2_time(end_time)
         self.artifact_uri = str(artifact_uri) if artifact_uri else ''
 
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: Run info
-        :rtype: RunInfo
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    id=dct.get('run_id') or dct.get('run_uuid') or dct.get('id'),
-                    experiment_id=dct.get('experiment_id'),
-                    status=dct.get('status'),
-                    stage=(dct.get('lifecycle_stage') or dct.get('stage')).upper(),
-                    start_time=dct.get('start_time'),
-                    end_time=dct.get('end_time'),
-                    artifact_uri=dct.get('artifact_uri')
+                    id=inp.get('run_id') or inp.get('run_uuid') or inp.get('id'),
+                    experiment_id=inp.get('experiment_id'),
+                    status=inp.get('status'),
+                    stage=inp.get('lifecycle_stage') or inp.get('stage'),
+                    start_time=inp.get('start_time'),
+                    end_time=inp.get('end_time'),
+                    artifact_uri=inp.get('artifact_uri')
                 )
 
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Runs info
-        :rtype: :obj:`list` of :obj:`RunInfo`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
     def __repr__(self):
         return "<RunInfo id={self.id} experiment_id={self.experiment_id} status={self.status}>"\
                 .format(self=self)
 
+
     def __str__(self):
         return self.id
-
-
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == self.__str__()
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)
 
 
 class Param(Tag):
@@ -164,7 +150,36 @@ class Param(Tag):
     pass
 
 
-class Metric(object):
+class MetricList(SearchableList):
+    def __contains__(self, item):
+        for it in self:
+            try:
+                if isinstance(it, Metric):
+                    if isinstance(item, Metric) and it == item:
+                        return True
+                    if isinstance(item, six.string_types) and it.key == item:
+                        return True
+            except Exception:
+                pass
+
+        return super(MetricList, self).__contains__(item)
+
+
+    def __getitem__(self, item):
+        for it in self:
+            try:
+                if isinstance(it, Metric):
+                    if isinstance(item, Metric) and it == item:
+                        return it
+                    if isinstance(item, six.string_types) and it.key == item:
+                        return it
+            except Exception:
+                pass
+
+        return super(MetricList, self).__getitem__(item)
+
+
+class Metric(Listable, MakeableFromTuple, MakeableFromStr, ComparableByStr, HashableByStr):
     """ Run metric
 
         :param key: Metric name
@@ -192,44 +207,24 @@ class Metric(object):
         :vartype step: int
     """
 
-    def __init__(self, key, value=None, timestamp=None, step=None):
+    list_class = MetricList
+
+    def __init__(self, key, value=None, step=None, timestamp=None):
         self.key = str(key)
         self.value = float(value) if value is not None else None
-        self.timestamp = timestamp_2_time(timestamp)
         self.step = int(step) if step else 0
+        self.timestamp = timestamp_2_time(timestamp)
 
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: Metric
-        :rtype: Metric
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    key=dct.get('key'),
-                    value=dct.get('value'),
-                    timestamp=dct.get('timestamp'),
-                    step=dct.get('step')
+                    key=inp.get('key'),
+                    value=inp.get('value'),
+                    step=inp.get('step'),
+                    timestamp=inp.get('timestamp')
                 )
 
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Metrics
-        :rtype: :obj:`list` of :obj:`Metric`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
     def __repr__(self):
         return "<Metric key={self.key} value={self.value} step={self.step} timestamp={self.timestamp}>"\
@@ -238,29 +233,6 @@ class Metric(object):
 
     def __str__(self):
         return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
-
-
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == self.__str__()
-            elif isinstance(other, tuple) and len(other) == 4:
-                other = self.__class__(key=other[0], value=other[1], step=other[2], timestamp=other[3])
-            elif isinstance(other, tuple) and len(other) == 3:
-                other = self.__class__(key=other[0], value=other[1], step=other[2])
-            elif isinstance(other, tuple) and len(other) == 2:
-                other = self.__class__(key=other[0], value=other[1])
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)
 
 
 class RunTag(Tag):
@@ -281,7 +253,7 @@ class RunTag(Tag):
     pass
 
 
-class RunData(object):
+class RunData(Listable, Comparable):
     """ Run params, metrics and tags
 
         :param params: Params list
@@ -304,61 +276,40 @@ class RunData(object):
     """
 
     def __init__(self, params=None, metrics=None, tags=None):
-        _params = Param.from_list(params or [])
-        self.params = {param.key: param for param in _params}
+        self.params = Param.from_list(params or [])
+        self.metrics = Metric.from_list(metrics or [])
+        self.tags = RunTag.from_list(tags or [])
 
-        _metrics = Metric.from_list(metrics or [])
-        self.metrics = {metric.key: metric for metric in _metrics}
-
-        _tags = RunTag.from_list(tags or [])
-        self.tags = {tag.key: tag for tag in _tags}
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
+    def make(cls, inp, **kwargs):
+        if isinstance(inp, cls):
+            return inp
 
-        :param dct: Response item
-        :type dct: dict`
+        if isinstance(inp, dict):
+            return cls.from_dict(inp, **kwargs)
 
-        :returns: Run data
-        :rtype: RunData
-        """
+        try:
+            return cls.from_dict(vars(inp), **kwargs)
+        except TypeError:
+            return None
+
+
+    @classmethod
+    def _from_dict(cls, inp):
         return cls(
-                    params=dct.get('params'),
-                    metrics=dct.get('metrics'),
-                    tags=dct.get('tags')
+                    params=inp.get('params'),
+                    metrics=inp.get('metrics'),
+                    tags=inp.get('tags')
                 )
 
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Runs data
-        :rtype: :obj:`list` of :obj:`RunData`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
     def __repr__(self):
         return "<RunData params={self.params} metrics={self.metrics} tags={self.tags}>"\
                 .format(self=self)
 
 
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)
-
-class Run(object):
+class Run(Listable, ComparableByStr, HashableByStr):
     """ Run
 
         :param info: Run info
@@ -375,39 +326,9 @@ class Run(object):
     """
 
     def __init__(self, info=None, data=None):
-        self.info = RunInfo.from_dict(info or {})
-        self.data = RunData.from_dict(data or {})
+        self.info = RunInfo.make(info or {})
+        self.data = RunData.make(data or {})
 
-
-    @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: Run
-        :rtype: Run
-        """
-        return cls(
-                    info=dct.get('info'),
-                    data=dct.get('data')
-                )
-
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Runs
-        :rtype: :obj:`list` of :obj:`Run`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
     def __repr__(self):
         return "<Run info={info} data={data}>"\
@@ -415,11 +336,7 @@ class Run(object):
 
 
     def __str__(self):
-        return str(self.info.id)
-
-
-    def __hash__(self):
-        return hash(self.__str__())
+        return str(self.info)
 
 
     def __getattr__(self, attr):
@@ -429,16 +346,3 @@ class Run(object):
             return getattr(self.data, attr)
         raise AttributeError("{} object has no attribute {}"\
                                 .format(self.__class__.__name__, attr))
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == str(self.info)
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)

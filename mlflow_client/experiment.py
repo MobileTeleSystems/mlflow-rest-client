@@ -1,11 +1,13 @@
 from enum import Enum
 
 from .tag import Tag
+from .internal import Listable, MakeableFromTupleStr, ComparableByStr
 
 class ExperimentStage(Enum):
     """ Experiment stage """
-    active = 'ACTIVE'
-    deleted = 'DELETED'
+
+    active = 'active'
+    deleted = 'deleted'
 
 class ExperimentTag(Tag):
     """ Experiment tag
@@ -25,7 +27,7 @@ class ExperimentTag(Tag):
     pass
 
 
-class Experiment(object):
+class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
     """ Experiment
 
         :param id: Experiment ID
@@ -59,48 +61,27 @@ class Experiment(object):
         :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
     """
 
-    def __init__(self, id, name, artifact_location=None, stage=ExperimentStage.active, tags=None):
+    def __init__(self, id, name, artifact_location=None, stage=None, tags=None):
         self.id = int(id)
         self.name = str(name)
         self.artifact_location = str(artifact_location) if artifact_location else ''
+
+        if not stage:
+            stage = ExperimentStage.active
         self.stage = ExperimentStage(stage)
 
-        _tags = ExperimentTag.from_list(tags or [])
-        self.tags = {tag.key: tag for tag in _tags}
+        self.tags = ExperimentTag.from_list(tags or [])
 
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: Experiment
-        :rtype: Experiment
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    id=dct.get('experiment_id') or dct.get('id'),
-                    name=dct.get('name'),
-                    artifact_location=dct.get('artifact_location'),
-                    stage=(dct.get('lifecycle_stage') or dct.get('stage')).upper(),
-                    tags=dct.get('tags')
+                    id=inp.get('experiment_id') or inp.get('id'),
+                    name=inp.get('name'),
+                    artifact_location=inp.get('artifact_location'),
+                    stage=inp.get('lifecycle_stage') or inp.get('stage'),
+                    tags=inp.get('tags')
                 )
-
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Experiment
-        :rtype: :obj:`list` of :obj:`Experiment`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
 
     def __repr__(self):
@@ -108,24 +89,9 @@ class Experiment(object):
                 .format(self=self)
 
 
+    def __int__(self):
+        return self.id
+
+
     def __str__(self):
         return self.name
-
-
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == self.__str__()
-            elif isinstance(other, int):
-                return other == self.id
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)

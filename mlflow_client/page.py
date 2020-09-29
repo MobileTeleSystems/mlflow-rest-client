@@ -20,51 +20,59 @@ class Page(object):
         :param `**kwargs`: Additional params for item constructor
     """
 
-    def __init__(self, items=None, next_page_token=None, item_class=None, **kwargs):
+    def __init__(self, items=None, next_page_token=None):
         self.items = items or []
-        if item_class:
-            if hasattr(item_class, 'from_list'):
-                self.items = item_class.from_list(self.items, **kwargs)
-            else:
-                self.items = [item_class(item, **kwargs) for item in self.items]
         self.next_page_token = str(next_page_token) if next_page_token is not None else next_page_token
 
 
     @classmethod
-    def from_dict(cls, dct, items_key='items', item_class=None, **kwargs):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :param `**kwargs`: Additional params for item constructor
-
-        :returns: Page
-        :rtype: :obj:`Page` of `item_class`
-        """
-        return cls(
-                    items=dct.get(items_key, []),
-                    next_page_token=dct.get('next_page_token'),
-                    item_class=item_class,
-                    **kwargs
-                )
-
-
-    @classmethod
-    def from_list(cls, lst, items_key='items', item_class=None, **kwargs):
+    def make(cls, inp, items_key='items', item_class=None, **kwargs):
         """
         Generate objects list from REST API response
 
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
+        :param inp: Response items
+        :type inp: :obj:`list` or :obj:`dict`
 
         :param `**kwargs`: Additional params for item constructor
+        :type kwargs: `dict`
 
         :returns: Page
         :rtype: :obj:`Page` of `item_class`
         """
-        return cls.from_dict({items_key: lst}, items_key, item_class, **kwargs)
+
+        items = inp.copy()
+        next_page_token = None
+
+        if isinstance(inp, dict):
+            items = inp.get(items_key, [])
+            next_page_token = inp.get('next_page_token', None) or kwargs.pop('next_page_token', None)
+
+        if item_class:
+            if hasattr(item_class, 'from_list'):
+                items = item_class.from_list(items, **kwargs)
+            elif hasattr(item_class, 'make'):
+                items = [item_class.make(item, **kwargs) for item in items]
+            else:
+                items = [item_class(item, **kwargs) for item in items]
+
+            return cls(
+                items=items,
+                next_page_token=next_page_token
+            )
+
+        if isinstance(inp, dict):
+            return cls(
+                items=items,
+                next_page_token=next_page_token
+            )
+
+        try:
+            return cls(
+                items=vars(inp),
+                next_page_token=next_page_token
+            )
+        except TypeError:
+            return None
 
 
     @property
@@ -77,6 +85,7 @@ class Page(object):
         """
         return bool(self.next_page_token)
 
+
     def __repr__(self):
         return "<{self.__class__.__name__} items={count} has_next_page={self.has_next_page}>"\
                 .format(self=self, count=len(self.items))
@@ -84,13 +93,16 @@ class Page(object):
 
     def __eq__(self, other):
         if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            else:
-                other = self.from_dict(vars(other))
+            if isinstance(other, list):
+                return self.items == other
+
+            other = self.make(other)
+
         return repr(self) == repr(other)
+
+
+    def __getitem__(self, i):
+        return self.items[i]
 
 
     def __getattr__(self, attr):
@@ -98,7 +110,8 @@ class Page(object):
 
 
     def __add__(self, item):
-        return self.items.append(item)
+        self.items.append(item)
+        return self
 
 
     def __contains__(self, item):
@@ -116,6 +129,7 @@ class Page(object):
     def __iter__(self):
         self._index = 0
         return self
+
 
     def next(self):
         # Python2 only

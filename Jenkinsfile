@@ -26,7 +26,7 @@ String docs_target_host = 'test_mlflow'
 
 node('bdbuilder04') {
     try {
-        gitlabBuilds(builds: ["Build test images", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images", "Check ansible pipeline", "Deploy documentation"]) {
+        gitlabBuilds(builds: ["Build test images", "Run unit tests", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images", "Check ansible pipeline", "Deploy documentation"]) {
             stage('Checkout') {
                 def scmVars = checkout scm
                 git_commit = scmVars.GIT_COMMIT
@@ -76,30 +76,55 @@ node('bdbuilder04') {
 
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                 pythonVersions.each{ def pythonVersion ->
-                                    def testTagVersioned = "${testTag}-python${pythonVersion}"
+                                    ['unit', 'integration'].each { String suffix ->
+                                        def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
 
-                                    build[pythonVersion] = {
-                                        ansiColor('xterm') {
-                                            try {
-                                                // Fetch cache
-                                                cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
-                                            } catch (Exception e) {}
+                                        build["${pythonVersion}-${suffix}"] = {
+                                            ansiColor('xterm') {
+                                                try {
+                                                    // Fetch cache
+                                                    cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
+                                                } catch (Exception e) {}
 
-                                            docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .")
+                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                            }
                                         }
                                     }
                                 }
                                 parallel build
 
-                                ansiColor('xterm') {
-                                    try {
-                                        // Fetch cache
-                                        docker.image("${docker_registry}/${docker_image}:${testTag}").pull()
-                                    } catch (Exception e) {}
+                                ['unit', 'integration'].each { String suffix ->
+                                    ansiColor('xterm') {
+                                        try {
+                                            // Fetch cache
+                                            docker.image("${docker_registry}/${docker_image}:${testTag}-${suffix}").pull()
+                                        } catch (Exception e) {}
 
-                                    docker.build("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.test .")
+                                        docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
+                                    }
                                 }
                             }
+                        }
+                    }
+
+                    stage('Run unit tests') {
+                        gitlabCommitStatus('Run unit tests') {
+                            def build = [
+                                failFast: true
+                            ]
+                            pythonVersions.each{ def pythonVersion ->
+                                build[pythonVersion] = {
+                                    withEnv(["TAG=${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                                        ansiColor('xterm') {
+                                            sh script: """
+                                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-unit
+                                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" down
+                                            """
+                                        }
+                                    }
+                                }
+                            }
+                            parallel build
                         }
                     }
 
@@ -110,11 +135,11 @@ node('bdbuilder04') {
                             ]
                             pythonVersions.each{ def pythonVersion ->
                                 build[pythonVersion] = {
-                                    withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                                    withEnv(["TAG=${testTag}-integration-python${pythonVersion}-${env.BUILD_TAG}"]) {
                                         ansiColor('xterm') {
                                             sh script: """
-                                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins
-                                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down
+                                                docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-integration
+                                                docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" down
                                             """
                                         }
                                     }
@@ -126,11 +151,11 @@ node('bdbuilder04') {
 
                     stage('Check coverage') {
                         gitlabCommitStatus('Check coverage') {
-                            withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
+                            withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins coverage.sh
-                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins-unit coverage.sh
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
                                     """
                                 }
                             }
@@ -141,11 +166,11 @@ node('bdbuilder04') {
 
                     stage('Pylint') {
                         gitlabCommitStatus('Pylint') {
-                            withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
+                            withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
-                                        docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins-unit bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
                                     """
                                 }
                             }
@@ -179,14 +204,16 @@ node('bdbuilder04') {
                         gitlabCommitStatus('Deploy test images') {
                             if (isDev || isRelease) {
                                 withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                    ansiColor('xterm') {
-                                        pythonVersions.each{ def pythonVersion ->
-                                            def testTagVersioned = "${testTag}-python${pythonVersion}"
+                                    ['unit', 'integration'].each { String suffix ->
+                                        ansiColor('xterm') {
+                                            pythonVersions.each{ def pythonVersion ->
+                                                def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
 
-                                            docker.build("${docker_registry}/${docker_image}:${testTagVersioned}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.test .").push()
+                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .").push()
+                                            }
+
+                                            docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .").push()
                                         }
-
-                                        docker.build("${docker_registry}/${docker_image}:${testTag}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.test .").push()
                                     }
                                 }
                             }
@@ -214,7 +241,7 @@ node('bdbuilder04') {
 
                     stage ('Building documentation') {
                         gitlabCommitStatus('Building documentation') {
-                            docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
+                            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
                                 try {
                                     version = sh script: "python setup.py --version", returnStdout: true
                                     version = version.trim()
@@ -222,7 +249,7 @@ node('bdbuilder04') {
                             }
 
                             if (isDev || isRelease) {
-                                docker.image("${docker_registry}/${docker_image}:${testTag}-${env.BUILD_TAG}").inside() {
+                                docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
                                     ansiColor('xterm') {
                                         sh script: """
                                             cd docs
@@ -333,27 +360,28 @@ node('bdbuilder04') {
                 failFast: false
             ]
 
-            pythonVersions.each{ def pythonVersion ->
-                build[pythonVersion] = {
-                    withEnv(["TAG=${testTag}-python${pythonVersion}-${env.BUILD_TAG}"]) {
-                        ansiColor('xterm') {
-                            sh script: """
-                                docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}-${pythonVersion}" down || true
-                                docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
-                            """
+            ['unit', 'integration'].each { String suffix ->
+                pythonVersions.each{ def pythonVersion ->
+                    build["${suffix}-${pythonVersion}"] = {
+                        withEnv(["TAG=${testTag}-${suffix}-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                            ansiColor('xterm') {
+                                sh script: """
+                                    docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${pythonVersion}" down || true
+                                    docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
+                                """
+                            }
                         }
                     }
                 }
-            }
 
-
-            build['main'] = {
-                withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
-                    ansiColor('xterm') {
-                        sh script: """
-                            docker-compose -f docker-compose.jenkins.yml -p "${env.BUILD_TAG}" down || true
-                            docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
-                        """
+                build[suffix] = {
+                    withEnv(["TAG=${testTag}-${suffix}-${env.BUILD_TAG}"]) {
+                        ansiColor('xterm') {
+                            sh script: """
+                                docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down || true
+                                docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
+                            """
+                        }
                     }
                 }
             }

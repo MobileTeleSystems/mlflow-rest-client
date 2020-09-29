@@ -1,8 +1,65 @@
 Changelog
 =================================================================
 
+1.1
+--------------------
+
+.. changelog::
+   :version: 1.1.0
+
+   .. change::
+      :tags: refactor
+      :tickets: DSX-46
+
+      Refactor code
+
+   .. change::
+      :tags: tests
+      :tickets: DSX-46
+
+      Increase tests coverage
+
+   .. change::
+      :tags: model, feature
+      :tickets: DSX-46
+
+      Allow to get version by stage from `Model` object
+
+   .. change::
+      :tags: tag, feature
+      :tickets: DSX-46
+
+      Allow to get tag by name from any object
+
+   .. change::
+      :tags: run, feature
+      :tickets: DSX-46
+
+      Allow to get param by key from `RunData` object
+
+   .. change::
+      :tags: run, feature
+      :tickets: DSX-46
+
+      Allow to get metric by key from `RunData` object
+
 1.0
 --------------------
+
+.. changelog::
+   :version: 1.0.9
+
+   .. change::
+      :tags: refactor
+      :tickets: DSX-46
+
+      Fix some code smells
+
+   .. change::
+      :tags: tests
+      :tickets: DSX-46
+
+      Add unit tests
 
 .. changelog::
    :version: 1.0.8

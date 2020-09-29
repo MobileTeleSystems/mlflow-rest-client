@@ -1,15 +1,15 @@
 version: "3.5"
 services:
-  mlflow-client-jenkins:
+  mlflow-client-jenkins-integration:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
-    env_file: .env.jenkins
+    env_file: .env.jenkins.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
       NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.integration
     volumes:
       - ./reports:/app/reports:rw
       - ./.coveragerc:/app/.coveragerc:ro
@@ -20,7 +20,7 @@ services:
       - mlflow
   mlflow-jenkins:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
-    env_file: .env.jenkins
+    env_file: .env.jenkins.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
@@ -33,7 +33,7 @@ services:
       - mlflow
   mlflow-jenkins-db:
     image: postgres:11.8
-    env_file: .env.jenkins
+    env_file: .env.jenkins.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}

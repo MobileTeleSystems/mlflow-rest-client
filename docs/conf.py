@@ -145,7 +145,7 @@ texinfo_documents = [
 
 changelog_sections = ["general", "client", "artifact", "experiment", "model", "page", "run", "tag", "docs", "samples", "ci", "tests"]
 
-changelog_inner_tag_sort = ["feature", "bug", "deprecated"]
+changelog_inner_tag_sort = ["breaking", "deprecated", "feature", "bug", "refactor"]
 
 changelog_hide_sections_from_tags = True
 

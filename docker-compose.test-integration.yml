@@ -1,18 +1,19 @@
 version: "3.5"
 services:
-  mlflow-client-test:
-    image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
-    env_file: .env.test
+  mlflow-client-test-integration:
+    image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-integration}
+    env_file: .env.test.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
       NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.integration
     volumes:
-      # for running local test, can be removed
-      - ./tests:/app/tests:ro
+      - ./mlflow_client:/app/mlflow_client:ro
+      - ./tests/integration:/app/tests/integration:ro
+      - ./integration-tests.sh:/app/integration-tests.sh:ro
     depends_on:
         - "mlflow-test"
     networks:
@@ -20,7 +21,7 @@ services:
       - mlflow
   mlflow-test:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
-    env_file: .env.test
+    env_file: .env.test.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
@@ -33,7 +34,7 @@ services:
       - mlflow
   mlflow-test-db:
     image: postgres:11.8
-    env_file: .env.test
+    env_file: .env.test.integration
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}

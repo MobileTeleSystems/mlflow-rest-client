@@ -1,5 +1,8 @@
+import os
 
-class Artifact(object):
+from .internal import Listable, MakeableFromStr, ComparableByStr, HashableByStr
+
+class Artifact(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     """ Artifact
 
         :param path: Artifact path
@@ -35,47 +38,27 @@ class Artifact(object):
 
 
     @classmethod
-    def from_dict(cls, dct, **kwargs):
-        """
-        Generate object from REST API response
-        
-        :param dct: Response item
-        :type dct: dict`
-
-        :param `**kwargs`: Additional constructor params
-        :type dct: dict`
-
-        :returns: Artifact
-        :rtype: Artifact
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    path=dct.get('path'),
-                    is_dir=dct.get('is_dir', False),
-                    file_size=dct.get('file_size'),
-                    root=kwargs.get('root')
-                )
+            path=inp.get('path'),
+            is_dir=inp.get('is_dir', False),
+            file_size=inp.get('file_size'),
+            root=inp.get('root')
+        )
 
 
     @classmethod
-    def from_list(cls, lst, **kwargs):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :param `**kwargs`: Additional constructor params
-        :type dct: dict`
-
-        :returns: Artifacts
-        :rtype: :obj:`list` of :obj:`Artifact`
-        """
-        return [cls.from_dict(item, **kwargs) if isinstance(item, dict) else item for item in lst]
+    def make(cls, inp, **kwargs):
+        if isinstance(inp, tuple) and len(inp) == 2:
+            return cls(root=inp[0], path=inp[1], **kwargs)
+        return super(Artifact, cls).make(inp, **kwargs)
 
 
     @property
     def full_path(self):
-        return "{self.root}/{self.path}".format(self=self)
+        if self.root:
+            return os.path.join(self.root, self.path)
+        return self.path
 
 
     def __repr__(self):
@@ -86,22 +69,3 @@ class Artifact(object):
 
     def __str__(self):
         return self.full_path
-
-
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == self.__str__()
-            elif isinstance(other, tuple) and len(other) == 2:
-                other = self.__class__(root=other[0], path=other[1])
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)

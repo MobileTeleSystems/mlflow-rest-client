@@ -1,4 +1,3 @@
-
 import json
 import requests
 
@@ -61,7 +60,8 @@ class MLflowApiClient(object):
         :returns: Experiments
         :rtype: :obj:`List` of :obj:`Experiment`
         """
-        return Experiment.from_list(self._get('experiments/list', view_type=view_type.value).get('experiments', []))
+        return Experiment.from_list(self._get('experiments/list',
+                                                view_type=view_type.value).get('experiments', []))
 
 
     def list_experiments_iterator(self, view_type=RunViewType.active):
@@ -89,7 +89,8 @@ class MLflowApiClient(object):
         :returns: Experiment
         :rtype: Experiment
         """
-        return Experiment.from_dict(self._get('experiments/get', experiment_id=id)['experiment'])
+        return Experiment.from_dict(self._get('experiments/get',
+                                                experiment_id=id)['experiment'])
 
 
     def get_experiment_by_name(self, name):
@@ -280,7 +281,10 @@ class MLflowApiClient(object):
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
 
-        return Run.from_dict(self._post('runs/create', experiment_id=experiment_id, start_time=time_2_timestamp(start_time), tags=tags)['run'])
+        return Run.from_dict(self._post('runs/create',
+                                        experiment_id=experiment_id,
+                                        start_time=time_2_timestamp(start_time),
+                                        tags=tags)['run'])
 
 
     def set_run_status(self, id, status, end_time=None):
@@ -464,7 +468,12 @@ class MLflowApiClient(object):
         """
         if not timestamp:
             timestamp = current_timestamp()
-        dct = self._add_timestamp({'run_id': id, 'key': key, 'value': value, 'step': int(step)}, time_2_timestamp(timestamp))
+        dct = self._add_timestamp({
+            'run_id': id,
+            'key': key,
+            'value': value,
+            'step': int(step)
+        }, time_2_timestamp(timestamp))
         self._post('runs/log-metric', **dct)
 
 
@@ -627,8 +636,8 @@ class MLflowApiClient(object):
                 elif isinstance(tag, dict) and 'key' in tag:
                     self.delete_run_tag(id, tag['key'])
 
-
-    def _add_timestamp(self, item, timestamp):
+    @staticmethod
+    def _add_timestamp(item, timestamp):
         if 'timestamp' in item and isinstance(item['timestamp'], int):
             return item
 
@@ -692,7 +701,7 @@ class MLflowApiClient(object):
             params['page_token'] = page_token
         response = self._get('artifacts/list', run_id=id, **params)
 
-        return Page.from_dict(response, items_key='files', item_class=Artifact, root=response['root_uri'])
+        return Page.make(response, items_key='files', item_class=Artifact, root=response['root_uri'])
 
 
     def list_run_artifacts_iterator(self, id, path=None, page_token=None):
@@ -721,7 +730,8 @@ class MLflowApiClient(object):
                 break
 
 
-    def search_runs(self, experiment_ids, query="", run_view_type=RunViewType.active, max_results=MAX_RESULTS, order_by=None, page_token=None):
+    def search_runs(self, experiment_ids, query="", run_view_type=RunViewType.active,
+                    max_results=MAX_RESULTS, order_by=None, page_token=None):
         """
         Search for runs
 
@@ -768,10 +778,11 @@ class MLflowApiClient(object):
         if page_token:
             params['page_token'] = page_token
         response = self._post('runs/search', **params)
-        return Page.from_dict(response, items_key='runs', item_class=Run)
+        return Page.make(response, items_key='runs', item_class=Run)
 
 
-    def search_runs_iterator(self, experiment_ids, query="", run_view_type=RunViewType.active, max_results=MAX_RESULTS, order_by=None, page_token=None):
+    def search_runs_iterator(self, experiment_ids, query="", run_view_type=RunViewType.active,
+                                max_results=MAX_RESULTS, order_by=None, page_token=None):
         """
         Iterate by runs
 
@@ -803,12 +814,26 @@ class MLflowApiClient(object):
         :type version: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.run.Run`
         """
 
-        page = self.search_runs(experiment_ids=experiment_ids, query=query, run_view_type=run_view_type, max_results=max_results, order_by=order_by, page_token=page_token)
+        page = self.search_runs(
+            experiment_ids=experiment_ids,
+            query=query,
+            run_view_type=run_view_type,
+            max_results=max_results,
+            order_by=order_by,
+            page_token=page_token
+        )
         while True:
             for item in page:
                 yield item
             if page.has_next_page:
-                page = self.search_runs(experiment_ids=experiment_ids, query=query, run_view_type=run_view_type, max_results=max_results, order_by=order_by, page_token=page.next_page_token)
+                page = self.search_runs(
+                    experiment_ids=experiment_ids,
+                    query=query,
+                    run_view_type=run_view_type,
+                    max_results=max_results,
+                    order_by=order_by,
+                    page_token=page.next_page_token
+                )
             else:
                 break
 
@@ -844,7 +869,9 @@ class MLflowApiClient(object):
             tags = []
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
-        return Model.from_dict(self._post('registered-models/create', name=name, tags=tags)['registered_model'])
+        return Model.from_dict(self._post('registered-models/create',
+                                            name=name,
+                                            tags=tags)['registered_model'])
 
     def delete_model_tag(self, name, tag_name):
         """
@@ -865,7 +892,8 @@ class MLflowApiClient(object):
         :returns: Model
         :rtype: Model
         """
-        return Model.from_dict(self._get('registered-models/get', name=name)['registered_model'])
+        return Model.from_dict(self._get('registered-models/get',
+                                            name=name)['registered_model'])
 
     def list_model_versions(self, name, stages=None):
         """
@@ -912,7 +940,9 @@ class MLflowApiClient(object):
         :returns: Updated model
         :rtype: Model
         """
-        return Model.from_dict(self._post('registered-models/rename', name=name, new_name=new_name)['registered_model'])
+        return Model.from_dict(self._post('registered-models/rename',
+                                            name=name,
+                                            new_name=new_name)['registered_model'])
 
     def create_model_version(self, name, source=None, run_id=None, **tags):
         """
@@ -945,7 +975,9 @@ class MLflowApiClient(object):
         :returns: Updated model
         :rtype: Model
         """
-        return Model.from_dict(self._patch('registered-models/update', name=name, description=description)['registered_model'])
+        return Model.from_dict(self._patch('registered-models/update',
+                                            name=name,
+                                            description=description)['registered_model'])
 
 
     def delete_model(self, name):
@@ -977,7 +1009,7 @@ class MLflowApiClient(object):
         if page_token:
             params['page_token'] = page_token
         response = self._get('registered-models/list', **params)
-        return Page.from_dict(response, items_key='registered_models', item_class=Model)
+        return Page.make(response, items_key='registered_models', item_class=Model)
 
 
     def list_models_iterator(self, max_results=MAX_RESULTS, page_token=None):
@@ -1039,9 +1071,11 @@ class MLflowApiClient(object):
             params['page_token'] = page_token
 
         response = self._get('registered-models/search', **params)
-        return Page.from_dict(response, items_key='registered_models', item_class=Model)
+        return Page.make(response, items_key='registered_models', item_class=Model)
 
-    def search_models_iterator(self, query="", max_results=MAX_RESULTS, order_by=None, page_token=None):
+
+    def search_models_iterator(self, query="", max_results=MAX_RESULTS,
+                                    order_by=None, page_token=None):
         """
         Iterate by models
 
@@ -1067,12 +1101,22 @@ class MLflowApiClient(object):
         :type version: :obj:`Iterator` of :obj:`mlflow_client.model.Model`
         """
 
-        page = self.search_models(query=query, max_results=max_results, order_by=order_by, page_token=page_token)
+        page = self.search_models(
+            query=query,
+            max_results=max_results,
+            order_by=order_by,
+            page_token=page_token
+        )
         while True:
             for item in page:
                 yield item
             if page.has_next_page:
-                page = self.search_models(query=query, max_results=max_results, order_by=order_by, page_token=page.next_page_token)
+                page = self.search_models(
+                    query=query,
+                    max_results=max_results,
+                    order_by=order_by,
+                    page_token=page.next_page_token
+                )
             else:
                 break
 
@@ -1181,7 +1225,10 @@ class MLflowApiClient(object):
             tags = []
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
-        return ModelVersion.from_dict(self._post('model-versions/create', name=name, tags=tags, **params)['model_version'])
+        return ModelVersion.from_dict(self._post('model-versions/create',
+                                                    name=name,
+                                                    tags=tags,
+                                                    **params)['model_version'])
 
 
     def get_model_version(self, name, version):
@@ -1197,7 +1244,9 @@ class MLflowApiClient(object):
         :returns: Model version
         :rtype: ModelVersion
         """
-        return ModelVersion.from_dict(self._get('model-versions/get', name=name, version=str(version))['model_version'])
+        return ModelVersion.from_dict(self._get('model-versions/get',
+                                                name=name,
+                                                version=str(version))['model_version'])
 
 
     def set_model_version_description(self, name, version, description):
@@ -1216,7 +1265,10 @@ class MLflowApiClient(object):
         :returns: Model version
         :rtype: ModelVersion
         """
-        return ModelVersion.from_dict(self._patch('model-versions/update', name=name, version=str(version), description=description)['model_version'])
+        return ModelVersion.from_dict(self._patch('model-versions/update',
+                                                    name=name,
+                                                    version=str(version),
+                                                    description=description)['model_version'])
 
 
     def set_model_version_tag(self, name, version, key, value):
@@ -1235,7 +1287,11 @@ class MLflowApiClient(object):
         :param value: Tag value
         :type value: str
         """
-        self._post('model-versions/set-tag', name=name, version=str(version), key=key, value=value)
+        self._post('model-versions/set-tag',
+                    name=name,
+                    version=str(version),
+                    key=key,
+                    value=value)
 
 
     def delete_model_version_tag(self, name, version, key):
@@ -1303,7 +1359,7 @@ class MLflowApiClient(object):
             params['page_token'] = page_token
 
         response = self._get('model-versions/search', **params)
-        return Page.from_dict(response, items_key='model_versions', item_class=ModelVersion)
+        return Page.make(response, items_key='model_versions', item_class=ModelVersion)
 
 
     def search_model_versions_iterator(self, query="", max_results=MAX_RESULTS, order_by=None, page_token=None):
@@ -1331,12 +1387,22 @@ class MLflowApiClient(object):
         :param version: Model versions
         :type version: Iterator[ModelVersion]
         """
-        page = self.search_model_versions(query=query, max_results=max_results, order_by=order_by, page_token=page_token)
+        page = self.search_model_versions(
+            query=query,
+            max_results=max_results,
+            order_by=order_by,
+            page_token=page_token
+        )
         while True:
             for item in page:
                 yield item
             if page.has_next_page:
-                page = self.search_model_versions(query=query, max_results=max_results, order_by=order_by, page_token=page.next_page_token)
+                page = self.search_model_versions(
+                    query=query,
+                    max_results=max_results,
+                    order_by=order_by,
+                    page_token=page.next_page_token
+                )
             else:
                 break
 
@@ -1377,8 +1443,11 @@ class MLflowApiClient(object):
         :rtype: ModelVersion
         """
         return ModelVersion.from_dict(
-            self._post('model-versions/transition-stage', name=name, version=str(version), stage=stage.value,
-                                                            archive_existing_versions=archive_existing)['model_version'])
+            self._post('model-versions/transition-stage',
+                        name=name,
+                        version=str(version),
+                        stage=stage.value,
+                        archive_existing_versions=archive_existing)['model_version'])
 
 
     def test_model_version(self, name, version, **params):
@@ -1438,7 +1507,8 @@ class MLflowApiClient(object):
         return self.transition_model_version_stage(name, version, stage=ModelVersionStage.archived, **params)
 
 
-    def _handle_tags(self, tags):
+    @staticmethod
+    def _handle_tags(tags):
         result = []
         for key, value in tags.items():
             dct = {'key': key, 'value': value}
@@ -1458,8 +1528,7 @@ class MLflowApiClient(object):
         rsp = str(resp.text)
         if rsp:
             return json.loads(rsp)
-        else:
-            return None
+        return None
 
 
     def _post(self, url, **data):
@@ -1467,8 +1536,7 @@ class MLflowApiClient(object):
         rsp = str(resp.text)
         if rsp:
             return json.loads(rsp)
-        else:
-            return None
+        return None
 
 
     def _patch(self, url, **data):
@@ -1476,8 +1544,7 @@ class MLflowApiClient(object):
         rsp = str(resp.text)
         if rsp:
             return json.loads(rsp)
-        else:
-            return None
+        return None
 
 
     def _delete(self, url, **data):
@@ -1505,6 +1572,5 @@ class MLflowApiClient(object):
     @property
     def _auth(self):
         if self.user and self._password:
-            return (self.user, self._password)
-        else:
-            return None
+            return self.user, self._password
+        return None
