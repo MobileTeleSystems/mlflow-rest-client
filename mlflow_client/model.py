@@ -2,9 +2,18 @@ from enum import Enum
 
 from .tag import Tag
 from .timestamp import timestamp_2_time
+from .internal import \
+    SearchableList, \
+    Listable, \
+    MakeableFromStr, \
+    MakeableFromTupleStr, \
+    Comparable, \
+    ComparableByStr, \
+    HashableByStr
 
 class ModelVersionStage(Enum):
     """ Model version stage """
+
     unknown = 'None'
     test = 'Staging'
     prod = 'Production'
@@ -16,6 +25,7 @@ class ModelVersionStage(Enum):
 
 class ModelVersionState(Enum):
     """ Model version stage """
+
     pending = 'PENDING_REGISTRATION'
     failed = 'FAILED_REGISTRATION'
     ready = 'READY'
@@ -24,7 +34,7 @@ class ModelVersionState(Enum):
         return hash(self.value)
 
 
-class ModelVersionStatus(object):
+class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
     """ Model version state with message
 
         :param state: Model version state
@@ -40,9 +50,19 @@ class ModelVersionStatus(object):
         :vartype message: str
     """
 
-    def __init__(self, state, message=""):
-        self.state = ModelVersionState(state)
-        self.message = message
+    def __init__(self, state=None, message=None, *args, **kwargs):
+        super(ModelVersionStatus, self).__init__(*args, **kwargs)
+
+        self.state = ModelVersionState(state) if state else ModelVersionState.pending
+        self.message = message or ""
+
+
+    @classmethod
+    def _from_dict(cls, inp):
+        return cls(
+            state=inp.get('state'),
+            message=inp.get('message'),
+        )
 
 
     def __repr__(self):
@@ -58,25 +78,46 @@ class ModelVersionStatus(object):
         return hash(self.state.value)
 
 
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, str):
-                return other == self.__str__()
-            elif isinstance(other, tuple) and len(other) == 2:
-                other = self.__class__(state=other[0], message=other[1])
-        return repr(self) == repr(other)
-
-
 class ModelVersionTag(Tag):
     """ Model version tag """
     pass
+
+
+class ModelVersionList(SearchableList):
+    def __contains__(self, item):
+        for it in self:
+            try:
+                if isinstance(it, ModelVersion):
+                    if isinstance(item, ModelVersionStage) and it.stage == item:
+                        return True
+                    if it.stage == ModelVersionStage(item):
+                        return True
+            except Exception:
+                pass
+
+        return super(ModelVersionList, self).__contains__(item)
+
+
+    def __getitem__(self, item):
+        for it in self:
+            try:
+                if isinstance(it, ModelVersion):
+                    if isinstance(item, ModelVersionStage) and it.stage == item:
+                        return it
+                    if it.stage == ModelVersionStage(item):
+                        return it
+            except Exception:
+                pass
+
+        return super(ModelVersionList, self).__getitem__(item)
+
 
 class ModelTag(Tag):
     """ Model tag """
     pass
 
 
-class ModelVersion(object):
+class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
     """ Model version
 
         :param name: Model name
@@ -143,17 +184,19 @@ class ModelVersion(object):
         :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
     """
 
+    list_class = ModelVersionList
+
     def __init__(
         self,
         name,
         version,
         creation_timestamp=None,
         last_updated_timestamp=None,
-        stage=ModelVersionStage.unknown,
+        stage=None,
         description=None,
         source=None,
         run_id=None,
-        state=ModelVersionState.pending,
+        state=None,
         state_message=None,
         tags=None
     ):
@@ -161,54 +204,33 @@ class ModelVersion(object):
         self.version = int(version)
         self.created_time = timestamp_2_time(creation_timestamp)
         self.updated_time = timestamp_2_time(last_updated_timestamp)
+
+        if stage is None:
+            stage = ModelVersionStage.unknown
         self.stage = ModelVersionStage(stage)
+
         self.description = str(description) if description else ''
         self.source = str(source) if source else ''
         self.run_id = str(run_id) if run_id else None
         self.status = ModelVersionStatus(state, state_message)
-
-        _tags = ModelVersionTag.from_list(tags or [])
-        self.tags = {tag.key: tag for tag in _tags}
+        self.tags = ModelVersionTag.from_list(tags or [])
 
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: ModelVersion
-        :rtype: ModelVersion
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    name=dct.get('name'),
-                    version=dct.get('version'),
-                    creation_timestamp=dct.get('creation_timestamp'),
-                    last_updated_timestamp=dct.get('last_updated_timestamp'),
-                    stage=dct.get('current_stage') or dct.get('stage'),
-                    description=dct.get('description'),
-                    source=dct.get('source'),
-                    run_id=dct.get('run_id'),
-                    state=dct.get('status', dct.get('state')).upper(),
-                    state_message=dct.get('status_message') or dct.get('state_message'),
-                    tags=dct.get('tags')
+                    name=inp.get('name'),
+                    version=inp.get('version'),
+                    creation_timestamp=inp.get('creation_timestamp'),
+                    last_updated_timestamp=inp.get('last_updated_timestamp'),
+                    stage=inp.get('current_stage') or inp.get('stage'),
+                    description=inp.get('description'),
+                    source=inp.get('source'),
+                    run_id=inp.get('run_id'),
+                    state=inp.get('status') or inp.get('state'),
+                    state_message=inp.get('status_message') or inp.get('state_message'),
+                    tags=inp.get('tags')
                 )
-
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: ModelVersion
-        :rtype: :obj:`list` of :obj:`ModelVersion`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
 
     def __repr__(self):
@@ -220,23 +242,7 @@ class ModelVersion(object):
         return str("{self.name} v{self.version}".format(self=self))
 
 
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, tuple) and len(other) == 2:
-                other = self.__class__(name=other[0], version=other[1])
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)
-
-class Model(object):
+class Model(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     """ Model
 
         :param name: Model name
@@ -281,47 +287,20 @@ class Model(object):
         self.created_time = timestamp_2_time(creation_timestamp)
         self.updated_time = timestamp_2_time(last_updated_timestamp)
         self.description = str(description) if description else ''
-
-        _versions = ModelVersion.from_list(versions or [])
-        self.versions = {version.stage: version for version in _versions}
-
-        _tags = ModelTag.from_list(tags or [])
-        self.tags = {tag.key: tag for tag in _tags}
+        self.versions = ModelVersion.from_list(versions or [], name=name)
+        self.tags = ModelTag.from_list(tags or [])
 
 
     @classmethod
-    def from_dict(cls, dct):
-        """
-        Generate object from REST API response
-
-        :param dct: Response item
-        :type dct: dict`
-
-        :returns: Model
-        :rtype: Model
-        """
+    def _from_dict(cls, inp):
         return cls(
-                    name=dct.get('name'),
-                    creation_timestamp=dct.get('creation_timestamp'),
-                    last_updated_timestamp=dct.get('last_updated_timestamp'),
-                    description=dct.get('description'),
-                    versions=dct.get('latest_versions') or dct.get('versions'),
-                    tags=dct.get('tags')
+                    name=inp.get('name'),
+                    creation_timestamp=inp.get('creation_timestamp'),
+                    last_updated_timestamp=inp.get('last_updated_timestamp'),
+                    description=inp.get('description'),
+                    versions=inp.get('latest_versions') or inp.get('versions'),
+                    tags=inp.get('tags')
                 )
-
-
-    @classmethod
-    def from_list(cls, lst):
-        """
-        Generate objects list from REST API response
-
-        :param lst: Response items
-        :type lst: :obj:`list` of :obj:`dict`
-
-        :returns: Model
-        :rtype: :obj:`list` of :obj:`Model`
-        """
-        return [cls.from_dict(item) if isinstance(item, dict) else item for item in lst]
 
 
     def __repr__(self):
@@ -331,20 +310,3 @@ class Model(object):
 
     def __str__(self):
         return str(self.name)
-
-
-    def __hash__(self):
-        return hash(self.__str__())
-
-
-    def __eq__(self, other):
-        if other is not None and not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                other = self.from_dict(other)
-            elif isinstance(other, list):
-                other = self.from_list(other)
-            elif isinstance(other, str):
-                return other == self.__str__()
-            else:
-                other = self.from_dict(vars(other))
-        return repr(self) == repr(other)

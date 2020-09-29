@@ -29,8 +29,7 @@ def timestamp_2_time(timestamp):
     if timestamp:
         if isinstance(timestamp, datetime.datetime):
             return timestamp
-        else:
-            return datetime.datetime.utcfromtimestamp(normalize_timestamp(timestamp))
+        return datetime.datetime.utcfromtimestamp(normalize_timestamp(timestamp))
     return None
 
 
@@ -47,11 +46,11 @@ def _remove_tz(inp):
 
 def time_2_timestamp(inp):
     if inp:
-        if isinstance(inp, float) or isinstance(inp, int):
+        if isinstance(inp, (float, int)):
             timestamp = normalize_timestamp(inp)
         if isinstance(inp, datetime.datetime):
             inp = _remove_tz(inp)
-            utc = _remove_tz(datetime.datetime(1970,1,1))
+            utc = _remove_tz(datetime.datetime(1970, 1, 1))
             timestamp = (inp - utc).total_seconds()
         return mlflow_timestamp(timestamp)
     return None
