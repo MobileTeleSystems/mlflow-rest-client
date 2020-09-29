@@ -6,6 +6,7 @@ Changelog
 
 .. changelog::
    :version: 1.1.1
+   :released: 29.09.2020 18:08
 
    .. change::
       :tags: docs
