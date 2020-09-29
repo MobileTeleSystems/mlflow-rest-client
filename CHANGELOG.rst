@@ -5,6 +5,15 @@ Changelog
 --------------------
 
 .. changelog::
+   :version: 1.1.1
+
+   .. change::
+      :tags: docs
+      :tickets: DSX-46
+
+      Improve documentation
+
+.. changelog::
    :version: 1.1.0
    :released: 29.09.2020 16:29
 
