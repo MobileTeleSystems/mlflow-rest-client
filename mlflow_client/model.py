@@ -13,11 +13,18 @@ from .internal import \
 
 class ModelVersionStage(Enum):
     """ Model version stage """
-
     unknown = 'None'
+
+    """ Model version has no stage """
+
     test = 'Staging'
+    """ Is a testing model version"""
+
     prod = 'Production'
+    """ Is a production model version """
+
     archived = 'Archived'
+    """ Model version was archived """
 
     def __hash__(self):
         return hash(self.value)
@@ -27,34 +34,56 @@ class ModelVersionState(Enum):
     """ Model version stage """
 
     pending = 'PENDING_REGISTRATION'
+    """ Model version registration is pending """
+
     failed = 'FAILED_REGISTRATION'
+    """ Model version registration was failed """
+
     ready = 'READY'
+    """ Model version registration was successful """
 
     def __hash__(self):
         return hash(self.value)
 
 
 class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
-    """ Model version state with message
+    """Model version state with message
 
-        :param state: Model version state
-        :type state: str
+        Parameters
+        ----------
+        state : :obj:`str` or :obj:`ModelVersionState`, optional
+            Model version state
 
-        :ivar state: Model version state
-        :vartype state: ModelVersionState
+        message : str, optional
+            Model version state message
 
-        :param message: Model version state message
-        :type message: str, optional
+        Attributes
+        ----------
+        state : :obj:`ModelVersionState`
+            Model version state
 
-        :ivar message: Model version state message
-        :vartype message: str
+        message : str
+            Model version state message
+
+        Examples
+        --------
+        .. code:: python
+
+            status = ModelVersionStatus(state='READY')
+
+            status = ModelVersionStatus(state=ModelVersionState.ready)
+
+            status = ModelVersionStatus(state=ModelVersionState.failed, message="Reason")
     """
 
     def __init__(self, state=None, message=None, *args, **kwargs):
         super(ModelVersionStatus, self).__init__(*args, **kwargs)
 
         self.state = ModelVersionState(state) if state else ModelVersionState.pending
+        """Model version state"""
+
         self.message = message or ""
+        """Model version state message"""
 
 
     @classmethod
@@ -79,11 +108,64 @@ class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
 
 
 class ModelVersionTag(Tag):
-    """ Model version tag """
+    """Model version tag
+
+        Parameters
+        ----------
+        key : str
+            Tag name
+
+        value : str
+            Tag value
+
+        Attributes
+        ----------
+        key : str
+            Tag name
+
+        value : str
+            Tag value
+
+        Examples
+        --------
+        .. code:: python
+
+            tag = ModelVersionTag('some.tag', 'some.val')
+    """
     pass
 
 
 class ModelVersionList(SearchableList):
+    """
+        List of :obj:`ModelVersion` with extended functions
+
+        Parameters
+        ----------
+        iterable : Iterable
+            Any iterable
+
+        Examples
+        --------
+        .. code:: python
+
+            name = 'some_metric'
+            item = ModelVersion(name)
+
+            simple_list = [item]
+            this_list = ModelVersion.from_list([item]) # or ModelVersionList([item])
+
+            assert item in simple_list
+            assert item in this_list
+
+            assert name not in simple_list
+            assert name in this_list
+            assert this_list[name] == item
+
+            assert ModelVersionStage.test not in simple_list
+            assert ModelVersionStage.prod in this_list
+            assert this_list[ModelVersionStage.prod] == item
+    """
+
     def __contains__(self, item):
         for it in self:
             try:
@@ -113,75 +195,108 @@ class ModelVersionList(SearchableList):
 
 
 class ModelTag(Tag):
-    """ Model tag """
+    """Model tag
+
+        Parameters
+        ----------
+        key : str
+            Tag name
+
+        value : str
+            Tag value
+
+        Attributes
+        ----------
+        key : str
+            Tag name
+
+        value : str
+            Tag value
+
+        Examples
+        --------
+        .. code:: python
+
+            tag = ModelTag('some.tag', 'some.val')
+    """
     pass
 
 
 class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
-    """ Model version
+    """ Model version representation
 
-        :param name: Model name
-        :type name: str
+        Parameters
+        ----------
+        name : str
+            Model name
 
-        :ivar name: Model name
-        :vartype name: str
+        version : int
+            Version number
 
-        :param version: Version number
-        :type version: int
+        creation_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Version creation timestamp
 
-        :ivar version: Version number
-        :vartype version: int
+        last_updated_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Version last update timestamp
 
-        :param creation_timestamp: Version creation timestamp
-        :type creation_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        stage : :obj:`str` or :obj:`ModelVersionStage`, optional
+            Version stage
 
-        :ivar creation_timestamp: Version creation timestamp
-        :vartype creation_timestamp: :obj:`datetime.datetime`
+        description : str, optional
+            Version description
 
-        :param last_updated_timestamp: Version last update timestamp
-        :type last_updated_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        source : str, optional
+            Version source path
 
-        :ivar last_updated_timestamp: Version last update timestamp
-        :vartype last_updated_timestamp: :obj:`datetime.datetime`
+        run_id : str, optional
+            Run ID used for generating version
 
-        :param stage: Version stage
-        :type stage: str, optional
+        state : :obj:`str` or :obj:`ModelVersionState`, optional
+            Version stage
 
-        :ivar stage:  Version stage
-        :vartype stage: :obj:`ModelVersionStage`
+        state_message : str, optional
+            Version state message
 
-        :param description: Version description
-        :type description: str, optional
+        tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Experiment tags list
 
-        :ivar description:  Version description
-        :vartype description: str
+        Attributes
+        ----------
+        name : str
+            Model name
 
-        :param source: Version source path
-        :type source: str, optional
+        version : int
+            Version number
 
-        :ivar source: Version source path
-        :vartype source: str
+        created_time : :obj:`datetime.datetime`
+            Version creation timestamp
 
-        :param run_id: Run ID used for generating version
-        :type run_id: str, optional
+        updated_time : :obj:`datetime.datetime`
+            Version last update timestamp
 
-        :ivar run_id: Run ID used for generating version
-        :vartype run_id: str
+        stage : :obj:`ModelVersionStage`
+            Version stage
 
-        :param state: Version state
-        :type state: str, optional
+        description : str
+            Version description
 
-        :param state_message: Version stage message
-        :type state_message: str, optional
+        source : str
+            Version source path
 
-        :ivar status: Version status
-        :vartype status: :obj:`ModelVersionStatus`
+        run_id : str
+            Run ID used for generating version
 
-        :param tags: Tags list
-        :type tags: :obj:`list` of :obj:`dict`, optional
+        status : :obj:`ModelVersionStatus`
+            Version status
 
-        :ivar tags: Tags list
-        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
+        tags : :obj:`ModelVersionTagList`
+            Experiment tags list
+
+        Examples
+        --------
+        .. code:: python
+
+            model_version = ModelVersion(name='some_model', version=1)
     """
 
     list_class = ModelVersionList
@@ -201,19 +316,38 @@ class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
         tags=None
     ):
         self.name = str(name)
+        """Model name"""
+
         self.version = int(version)
+        """Version number"""
+
         self.created_time = timestamp_2_time(creation_timestamp)
+        """Version creation timestamp"""
+
         self.updated_time = timestamp_2_time(last_updated_timestamp)
+        """Version last update timestamp"""
 
         if stage is None:
             stage = ModelVersionStage.unknown
         self.stage = ModelVersionStage(stage)
+        """Version stage"""
+
 
         self.description = str(description) if description else ''
+        """Version description"""
+
         self.source = str(source) if source else ''
+        """Version source path"""
+
         self.run_id = str(run_id) if run_id else None
+        """Run ID used for generating version"""
+
         self.status = ModelVersionStatus(state, state_message)
+        """Version status"""
+
         self.tags = ModelVersionTag.from_list(tags or [])
+        """Version tags list"""
+
 
 
     @classmethod
@@ -243,43 +377,55 @@ class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
 
 
 class Model(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
-    """ Model
+    """ Model representation
 
-        :param name: Model name
-        :type name: str
+        Parameters
+        ----------
+        name : str
+            Model name
 
-        :ivar name: Model name
-        :vartype name: str
+        creation_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Model creation timestamp
 
-        :param creation_timestamp: Model creation timestamp
-        :type creation_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        last_updated_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Model last update timestamp
 
-        :ivar creation_timestamp: Model creation timestamp
-        :vartype creation_timestamp: :obj:`datetime.datetime`
+        description : str, optional
+            Model description
 
-        :param last_updated_timestamp: Model last update timestamp
-        :type last_updated_timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        versions: :obj:`list` of :obj:`ModelVersion` or :obj:`list` of :obj:`dict`, optional
+            Model latest versions
 
-        :ivar last_updated_timestamp: Model last update timestamp
-        :vartype last_updated_timestamp: :obj:`datetime.datetime`
+        tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Model tags list
 
-        :param description: Model description
-        :type description: str, optional
+        Attributes
+        ----------
+        name : str
+            Model name
 
-        :ivar description: Model description
-        :vartype description: str
+        created_time : :obj:`datetime.datetime`
+            Model creation timestamp
 
-        :param versions: Model latest versions
-        :type versions: :obj:`list` of :obj:`ModelVersion`, optional
+        updated_time : :obj:`datetime.datetime`
+            Model last update timestamp
 
-        :ivar versions: Model latest versions
-        :vartype versions: :obj:`dict` of :obj:`ModelVersionStage`::obj:`ModelVersion`, optional
+        description : str
+            Model description
 
-        :param tags: Tags list
-        :type tags: :obj:`list` of :obj:`ModelTag`, optional
+        versions: :obj:`ModelVersionList`
+            Model latest versions
 
-        :ivar tags: Tags list
-        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelTag`, optional
+        tags : :obj:`ModelTagList`
+            Model tags list
+
+        Examples
+        --------
+        .. code:: python
+
+            model = Model(name='some_model')
+
+            model = Model(name='some_model', versions=[ModelVersion('some_model', 1)])
     """
 
     def __init__(self, name, creation_timestamp=None, last_updated_timestamp=None, description=None, versions=None, tags=None):

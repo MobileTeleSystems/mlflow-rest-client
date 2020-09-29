@@ -7,58 +7,81 @@ class ExperimentStage(Enum):
     """ Experiment stage """
 
     active = 'active'
+    """ Experiment is active """
+
     deleted = 'deleted'
+    """ Experiment was deleted"""
 
 class ExperimentTag(Tag):
-    """ Experiment tag
+    """Experiment tag
 
-        :param key: Tag name
-        :type key: str
+        Parameters
+        ----------
+        key : str
+            Tag name
 
-        :ivar name: Tag name
-        :vartype name: str
+        value : str
+            Tag value
 
-        :param value: Tag value
-        :type value: str
+        Attributes
+        ----------
+        key : str
+            Tag name
 
-        :ivar value: Tag value
-        :vartype value: str
+        value : str
+            Tag value
+
+        Examples
+        --------
+        .. code:: python
+
+            tag = ExperimentTag('some.tag', 'some.val')
     """
     pass
 
 
 class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
-    """ Experiment
+    """Experiment representation
 
-        :param id: Experiment ID
-        :type id: int
+        Parameters
+        ----------
+        id : int
+            Experiment ID
 
-        :ivar id: Experiment ID
-        :vartype id: int
+        name : str
+            Experiment name
 
-        :param name: Experiment name
-        :type name: str
+        artifact_location : str, optional
+            Experiment artifact location
 
-        :ivar name: Experiment name
-        :vartype name: str
+        stage : :obj:`str` or :obj:`ExperimentStage`, optional
+            Experiment stage
 
-        :param artifact_location: Experiment artifact location
-        :type artifact_location: str, optional
+        tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Experiment tags list
 
-        :ivar artifact_location: Experiment artifact location
-        :vartype artifact_location: str
+        Attributes
+        ----------
+        id : int
+            Experiment ID
 
-        :param stage: Experiment stage
-        :type stage: str, optional
+        name : str
+            Experiment name
 
-        :ivar stage: Experiment stage
-        :vartype stage: :obj:`ExperimentStage`
+        artifact_location : str
+            Experiment artifact location
 
-        :param tags: Tags list
-        :type tags: :obj:`list` of :obj:`dict`, optional
+        stage : :obj:`ExperimentStage`
+            Experiment stage
 
-        :ivar tags: Tags list
-        :vartype tags: :obj:`dict` of :obj:`str`::obj:`ModelVersionTag`, optional
+        tags : :obj:`ExperimentTagList`
+            Experiment tags list
+
+        Examples
+        --------
+        .. code:: python
+
+            experiment = Experiment(id=123, name='some_name')
     """
 
     def __init__(self, id, name, artifact_location=None, stage=None, tags=None):

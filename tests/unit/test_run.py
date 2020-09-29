@@ -595,16 +595,34 @@ def test_metric_in_by_key():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_metric_get_item_by_key():
+def test_metric_in_by_value():
     key1 = rand_str()
+    key2 = rand_str()
 
-    metric1 = Metric(key1)
+    value1 = rand_float()
+    value2 = rand_float()
+
+    metric1 = Metric(key1, value1)
 
     lst = Metric.from_list([
         metric1
     ])
 
-    assert lst[key1] == metric1
+    assert value1 in lst
+    assert value2 not in lst
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+def test_metric_get_item_by_value():
+    key1 = rand_str()
+    value1 = rand_float()
+    metric1 = Metric(key1, value1)
+
+    lst = Metric.from_list([
+        metric1
+    ])
+
+    assert lst[value1] == metric1
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)

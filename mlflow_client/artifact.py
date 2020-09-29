@@ -3,38 +3,41 @@ import os
 from .internal import Listable, MakeableFromStr, ComparableByStr, HashableByStr
 
 class Artifact(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
-    """ Artifact
+    """Artifact representation
 
-        :param path: Artifact path
-        :type path: str
+        Parameters
+        ----------
+        path : str
+            Artifact path
 
-        :ivar path: Artifact path
-        :vartype path: str
+        root : str
+            Artifact root
 
-        :param root: Artifact root
-        :type root: str, optional
+        is_dir : bool
+            Is artifact a dir
 
-        :ivar root: Artifact root
-        :vartype root: str
+        file_size : int
+            Artifact file size in bytes
 
-        :param is_dir: Is artifact a dir
-        :type is_dir: bool, optional
+        Examples
+        --------
+        .. code:: python
 
-        :ivar is_dir: If `True`, artifact is dir
-        :vartype is_dir: bool
-
-        :param file_size: Artifact file size in bytes
-        :type file_size: int, optional
-
-        :ivar file_size: Artifact file size in bytes
-        :vartype file_size: int
+            artifact = Artifact(path='some/path')
     """
 
     def __init__(self, path, root=None, is_dir=False, file_size=None):
         self.path = str(path)
+        """Artifact path"""
+
         self.root = str(root) if root else None
+        """Artifact root"""
+
         self.is_dir = bool(is_dir)
+        """If `True`, artifact is dir"""
+
         self.file_size = int(file_size) if file_size else 0
+        """Artifact file size in bytes"""
 
 
     @classmethod

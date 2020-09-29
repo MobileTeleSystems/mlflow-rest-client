@@ -225,7 +225,7 @@ node('bdbuilder04') {
                             if (isDev || isRelease) {
                                 //Build wheels for each version
                                 pythonVersions.each{ def pythonVersion ->
-                                    def testTagVersioned = "${testTag}-python${pythonVersion}-${env.BUILD_TAG}"
+                                    def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
 
                                     docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
                                         ansiColor('xterm') {

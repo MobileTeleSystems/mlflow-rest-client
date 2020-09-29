@@ -9,7 +9,7 @@ from .internal import \
     Listable, \
     Comparable, \
     ComparableByStr, \
-    MakeableFromTuple, \
+    MakeableFromTupleStr, \
     MakeableFromStr, \
     HashableByStr
 
@@ -17,71 +17,98 @@ class RunStage(Enum):
     """ Run stage """
 
     active = 'active'
+    """ Run is active """
+
     deleted = 'deleted'
+    """ Run was deleted """
 
 
 class RunStatus(Enum):
     """ Run status """
 
     started = 'RUNNING'
+    """ Run is running or created """
+
     scheduled = 'SCHEDULED'
+    """ Run is scheduled for run """
+
     finished = 'FINISHED'
+    """ Run was finished successfully """
+
     failed = 'FAILED'
+    """ Run is failed """
+
     killed = 'KILLED'
+    """ Run was killed """
 
 
 class RunViewType(Enum):
     """ Run view type """
 
     active = 'ACTIVE_ONLY'
+    """ Show only active runs """
+
     deleted = 'DELETED_ONLY'
+    """ Show only deleted runs """
+
     all = 'ALL'
+    """ Show all runs """
 
 
 class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
-    """ Run information
+    """ Run information representation
 
-        :param id: Run ID
-        :type id: str
+        Parameters
+        ----------
+        id : str
+            Run ID
 
-        :ivar id: Run ID
-        :vartype id: str
+        experiment_id : int, optional
+            Experiment ID
 
-        :param experiment_id: Experiment ID
-        :type experiment_id: int
+        status : :obj:`str` or :obj:`RunStatus`, optional
+            Run status
 
-        :ivar experiment_id: Experiment ID
-        :vartype experiment_id: int
+        stage : :obj:`str` or :obj:`RunStage`, optional
+            Run stage
 
-        :param status: Run status
-        :type status: str, optional
+        start_time : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Run start time
 
-        :ivar status: Run status
-        :vartype status: :obj:`RunStatus`
+        end_time : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Run end time
 
-        :param stage: Run stage
-        :type stage: str, optional
+        artifact_uri : str, optional
+            Artifact URL
 
-        :ivar stage: Run stage
-        :vartype stage: :obj:`RunStage`
+        Attributes
+        ----------
+        id : :str
+            Run ID
 
-        :param start_time: Run start time
-        :type start_time: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        experiment_id : int
+            Experiment ID
 
-        :ivar start_time: Run start time
-        :vartype start_time: :obj:`datetime.datetime`
+        status : :obj:`RunStatus`
+            Run status
 
-        :param end_time: Run end time
-        :type end_time: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        stage : :obj:`RunStage`
+            Run stage
 
-        :ivar end_time: Run end time
-        :vartype end_time: :obj:`datetime.datetime`
+        start_time : :obj:`datetime.datetime`
+            Run start time
 
-        :param artifact_uri: Artifact URL
-        :type artifact_uri: str, optional
+        end_time : :obj:`datetime.datetime`
+            Run end time
 
-        :ivar artifact_uri: Artifact URL
-        :vartype artifact_uri: str
+        artifact_uri : str
+            Artifact URL
+
+        Examples
+        --------
+        .. code:: python
+
+            run_info = RunInfo('some_id')
     """
 
     def __init__(
@@ -133,78 +160,120 @@ class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
 
 
 class Param(Tag):
-    """ Run param
+    """ Run parameter
 
-        :param key: Param name
-        :type key: str
+        Parameters
+        ----------
+        key : str
+            Param name
 
-        :ivar name: Param name
-        :vartype name: str
+        value : str
+            Param value
 
-        :param value: Param value
-        :type value: str
+        Attributes
+        ----------
+        key : str
+            Param name
 
-        :ivar value: Param value
-        :vartype value: str
+        value : str
+            Param value
     """
     pass
 
 
 class MetricList(SearchableList):
+    """
+        List of :obj:`Metric` with extended functions
+
+        Parameters
+        ----------
+        iterable : Iterable
+            Any iterable
+
+        Examples
+        --------
+        .. code:: python
+
+            name = 'some_metric'
+            value = 1.23
+            item = Metric(name, value)
+
+            simple_list = [item]
+            this_list = Metric.from_list([item]) # or MetricList([item])
+
+            assert item in simple_list
+            assert item in this_list
+
+            assert name not in simple_list
+            assert name in this_list
+            assert this_list[name] == item
+
+            assert value not in simple_list
+            assert value in this_list
+            assert this_list[value] == item
+    """
+
     def __contains__(self, item):
         for it in self:
-            try:
-                if isinstance(it, Metric):
-                    if isinstance(item, Metric) and it == item:
-                        return True
-                    if isinstance(item, six.string_types) and it.key == item:
-                        return True
-            except Exception:
-                pass
+            if isinstance(it, Metric):
+                if isinstance(item, six.string_types) and it.key == item:
+                    return True
+                if isinstance(item, float) and it.value == item:
+                    return True
 
         return super(MetricList, self).__contains__(item)
 
 
     def __getitem__(self, item):
         for it in self:
-            try:
-                if isinstance(it, Metric):
-                    if isinstance(item, Metric) and it == item:
-                        return it
-                    if isinstance(item, six.string_types) and it.key == item:
-                        return it
-            except Exception:
-                pass
+            if isinstance(it, Metric):
+                if isinstance(item, six.string_types) and it.key == item:
+                    return it
+                if isinstance(item, float) and it.value == item:
+                    return it
 
         return super(MetricList, self).__getitem__(item)
 
 
-class Metric(Listable, MakeableFromTuple, MakeableFromStr, ComparableByStr, HashableByStr):
-    """ Run metric
+class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
+    """ Run metric representation
 
-        :param key: Metric name
-        :type key: str
+        Parameters
+        ----------
+        name : str
+            Metric name
 
-        :ivar key: Metric name
-        :vartype key: str
+        value : float, optional
+            Metric value
 
-        :param value: Metric value
-        :type value: float
+        step : int, optional
+            Metric step
 
-        :ivar value: Metric value
-        :vartype value: float
+        timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+            Metric timestamp
 
-        :param timestamp: Metric timestamp
-        :type timestamp: :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
+        Attributes
+        ----------
+        name : str
+            Metric name
 
-        :ivar timestamp: Metric timestamp
-        :vartype timestamp: :obj:`datetime.datetime`
+        value : float
+            Metric value
 
-        :param step: Metric step
-        :type step: int, optional
+        step : int
+            Metric step
 
-        :ivar step: Metric step
-        :vartype step: int
+        timestamp : :obj:`datetime.datetime`
+            Metric timestamp
+
+        Examples
+        --------
+        .. code:: python
+
+            metric = Metric(name='some.metric')
+            metric = Metric(name='some.metric', value=1.23)
+            metric = Metric(name='some.metric', value=1.23, step=2)
+            metric = Metric(name='some.metric', value=1.23, step=2, timestamp=datetime.datetime.now())
     """
 
     list_class = MetricList
@@ -238,41 +307,65 @@ class Metric(Listable, MakeableFromTuple, MakeableFromStr, ComparableByStr, Hash
 class RunTag(Tag):
     """ Run tag
 
-        :param key: Tag name
-        :type key: str
+        Parameters
+        ----------
+        key : str
+            Tag name
 
-        :ivar name: Tag name
-        :vartype name: str
+        value : str
+            Tag value
 
-        :param value: Tag value
-        :type value: str
+        Attributes
+        ----------
+        key : str
+            Tag name
 
-        :ivar value: Tag value
-        :vartype value: str
+        value : str
+            Tag value
+
+        Examples
+        --------
+        .. code:: python
+
+            tag = RunTag('some.tag', 'some.val')
     """
     pass
 
 
 class RunData(Listable, Comparable):
-    """ Run params, metrics and tags
+    """ Run data representation
 
-        :param params: Params list
-        :type params: :obj:`list` of :obj:`dict`, optional
+        Parameters
+        ----------
+        params : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Params list
 
-        :ivar params: Params list
-        :vartype params: :obj:`dict` of :obj:`str`::obj:`Param`, optional
+        metrics : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Metrics list
 
-        :param metrics: Metrics list
-        :type metrics: :obj:`list` of :obj:`dict`, optional
+        tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
+            Run tags list
 
-        :ivar metrics: Metrics list
-        :vartype metrics: :obj:`dict` of :obj:`str`::obj:`Metric`, optional
+        Attributes
+        ----------
+        params : :obj:`ParamList`
+            Params list
 
-        :param tags: Tags list
-        :type tags: :obj:`list` of :obj:`dict`, optional
+        metrics : :obj:`MetricList`
+            Metrics list
 
-        :ivar tags: Tags list
-        :vartype tags: :obj:`dict` of :obj:`str`::obj:`RunTag`, optional
+        tags : :obj:`RunTagList`
+            Run tags list
+
+        Examples
+        --------
+        .. code:: python
+
+            param = Param('some.param', 'some_value')
+            metric = Metric('some.metric', value=1.23)
+            tag = RunTag('some.tag', 'some.val')
+
+            run_data = RunData(params=[param], metrics=[metric], tags=[tag])
     """
 
     def __init__(self, params=None, metrics=None, tags=None):
@@ -310,19 +403,32 @@ class RunData(Listable, Comparable):
 
 
 class Run(Listable, ComparableByStr, HashableByStr):
-    """ Run
+    """ Run representation
 
-        :param info: Run info
-        :type info: dict, optional
+        Parameters
+        ----------
+        info : :obj:`dict` or :obj:`RunInfo`
+            Run info
 
-        :ivar info: Run info
-        :vartype info: RunInfo
+        data : :obj:`dict` or :obj:`RunData`, optional
+            Run data
 
-        :param data: Run data
-        :type data: dict, optional
+        Attributes
+        ----------
+        info : :obj:`RunInfo`
+            Run info
 
-        :ivar data: Run data
-        :vartype data: RunData
+        data : :obj:`RunData`
+            Run data
+
+        Examples
+        --------
+        .. code:: python
+
+            run_info = RunInfo('some_id')
+            run_data = RunData(params=..., metrics=..., tags=...)
+
+            run = Run(run_info, run_data)
     """
 
     def __init__(self, info=None, data=None):

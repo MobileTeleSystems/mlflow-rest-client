@@ -58,7 +58,7 @@ class MLflowApiClient(object):
         :type view_type: RunViewType
 
         :returns: Experiments
-        :rtype: :obj:`List` of :obj:`Experiment`
+        :rtype: ExperimentList
         """
         return Experiment.from_list(self._get('experiments/list',
                                                 view_type=view_type.value).get('experiments', []))
@@ -222,9 +222,9 @@ class MLflowApiClient(object):
         :type id: str
 
         :returns: Runs
-        :rtype: :obj:`List` of :obj:`Run`
+        :rtype: RunList
         """
-        return [run for run in self.list_experiment_runs_iterator(id)]
+        return Run.from_list(run for run in self.list_experiment_runs_iterator(id))
 
 
     def list_experiment_runs_iterator(self, id):
@@ -656,7 +656,7 @@ class MLflowApiClient(object):
         :type key: str
 
         :returns: Metrics
-        :rtype: :obj:`List` of :obj:`Metric`
+        :rtype: MetricList
         """
         return Metric.from_list(self._get('metrics/get-history', run_id=id, metric_key=key)['metrics'])
 
@@ -742,7 +742,7 @@ class MLflowApiClient(object):
         :type query: str
 
         :param experiment_ids: Experiment IDS
-        :type experiment_ids: :obj:`List` of int
+        :type experiment_ids: :obj:`list` of int
 
         :param run_view_type: View type
         :type run_view_type: RunViewType
@@ -759,7 +759,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Runs
+        :param version: Runs page
         :type version: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.run.Run`
         """
 
@@ -810,8 +810,8 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Runs
-        :type version: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.run.Run`
+        :param version: Runs iterator
+        :type version: :obj:`Iterator` of :obj:`mlflow_client.run.Run`
         """
 
         page = self.search_runs(
@@ -1000,7 +1000,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :returns: Models
+        :returns: Models page
         :rtype: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
         """
         params = {}
@@ -1022,7 +1022,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :returns: Model
+        :returns: Models iterator
         :rtype: :obj:`Iterator` of :obj:`mlflow_client.model.Model`
         """
         page = self.list_models(max_results=max_results, page_token=page_token)
@@ -1057,7 +1057,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Models
+        :param version: Models page
         :type version: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
         """
         params = {
@@ -1097,7 +1097,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Models
+        :param version: Models iterator
         :type version: :obj:`Iterator` of :obj:`mlflow_client.model.Model`
         """
 
@@ -1161,7 +1161,7 @@ class MLflowApiClient(object):
         :type stages: :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
 
         :returns: Model versions
-        :rtype: List[ModelVersion]
+        :rtype: ModelVersionList
         """
         params = {}
         if stages:
@@ -1345,8 +1345,8 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Model versions
-        :type version: List[ModelVersion]
+        :param version: Model versions page
+        :type version: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.ModelVersion`
         """
         params = {
             'filter': query
@@ -1384,7 +1384,7 @@ class MLflowApiClient(object):
         :param page_token: Previous page token
         :type page_token: str, optional
 
-        :param version: Model versions
+        :param version: Model version iterator
         :type version: Iterator[ModelVersion]
         """
         page = self.search_model_versions(
