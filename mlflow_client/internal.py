@@ -1,7 +1,8 @@
-import six
-import sys
+import syslog
 
 from textwrap import dedent
+
+import six
 
 
 class SearchableList(list):
@@ -56,7 +57,7 @@ class Makeable(object):
 
         try:
             return cls.from_dict(vars(inp), **kwargs)
-        except TypeError as e:
+        except TypeError:
             return None
 
 
