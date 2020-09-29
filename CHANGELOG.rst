@@ -6,6 +6,7 @@ Changelog
 
 .. changelog::
    :version: 1.1.0
+   :released: 29.09.2020 16:29
 
    .. change::
       :tags: refactor
@@ -51,21 +52,6 @@ Changelog
 
 1.0
 --------------------
-
-.. changelog::
-   :version: 1.0.9
-
-   .. change::
-      :tags: refactor
-      :tickets: DSX-46
-
-      Fix some code smells
-
-   .. change::
-      :tags: tests
-      :tickets: DSX-46
-
-      Add unit tests
 
 .. changelog::
    :version: 1.0.8
