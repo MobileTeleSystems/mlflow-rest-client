@@ -143,7 +143,7 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-changelog_sections = ["general", "client", "artifact", "experiment", "model", "page", "run", "tag", "docs", "samples", "ci", "tests"]
+changelog_sections = ["general", "client", "artifact", "experiment", "model", "page", "run", "tag", "dependency", "docs", "samples", "ci", "tests"]
 
 changelog_inner_tag_sort = ["breaking", "deprecated", "feature", "bug", "refactor"]
 
