@@ -278,7 +278,9 @@ def test_experiment_in_by_name():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_experiment_get_item_by_name():
     id1 = rand_int()
+
     name1 = rand_str()
+    name2 = rand_str()
 
     experiment1 = Experiment(id1, name1)
 
@@ -287,3 +289,6 @@ def test_experiment_get_item_by_name():
     ])
 
     assert lst[name1] == experiment1
+
+    with pytest.raises(KeyError):
+        lst[name2]

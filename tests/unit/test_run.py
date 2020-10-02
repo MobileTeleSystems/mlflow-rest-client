@@ -357,6 +357,7 @@ def test_run_info_in_by_id():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_get_item_by_id():
     id1 = rand_str()
+    id2 = rand_str()
 
     run1 = RunInfo(id1)
 
@@ -365,6 +366,9 @@ def test_run_info_get_item_by_id():
     ])
 
     assert lst[id1] == run1
+
+    with pytest.raises(KeyError):
+        lst[id2]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -597,7 +601,6 @@ def test_metric_in_by_key():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_in_by_value():
     key1 = rand_str()
-    key2 = rand_str()
 
     value1 = rand_float()
     value2 = rand_float()
@@ -613,9 +616,30 @@ def test_metric_in_by_value():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
+def test_metric_get_item_by_key():
+    key1 = rand_str()
+    key2 = rand_str()
+
+    metric1 = Metric(key1)
+
+    lst = Metric.from_list([
+        metric1
+    ])
+
+    assert lst[key1] == metric1
+
+    with pytest.raises(KeyError):
+        lst[key2]
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_get_item_by_value():
     key1 = rand_str()
+    key2 = rand_str()
+
     value1 = rand_float()
+    value2 = rand_float()
+
     metric1 = Metric(key1, value1)
 
     lst = Metric.from_list([
@@ -623,6 +647,9 @@ def test_metric_get_item_by_value():
     ])
 
     assert lst[value1] == metric1
+
+    with pytest.raises(KeyError):
+        lst[value2]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -967,6 +994,7 @@ def test_run_in_by_id():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_get_item_by_id():
     id1 = rand_str()
+    id2 = rand_str()
 
     run_info1 = RunInfo(id1)
 
@@ -977,3 +1005,6 @@ def test_run_get_item_by_id():
     ])
 
     assert lst[id1] == run1
+
+    with pytest.raises(KeyError):
+        lst[id2]

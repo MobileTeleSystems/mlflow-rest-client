@@ -13,6 +13,9 @@ class SearchableList(list):
             if isinstance(it, self._compare_with_class) and it == item:
                 return True
 
+        if not isinstance(item, int):
+            return False
+
         return super(SearchableList, self).__contains__(item)
 
 
@@ -20,6 +23,13 @@ class SearchableList(list):
         for it in self:
             if isinstance(it, self._compare_with_class) and it == item:
                 return it
+
+        if not isinstance(item, int):
+            raise KeyError('{klass.__name__} not found in list by {item.__class__.__name__} {item}'.format(
+                    klass=self._compare_with_class,
+                    item=item
+                ))
+
         return super(SearchableList, self).__getitem__(item)
 
 

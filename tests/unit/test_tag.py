@@ -131,6 +131,7 @@ def test_tag_list_in_by_key():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_tag_list_get_item_by_key():
     key1 = rand_str()
+    key2 = rand_str()
 
     value1 = rand_str()
 
@@ -141,3 +142,6 @@ def test_tag_list_get_item_by_key():
     ])
 
     assert lst[key1] == tag1
+
+    with pytest.raises(KeyError):
+        lst[key2]
