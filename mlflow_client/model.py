@@ -177,6 +177,9 @@ class ModelVersionList(SearchableList):
             except Exception:
                 pass
 
+        if isinstance(item, ModelVersionStage):
+            return False
+
         return super(ModelVersionList, self).__contains__(item)
 
 
@@ -190,6 +193,9 @@ class ModelVersionList(SearchableList):
                         return it
             except Exception:
                 pass
+
+        if isinstance(item, ModelVersionStage):
+            raise KeyError('ModelVersion with stage {stage} not found'.format(stage=item))
 
         return super(ModelVersionList, self).__getitem__(item)
 

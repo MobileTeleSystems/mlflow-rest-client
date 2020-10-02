@@ -318,6 +318,7 @@ def test_artifact_in_by_path_with_root():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_artifact_get_item_by_path():
     path1 = rand_str()
+    path2 = rand_str()
 
     artifact1 = Artifact(path1)
 
@@ -327,12 +328,17 @@ def test_artifact_get_item_by_path():
 
     assert lst[path1] == artifact1
 
+    with pytest.raises(KeyError):
+        lst[path2]
+
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_artifact_get_item_by_path_with_root():
     path1 = rand_str()
+    path2 = rand_str()
 
     root1 = rand_str()
+    root2 = rand_str()
 
     artifact1 = Artifact(path1, root=root1)
 
@@ -341,3 +347,12 @@ def test_artifact_get_item_by_path_with_root():
     ])
 
     assert lst['{}/{}'.format(root1, path1)] == artifact1
+
+    with pytest.raises(KeyError):
+        lst['{}/{}'.format(root1, path2)]
+
+    with pytest.raises(KeyError):
+        lst['{}/{}'.format(root2, path1)]
+
+    with pytest.raises(KeyError):
+        lst['{}/{}'.format(root2, path2)]

@@ -506,11 +506,47 @@ def test_model_version_in_by_stage(stage, other_stage):
     ])
 
     assert stage in lst
+
+    if other_stage != stage:
+        assert other_stage not in lst
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+@pytest.mark.parametrize(
+    'stage', [
+        ModelVersionStage.unknown,
+        ModelVersionStage.prod,
+        ModelVersionStage.test,
+        ModelVersionStage.archived
+    ]
+)
+@pytest.mark.parametrize(
+    'other_stage', [
+        ModelVersionStage.unknown,
+        ModelVersionStage.prod,
+        ModelVersionStage.test,
+        ModelVersionStage.archived
+    ]
+)
+def test_model_version_get_item_by_stage(stage, other_stage):
+    name1 = rand_str()
+
+    version1 = rand_int()
+
+    model1 = ModelVersion(name1, version1, stage=stage)
+
+    lst = ModelVersion.from_list([
+        model1
+    ])
+
     assert lst[stage].version == version1
     assert lst[stage].stage == stage
 
-    if stage != other_stage:
+    if other_stage != stage:
         assert other_stage not in lst
+
+        with pytest.raises(KeyError):
+            lst[other_stage]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -759,9 +795,9 @@ def test_model_in():
     model1 = Model(name1)
     model2 = Model(name2)
 
-    lst = [
+    lst = Model.from_list([
         model1
-    ]
+    ])
 
     assert model1 in lst
     assert model2 not in lst
@@ -774,9 +810,26 @@ def test_model_in_by_name():
 
     model1 = Model(name1)
 
-    lst = [
+    lst = Model.from_list([
         model1
-    ]
+    ])
 
     assert name1 in lst
     assert name2 not in lst
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+def test_model_get_item_by_name():
+    name1 = rand_str()
+    name2 = rand_str()
+
+    model1 = Model(name1)
+
+    lst = Model.from_list([
+        model1
+    ])
+
+    assert lst[name1] == model1
+
+    with pytest.raises(KeyError):
+        lst[name2]

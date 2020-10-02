@@ -13,6 +13,12 @@ Changelog
 
       Don't hard code dependency versions
 
+   .. change::
+      :tags: model
+      :tickets: DSX-45
+
+      Fix error with accessing model list by stage
+
 .. changelog::
    :version: 1.1.1
    :released: 29.09.2020 18:08
