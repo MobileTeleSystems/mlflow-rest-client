@@ -5,6 +5,15 @@ Changelog
 --------------------
 
 .. changelog::
+   :version: 1.1.2
+
+   .. change::
+      :tags: dependency
+      :tickets: DSX-45
+
+      Don't hard code dependency versions
+
+.. changelog::
    :version: 1.1.1
    :released: 29.09.2020 18:08
 
