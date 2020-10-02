@@ -6,6 +6,7 @@ Changelog
 
 .. changelog::
    :version: 1.1.2
+   :released: 02.10.2020 19:06
 
    .. change::
       :tags: dependency
