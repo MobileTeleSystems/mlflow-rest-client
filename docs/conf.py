@@ -166,7 +166,7 @@ versions.extend([(tag, "/{}/".format(tag)) for tag in tags])
 tag = get_tag()
 tag_sha = get_sha(tag)
 head_sha = get_sha('HEAD')
-on_tag = tag and head_sha == tag_sha
+on_tag = tag and head_sha is not None and head_sha == tag_sha
 
 context = {
     'current_version': release,
@@ -182,7 +182,7 @@ context = {
     'gitlab_version': version if on_tag else 'master',
     'conf_py_path': '/docs/',
     'display_gitlab': True,
-    'commit': head_sha[:8]
+    'commit': head_sha[:8] if head_sha is not None else None
 }
 
 if 'html_context' in globals():
