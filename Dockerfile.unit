@@ -15,7 +15,7 @@ ENV PYTHONPATH "/app:$PYTHONPATH"
 ENV PATH /app:$PATH
 
 COPY mlflow_client/ /app/mlflow_client/
-COPY unit-tests.sh coverage.sh __init__.py /app/
+COPY unit-tests.sh coverage.sh pytest_runner.sh /app/
 COPY tests/__init__.py /app/tests/
 COPY tests/unit /app/tests/unit
 
