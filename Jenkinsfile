@@ -19,6 +19,7 @@ Boolean isRelease = false
 String testTag
 String prodTag
 String version
+String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
@@ -52,7 +53,8 @@ node('bdbuilder04') {
             isMaster  = git_branch == 'master'
             isDev     = git_branch == 'dev'
             isRelease = isMaster && git_tag
-            version   = git_tag ? git_tag.replace('v', '') : null
+            version = git_tag ? git_tag.replace('v', '') : null
+            docker_version = version ? version.replace('.dev', '-dev') : null
 
             testTag = isMaster ? 'test' : 'dev-test'
             prodTag = isMaster ? 'latest' : 'dev'
@@ -105,6 +107,14 @@ node('bdbuilder04') {
                                 }
                             }
                         }
+                    }
+
+                    docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
+                        try {
+                            version = sh script: "python setup.py --version", returnStdout: true
+                            version = version.trim()
+                            docker_version = version ? version.replace('.dev', '-dev') : null
+                        } catch (Exception e) {}
                     }
 
                     stage('Run unit tests') {
@@ -209,10 +219,12 @@ node('bdbuilder04') {
                                             pythonVersions.each{ def pythonVersion ->
                                                 def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
 
-                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .").push()
+                                                def image = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}")
+                                                image.push(testTagVersioned)
                                             }
 
-                                            docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .").push()
+                                            def image = docker.image("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}")
+                                            image.push("${testTag}-${suffix}")
                                         }
                                     }
                                 }
@@ -241,13 +253,6 @@ node('bdbuilder04') {
 
                     stage ('Building documentation') {
                         gitlabCommitStatus('Building documentation') {
-                            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
-                                try {
-                                    version = sh script: "python setup.py --version", returnStdout: true
-                                    version = version.trim()
-                                } catch (Exception e) {}
-                            }
-
                             if (isDev || isRelease) {
                                 docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
                                     ansiColor('xterm') {
@@ -312,8 +317,8 @@ node('bdbuilder04') {
                                             docker.image("${docker_registry}/${docker_image}.nginx:latest").pull()
                                         } catch (Exception e) {}
 
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${version.replace('.dev', '-dev')}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
-                                        docs_image.push()
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        docs_image.push(docker_version)
                                         docs_image.push(prodTag)
                                     }
                                 }
@@ -326,7 +331,7 @@ node('bdbuilder04') {
                             gitlabCommitStatus(name: 'Check ansible pipeline') {
                                 sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
                                 ansiColor('xterm') {
-                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${version.replace('.dev', '-dev')} --syntax-check --list-tasks -vv"
+                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${docker_version} --syntax-check --list-tasks -vv"
                                 }
                             }
                         }
@@ -342,7 +347,7 @@ node('bdbuilder04') {
                                             inventory: '/app/docs/ansible/inventory.ini',
                                             extraVars: [
                                                 target_host: docs_target_host,
-                                                image_version: version.replace('.dev', '-dev')
+                                                image_version: docker_version
                                             ],
                                             extras: '-vv'
                                         )
@@ -382,6 +387,16 @@ node('bdbuilder04') {
                                 docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
                             """
                         }
+                    }
+                }
+            }
+
+            build['nginx'] = {
+                withEnv(["TAG=${docker_version}-${env.BUILD_TAG}"]) {
+                    ansiColor('xterm') {
+                        sh script: """
+                            docker rmi ${docker_registry}/${docker_image}.nginx:\$TAG --no-prune || true
+                        """
                     }
                 }
             }
