@@ -22,12 +22,30 @@ String version
 String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
+Map images = [:]
+Map docs_images = [:]
 
 String docs_target_host = 'nginx'
 
 node('bdbuilder04') {
     try {
-        gitlabBuilds(builds: ["Build test images", "Run unit tests", "Run integration tests", "Check coverage", "Pylint", "Sonar Scan", "Retrieve Sonar Results", "Deploy test images", "Build pip package", "Building documentation", "Publishing package to Artifactory", "Build and push nginx docs images", "Check ansible pipeline", "Deploy documentation"]) {
+        gitlabBuilds(builds: [
+            "Build test images",
+            "Run unit tests",
+            "Run integration tests",
+            "Check coverage",
+            "Pylint",
+            "Sonar Scan",
+            "Retrieve Sonar Results",
+            "Build pip package",
+            "Build documentation",
+            "Build documentation image",
+            "Check ansible pipeline",
+            "Publish images",
+            "Publish package",
+            "Publish documentation",
+            "Deploy documentation"
+        ]) {
             stage('Checkout') {
                 def scmVars = checkout scm
                 git_commit = scmVars.GIT_COMMIT
@@ -77,7 +95,7 @@ node('bdbuilder04') {
                             ]
 
                             withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                pythonVersions.each{ def pythonVersion ->
+                                pythonVersions.each { def pythonVersion ->
                                     ['unit', 'integration'].each { String suffix ->
                                         def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
 
@@ -88,7 +106,7 @@ node('bdbuilder04') {
                                                     cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
                                                 } catch (Exception e) {}
 
-                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                                images[tag_versioned] = docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
                                             }
                                         }
                                     }
@@ -102,7 +120,7 @@ node('bdbuilder04') {
                                             docker.image("${docker_registry}/${docker_image}:${testTag}-${suffix}").pull()
                                         } catch (Exception e) {}
 
-                                        docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
+                                        images["${testTag}-${suffix}"] = docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
                                     }
                                 }
                             }
@@ -122,7 +140,7 @@ node('bdbuilder04') {
                             def build = [
                                 failFast: true
                             ]
-                            pythonVersions.each{ def pythonVersion ->
+                            pythonVersions.each { def pythonVersion ->
                                 build[pythonVersion] = {
                                     withEnv(["TAG=${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"]) {
                                         ansiColor('xterm') {
@@ -143,7 +161,7 @@ node('bdbuilder04') {
                             def build = [
                                 failFast: true
                             ]
-                            pythonVersions.each{ def pythonVersion ->
+                            pythonVersions.each { def pythonVersion ->
                                 build[pythonVersion] = {
                                     withEnv(["TAG=${testTag}-integration-python${pythonVersion}-${env.BUILD_TAG}"]) {
                                         ansiColor('xterm') {
@@ -210,33 +228,11 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage('Deploy test images') {
-                        gitlabCommitStatus('Deploy test images') {
-                            if (isDev || isRelease) {
-                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                    ['unit', 'integration'].each { String suffix ->
-                                        ansiColor('xterm') {
-                                            pythonVersions.each{ def pythonVersion ->
-                                                def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
-
-                                                def image = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}")
-                                                image.push(testTagVersioned)
-                                            }
-
-                                            def image = docker.image("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}")
-                                            image.push("${testTag}-${suffix}")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     stage('Build pip package') {
                         gitlabCommitStatus('Build pip package') {
                             if (isDev || isRelease) {
                                 //Build wheels for each version
-                                pythonVersions.each{ def pythonVersion ->
+                                pythonVersions.each { def pythonVersion ->
                                     def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
 
                                     docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
@@ -251,8 +247,8 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage ('Building documentation') {
-                        gitlabCommitStatus('Building documentation') {
+                    stage ('Build documentation') {
+                        gitlabCommitStatus('Build documentation') {
                             if (isDev || isRelease) {
                                 docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
                                     ansiColor('xterm') {
@@ -272,24 +268,59 @@ node('bdbuilder04') {
                                         }
                                     }
                                 }
-
-                                def uploadSpec = '''{
-                                        "files": [
-                                            {
-                                                "pattern": "docs/html-*.tar.gz",
-                                                "target": "files/mlflow-client-docs/"
-                                            }
-                                        ]
-                                    }'''
-
-                                def buildInfo = server.upload spec: uploadSpec
-                                server.publishBuildInfo buildInfo
                             }
                         }
                     }
 
-                    stage('Publishing package to Artifactory') {
-                        gitlabCommitStatus('Publishing package to Artifactory') {
+                    stage('Build documentation image') {
+                        gitlabCommitStatus('Build documentation image') {
+                            if (isDev || isRelease) {
+                                ansiColor('xterm') {
+                                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                                        try {
+                                            // Fetch cache
+                                            docker.image("${docker_registry}/${docker_image}.nginx:${prodTag}").pull()
+                                        } catch (Exception e) {}
+
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        docs_images[docker_version] = docs_image
+                                        docs_images[prodTag] = docs_image
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
+                        stage ('Check ansible pipeline') {
+                            gitlabCommitStatus('Check ansible pipeline') {
+                                ansiColor('xterm') {
+                                    sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
+                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${docker_version} --syntax-check --list-tasks -vv"
+                                }
+                            }
+                        }
+                    }
+
+                    stage('Publish images') {
+                        gitlabCommitStatus('Publish images') {
+                            if (isDev || isRelease) {
+                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                                    ansiColor('xterm') {
+                                        images.each {def tag, def image ->
+                                            image.push(tag)
+                                        }
+                                        docs_images.each {def tag, def image ->
+                                            image.push(tag)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    stage('Publish package') {
+                        gitlabCommitStatus('Publish package') {
                             if (isDev || isRelease) {
                                 def uploadSpec = '''{
                                         "files": [
@@ -307,39 +338,31 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage('Build and push nginx docs images') {
-                        gitlabCommitStatus('Build and push nginx docs images') {
+                    stage ('Publish documentation') {
+                        gitlabCommitStatus('Publish documentation') {
                             if (isDev || isRelease) {
-                                ansiColor('xterm') {
-                                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        try {
-                                            // Fetch cache
-                                            docker.image("${docker_registry}/${docker_image}.nginx:${prodTag}").pull()
-                                        } catch (Exception e) {}
+                                def uploadSpec = '''{
+                                        "files": [
+                                            {
+                                                "pattern": "docs/html-*.tar.gz",
+                                                "target": "files/mlflow-client-docs/"
+                                            }
+                                        ]
+                                    }'''
 
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
-                                        docs_image.push(docker_version)
-                                        docs_image.push(prodTag)
-                                    }
-                                }
+                                def buildInfo = server.upload spec: uploadSpec
+                                server.publishBuildInfo buildInfo
                             }
                         }
                     }
 
                     docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
-                        stage ('Check ansible pipeline') {
-                            gitlabCommitStatus(name: 'Check ansible pipeline') {
-                                sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
-                                ansiColor('xterm') {
-                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${docker_version} --syntax-check --list-tasks -vv"
-                                }
-                            }
-                        }
-
                         stage ('Deploy documentation') {
-                            gitlabCommitStatus(name: 'Deploy documentation') {
+                            gitlabCommitStatus('Deploy documentation') {
                                 if (isDev || isRelease) {
                                     ansiColor('xterm') {
+                                        sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
+
                                         ansiblePlaybook(
                                             colorized: true,
                                             installation: 'ansible',
@@ -366,7 +389,7 @@ node('bdbuilder04') {
             ]
 
             ['unit', 'integration'].each { String suffix ->
-                pythonVersions.each{ def pythonVersion ->
+                pythonVersions.each { def pythonVersion ->
                     build["${suffix}-${pythonVersion}"] = {
                         withEnv(["TAG=${testTag}-${suffix}-python${pythonVersion}-${env.BUILD_TAG}"]) {
                             ansiColor('xterm') {
@@ -392,12 +415,10 @@ node('bdbuilder04') {
             }
 
             build['nginx'] = {
-                withEnv(["TAG=${docker_version}-${env.BUILD_TAG}"]) {
-                    ansiColor('xterm') {
-                        sh script: """
-                            docker rmi ${docker_registry}/${docker_image}.nginx:\$TAG --no-prune || true
-                        """
-                    }
+                ansiColor('xterm') {
+                    sh script: """
+                        docker rmi ${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG} --no-prune || true
+                    """
                 }
             }
 

@@ -5,6 +5,15 @@ Changelog
 --------------------
 
 .. changelog::
+   :version: 1.1.3
+
+   .. change::
+      :tags: ci
+      :tickets: DSX-53
+
+      Improve Jenkinsfile
+
+.. changelog::
    :version: 1.1.2
    :released: 02.10.2020 19:06
 
