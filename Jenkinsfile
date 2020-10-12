@@ -106,7 +106,7 @@ node('bdbuilder04') {
                                                     cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
                                                 } catch (Exception e) {}
 
-                                                images[tag_versioned] = docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                                images[testTagVersioned] = docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
                                             }
                                         }
                                     }
@@ -230,17 +230,15 @@ node('bdbuilder04') {
 
                     stage('Build pip package') {
                         gitlabCommitStatus('Build pip package') {
-                            if (isDev || isRelease) {
-                                //Build wheels for each version
-                                pythonVersions.each { def pythonVersion ->
-                                    def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
+                            //Build wheels for each version
+                            pythonVersions.each { def pythonVersion ->
+                                def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
 
-                                    docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
-                                        ansiColor('xterm') {
-                                            sh script: """
-                                                python setup.py bdist_wheel sdist
-                                            """
-                                        }
+                                docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
+                                    ansiColor('xterm') {
+                                        sh script: """
+                                            python setup.py bdist_wheel sdist
+                                        """
                                     }
                                 }
                             }
@@ -249,23 +247,21 @@ node('bdbuilder04') {
 
                     stage ('Build documentation') {
                         gitlabCommitStatus('Build documentation') {
-                            if (isDev || isRelease) {
-                                docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
+                            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
+                                ansiColor('xterm') {
+                                    sh script: """
+                                        cd docs
+                                        make html
+                                        tar cvzf html-${version}.tar.gz -C build/html .
+                                    """
+                                }
+
+                                if (isRelease) {
                                     ansiColor('xterm') {
                                         sh script: """
                                             cd docs
-                                            make html
-                                            tar cvzf html-${version}.tar.gz -C build/html .
+                                            cp html-${version}.tar.gz html-latest.tar.gz
                                         """
-                                    }
-
-                                    if (isRelease) {
-                                        ansiColor('xterm') {
-                                            sh script: """
-                                                cd docs
-                                                cp html-${version}.tar.gz html-latest.tar.gz
-                                            """
-                                        }
                                     }
                                 }
                             }
@@ -307,10 +303,10 @@ node('bdbuilder04') {
                             if (isDev || isRelease) {
                                 withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                     ansiColor('xterm') {
-                                        images.each {def tag, def image ->
+                                        images.each { def tag, def image ->
                                             image.push(tag)
                                         }
-                                        docs_images.each {def tag, def image ->
+                                        docs_images.each { def tag, def image ->
                                             image.push(tag)
                                         }
                                     }

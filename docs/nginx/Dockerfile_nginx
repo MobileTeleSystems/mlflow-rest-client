@@ -30,9 +30,12 @@ RUN chmod +x /tmp/replace_versions.py
 ARG VERSION=latest
 ADD http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/html-latest.tar.gz ./
 RUN curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/$REPO" \
-    | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/{} && \
-    find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \; && \
-    rm -f  html-*.tar.gz && \
+    | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/{}
+
+COPY ./docs/*.tar.gz ./
+RUN find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \;
+
+RUN rm -f  html-*.tar.gz && \
     ls .
 
 RUN /tmp/replace_versions.py /var/www/$PROJECT
