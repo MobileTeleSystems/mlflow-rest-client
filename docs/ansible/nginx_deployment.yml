@@ -36,7 +36,6 @@
           - name: "{{ network }}"
         network_mode: "{{ network }}"
         networks_cli_compatible: yes
-        init: true
 
     - name: Restart nginx proxy
       shell: "docker exec {{ proxy_container }} bash -cl 'nginx -s reload'"
