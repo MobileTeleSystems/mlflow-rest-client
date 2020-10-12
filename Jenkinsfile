@@ -23,7 +23,7 @@ String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
-String docs_target_host = 'test_mlflow'
+String docs_target_host = 'nginx'
 
 node('bdbuilder04') {
     try {

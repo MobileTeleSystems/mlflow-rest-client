@@ -1,11 +1,11 @@
-- name: "mlflow-client-docs deployment"
+- name: "documentation deployment"
   hosts: "{{ target_host }}"
   vars_prompt:
     - name: "target_host"
-      prompt: "Enter a target host name or a group name where mlflow-client-docs should be installed"
+      prompt: "Enter a target host name or a group name where documentation should be installed"
       private: no
     - name: "image_version"
-      prompt: "Enter version of mlflow-client-docs to be installed"
+      prompt: "Enter version of documentation to be installed"
 
   tasks:
     - name: "Start docker service"
@@ -22,18 +22,22 @@
 
     - name: "Pull docker image"
       docker_image:
-        name: "{{ mlflow_client_docs_image }}:{{ image_version }}"
+        name: "{{ image }}:{{ image_version }}"
         state: present
         source: pull
         force_source: yes
 
     - name: "Start nginx"
       docker_container:
-        name: "{{ mlflow_client_docs_container }}"
+        name: "{{ container }}"
         state: started
-        image: "{{ mlflow_client_docs_image }}:{{ image_version }}"
+        image: "{{ image }}:{{ image_version }}"
         networks:
-          - name: "{{ mlflow_client_docs_network }}"
-        network_mode: "{{ mlflow_client_docs_network }}"
+          - name: "{{ network }}"
+        network_mode: "{{ network }}"
         networks_cli_compatible: yes
         init: true
+
+    - name: Restart nginx proxy
+      shell: "docker exec {{ proxy_container }} bash -cl 'nginx -s reload'"
+      changed_when: false
