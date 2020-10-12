@@ -314,7 +314,7 @@ node('bdbuilder04') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                         try {
                                             // Fetch cache
-                                            docker.image("${docker_registry}/${docker_image}.nginx:latest").pull()
+                                            docker.image("${docker_registry}/${docker_image}.nginx:${prodTag}").pull()
                                         } catch (Exception e) {}
 
                                         def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")

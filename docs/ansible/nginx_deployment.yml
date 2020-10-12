@@ -34,5 +34,6 @@
         image: "{{ mlflow_client_docs_image }}:{{ image_version }}"
         networks:
           - name: "{{ mlflow_client_docs_network }}"
+        network_mode: "{{ mlflow_client_docs_network }}"
         networks_cli_compatible: yes
         init: true

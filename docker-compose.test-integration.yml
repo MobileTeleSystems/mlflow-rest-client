@@ -11,9 +11,16 @@ services:
       context: .
       dockerfile: Dockerfile.integration
     volumes:
-      - ./mlflow_client:/app/mlflow_client:ro
-      - ./tests/integration:/app/tests/integration:ro
+      - ./mlflow_client:/app/mlflow_client
+      - ./tests/integration:/app/tests/integration
+      - ./pytest.ini:/app/pytest.ini
+      - ./pytest_runner.sh:/app/pytest_runner.sh
       - ./integration-tests.sh:/app/integration-tests.sh:ro
+      - ./docs:/app/docs
+      - ./setup.py:/app/setup.py
+      - ./setup.cfg:/app/setup.cfg
+      - ./README.rst:/app/README.rst
+      - ./MANIFEST.in:/app/MANIFEST.in
     depends_on:
         - "mlflow-test"
     networks:
