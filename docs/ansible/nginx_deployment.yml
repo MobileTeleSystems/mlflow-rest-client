@@ -37,3 +37,13 @@
         network_mode: "{{ mlflow_client_docs_network }}"
         networks_cli_compatible: yes
         init: true
+
+    - name: Add proxy container to inventory
+      add_host:
+        name: nginx-proxy
+        ansible_connection: docker
+      changed_when: false
+
+    - name: Reload proxy configuration
+      delegate_to: nginx-proxy
+      command: nginx -s reload
