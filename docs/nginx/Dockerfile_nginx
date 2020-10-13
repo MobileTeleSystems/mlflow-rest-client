@@ -32,6 +32,7 @@ ADD http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/html-latest.tar.gz ./
 RUN curl -X GET "http://bdreposdev01.msk.mts.ru/artifactory/api/storage/files/$REPO" \
     | jq ".children[].uri" | xargs -I{} curl -L -O http://bdreposdev01.msk.mts.ru/artifactory/files/$REPO/{}
 
+# Comment this line in case of local build
 COPY ./docs/*.tar.gz ./
 RUN find . -name "html-*" -print0 | xargs -0 -n1 -I {} bash -c 'export DIR={}; export VERSION=$(echo $DIR | sed "s/.tar.gz//"| sed "s/html-//"); mkdir -p $VERSION; tar -xf $DIR -C $VERSION' \;
 
