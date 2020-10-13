@@ -391,7 +391,7 @@ node('bdbuilder04') {
                             ansiColor('xterm') {
                                 sh script: """
                                     docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${pythonVersion}" down || true
-                                    docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
+                                    docker rmi ${docker_registry}/${docker_image}:\$TAG || true
                                 """
                             }
                         }
@@ -403,7 +403,7 @@ node('bdbuilder04') {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down || true
-                                docker rmi ${docker_registry}/${docker_image}:\$TAG --no-prune || true
+                                docker rmi ${docker_registry}/${docker_image}:\$TAG || true
                             """
                         }
                     }
@@ -413,7 +413,7 @@ node('bdbuilder04') {
             build['nginx'] = {
                 ansiColor('xterm') {
                     sh script: """
-                        docker rmi ${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG} --no-prune || true
+                        docker rmi ${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG} || true
                     """
                 }
             }
