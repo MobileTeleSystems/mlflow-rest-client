@@ -22,9 +22,8 @@ String version
 String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
-Map images = [:]
-Map docs_images = [:]
 
+Map docs_images = [:]
 String docs_target_host = 'nginx'
 
 node('bdbuilder04') {
@@ -101,12 +100,7 @@ node('bdbuilder04') {
 
                                         build["${pythonVersion}-${suffix}"] = {
                                             ansiColor('xterm') {
-                                                try {
-                                                    // Fetch cache
-                                                    cache = docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").pull()
-                                                } catch (Exception e) {}
-
-                                                images[testTagVersioned] = docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
                                             }
                                         }
                                     }
@@ -115,12 +109,7 @@ node('bdbuilder04') {
 
                                 ['unit', 'integration'].each { String suffix ->
                                     ansiColor('xterm') {
-                                        try {
-                                            // Fetch cache
-                                            docker.image("${docker_registry}/${docker_image}:${testTag}-${suffix}").pull()
-                                        } catch (Exception e) {}
-
-                                        images["${testTag}-${suffix}"] = docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
+                                        docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
                                     }
                                 }
                             }
@@ -273,11 +262,6 @@ node('bdbuilder04') {
                             if (isDev || isRelease) {
                                 ansiColor('xterm') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        try {
-                                            // Fetch cache
-                                            docker.image("${docker_registry}/${docker_image}.nginx:${prodTag}").pull()
-                                        } catch (Exception e) {}
-
                                         def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_images[docker_version] = docs_image
                                         docs_images[prodTag] = docs_image
@@ -303,9 +287,6 @@ node('bdbuilder04') {
                             if (isDev || isRelease) {
                                 withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                     ansiColor('xterm') {
-                                        images.each { def tag, def image ->
-                                            image.push(tag)
-                                        }
                                         docs_images.each { def tag, def image ->
                                             image.push(tag)
                                         }
