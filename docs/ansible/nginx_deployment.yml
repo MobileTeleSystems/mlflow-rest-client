@@ -36,6 +36,7 @@
           - name: "{{ network }}"
         network_mode: "{{ network }}"
         networks_cli_compatible: yes
+        restart_policy: unless-stopped
         init: true
 
     - name: Restart nginx proxy

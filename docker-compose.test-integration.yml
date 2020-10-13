@@ -20,6 +20,7 @@ services:
       - ./setup.py:/app/setup.py
       - ./setup.cfg:/app/setup.cfg
       - ./README.rst:/app/README.rst
+      - ./CHANGELOG.rst:/app/CHANGELOG.rst
       - ./MANIFEST.in:/app/MANIFEST.in
     depends_on:
         - "mlflow-test"
