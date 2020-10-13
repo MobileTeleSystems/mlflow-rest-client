@@ -10,7 +10,7 @@ RUN pip install -U pip --no-cache-dir
 WORKDIR /app
 
 # Ignore cached dependency layer, download new dependencies every time
-ADD http://bdreposdev01.msk.mts.ru/artifactory/files/mlflow-client/empty.txt /tmp/
+ARG CACHEBUST=1
 
 COPY requirements.txt requirements-test.txt /app/
 RUN pip install -r requirements.txt -r requirements-test.txt --no-cache-dir

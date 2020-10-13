@@ -100,7 +100,7 @@ node('bdbuilder04') {
 
                                         build["${pythonVersion}-${suffix}"] = {
                                             ansiColor('xterm') {
-                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                                docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg CACHEBUST=\$(date +%s) --build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
                                             }
                                         }
                                     }
@@ -109,7 +109,7 @@ node('bdbuilder04') {
 
                                 ['unit', 'integration'].each { String suffix ->
                                     ansiColor('xterm') {
-                                        docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
+                                        docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg CACHEBUST=\$(date +%s) --build-arg HTTP_PROXY='${env.HTTP_PROXY}' --build-arg HTTPS_PROXY='${env.HTTPS_PROXY}' --build-arg NO_PROXY='${env.NO_PROXY}' --force-rm -f Dockerfile.${suffix} .")
                                     }
                                 }
                             }
