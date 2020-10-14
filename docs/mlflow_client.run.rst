@@ -2,48 +2,48 @@ Run
 =================================================================
 
 .. autoclass:: mlflow_client.run.RunStage
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunStatus
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunViewType
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunInfo
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunInfoList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.Param
-   :members:
-   :show-inheritance:
+    :members:
+    :show-inheritance:
 
 .. autoclass:: mlflow_client.run.ParamList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.Metric
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.MetricList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunTag
-   :members:
-   :show-inheritance:
+    :members:
+    :show-inheritance:
 
 .. autoclass:: mlflow_client.run.RunTagList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunData
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunDataList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.Run
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.run.RunList
-   :members:
+    :members:

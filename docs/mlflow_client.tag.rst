@@ -2,7 +2,7 @@ Tag
 =================================================================
 
 .. autoclass:: mlflow_client.tag.Tag
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.tag.TagList
-   :members:
+    :members:

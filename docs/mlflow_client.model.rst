@@ -2,36 +2,36 @@ Model
 =================================================================
 
 .. autoclass:: mlflow_client.model.ModelVersionStage
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionState
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionStatus
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelVersion
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionTag
-   :members:
-   :show-inheritance:
+    :members:
+    :show-inheritance:
 
 .. autoclass:: mlflow_client.model.ModelVersionTagList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.Model
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelList
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.model.ModelTag
-   :members:
-   :show-inheritance:
+    :members:
+    :show-inheritance:
 
 .. autoclass:: mlflow_client.model.ModelTagList
-   :members:
+    :members:
