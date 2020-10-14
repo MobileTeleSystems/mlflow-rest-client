@@ -76,6 +76,9 @@ local.properties
 .idea/**/gradle.xml
 .idea/**/libraries
 
+# Visual Studio Code
+.vscode
+
 # CMake
 cmake-build-debug/
 
