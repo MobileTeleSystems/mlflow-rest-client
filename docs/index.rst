@@ -1,47 +1,47 @@
 .. include:: ../README.rst
-   :end-before: documentation
+    :end-before: documentation
 
 .. toctree::
-   :maxdepth: 2
-   :caption: MLFlow Client
-   :name: mlflow_client
-   :hidden:
+    :maxdepth: 2
+    :caption: MLFlow Client
+    :name: mlflow_client
+    :hidden:
 
-   self
-
-.. toctree::
-   :maxdepth: 2
-   :caption: How to
-   :name: howto
-
-   install
-   usage
+    self
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents
-   :name: mastertoc
+    :maxdepth: 2
+    :caption: How to
+    :name: howto
 
-   mlflow_client.client
-   mlflow_client.artifact
-   mlflow_client.experiment
-   mlflow_client.model
-   mlflow_client.page
-   mlflow_client.run
-   mlflow_client.tag
+    install
+    usage
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Changelog
-   :name: changelog
+    :maxdepth: 1
+    :caption: Contents
+    :name: mastertoc
 
-   changelog
+    mlflow_client.client
+    mlflow_client.artifact
+    mlflow_client.experiment
+    mlflow_client.model
+    mlflow_client.page
+    mlflow_client.run
+    mlflow_client.tag
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Links
-   :name: links
+    :maxdepth: 3
+    :caption: Changelog
+    :name: changelog
 
-   references
-   Index <genindex.html#https://>
-   Search page <search.html#https://>
+    changelog
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Links
+    :name: links
+
+    references
+    Index <genindex.html#https://>
+    Search page <search.html#https://>

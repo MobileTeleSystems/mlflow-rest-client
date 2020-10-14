@@ -2,7 +2,7 @@ Artifact
 =================================================================
 
 .. autoclass:: mlflow_client.artifact.Artifact
-   :members:
+    :members:
 
 .. autoclass:: mlflow_client.artifact.ArtifactList
-   :members:
+    :members:
