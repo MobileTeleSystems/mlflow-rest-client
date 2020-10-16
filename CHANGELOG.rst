@@ -13,6 +13,12 @@ Changelog
 
         Improve Jenkinsfile
 
+    .. change::
+        :tags: client, feature
+        :tickets: DSX-25
+
+        Add `list_model_all_versions` and `list_model_all_versions_iterator` methods
+
 .. changelog::
     :version: 1.1.2
     :released: 02.10.2020 19:06

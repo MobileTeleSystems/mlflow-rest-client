@@ -895,27 +895,272 @@ def test_list_model_versions(create_model):
     versions = client.list_model_versions(model.name)
     assert len(versions) == 0
 
-    version = client.create_model_version(model.name)
-    client.test_model_version(model.name, version.version)
+    version1 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version1.version)
 
     versions = client.list_model_versions(model.name)
-    assert version in versions
+    assert version1 in versions
+
+    version2 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version2.version)
+
+    versions = client.list_model_versions(model.name)
+    assert version1 not in versions
+    assert version2 in versions
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+@pytest.mark.parametrize(
+    'stage', [stage for stage in ModelVersionStage]
+)
+def test_list_model_versions_with_stage(create_model, stage):
+    model = create_model
+
+    versions = client.list_model_versions(model.name, stages=stage)
+    assert len(versions) == 0
+
+    version1 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version1.version, stage)
+
+    for _stage in ModelVersionStage:
+        versions = client.list_model_versions(model.name, stages=_stage)
+        if _stage == stage:
+            assert version1 in versions
+        else:
+            assert version1 not in versions
+
+
+    version2 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version2.version, stage)
+
+    for _stage in ModelVersionStage:
+        versions = client.list_model_versions(model.name, stages=_stage)
+        if _stage == stage:
+            assert version1 not in versions
+            assert version2 in versions
+        else:
+            assert version1 not in versions
+            assert version2 not in versions
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_list_model_versions_iterator(create_model):
     model = create_model
 
-    exist = False
-    for version in client.list_model_versions_iterator(model.name):
-        exist = True
-    assert not exist
+    is_empty = True
+    for _version in client.list_model_versions_iterator(model.name):
+        is_empty = False
+    assert is_empty
 
-    version = client.create_model_version(model.name)
-    client.test_model_version(model.name, version.version)
+    version1 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version1.version)
+
+    present1 = False
+    for _version in client.list_model_versions_iterator(model.name):
+        if _version.version == version1.version:
+            present1 = True
+    assert present1
+
+    version2 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version2.version)
+
+    present1 = False
+    present2 = False
 
     for _version in client.list_model_versions_iterator(model.name):
-        assert version == _version
+        if _version.version == version1.version:
+            present1 = True
+        if _version.version == version2.version:
+            present2 = True
+
+    assert not present1
+    assert present2
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+@pytest.mark.parametrize(
+    'stage', [stage for stage in ModelVersionStage]
+)
+def test_list_model_versions_iterator_with_stage(create_model, stage):
+    model = create_model
+
+    is_empty = True
+    for _version in client.list_model_versions_iterator(model.name, stages=stage):
+        is_empty = False
+    assert is_empty
+
+    version1 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version1.version, stage)
+
+    for _stage in ModelVersionStage:
+        present1 = False
+        for _version in client.list_model_versions_iterator(model.name, stages=_stage):
+            if _version.version == version1.version:
+                present1 = True
+
+        if _stage == stage:
+            assert present1
+        else:
+            assert not present1
+
+    version2 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version2.version, stage)
+
+
+    for _stage in ModelVersionStage:
+        present1 = False
+        present2 = False
+
+        for _version in client.list_model_versions_iterator(model.name, stages=_stage):
+            if _version.version == version1.version:
+                present1 = True
+            if _version.version == version2.version:
+                present2 = True
+
+        if _stage == stage:
+            assert not present1
+            assert present2
+        else:
+            assert not present1
+            assert not present2
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+def test_list_model_all_versions(create_model):
+    model = create_model
+
+    versions = client.list_model_all_versions(model.name)
+    assert len(versions) == 0
+
+    version1 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version1.version)
+
+    versions = client.list_model_all_versions(model.name)
+    assert version1 in versions
+
+    version2 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version2.version)
+
+    versions = client.list_model_all_versions(model.name)
+    assert version1 in versions
+    assert version2 in versions
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+def test_list_model_all_versions_iterator(create_model):
+    model = create_model
+
+    is_empty = True
+    for _version in client.list_model_all_versions_iterator(model.name):
+        is_empty = False
+    assert is_empty
+
+    version1 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version1.version)
+
+    present1 = False
+    for _version in client.list_model_all_versions_iterator(model.name):
+        print(_version)
+        if _version.version == version1.version:
+            present1 = True
+    assert present1
+
+    version2 = client.create_model_version(model.name)
+    client.test_model_version(model.name, version2.version)
+
+    present1 = False
+    present2 = False
+
+    for _version in client.list_model_all_versions_iterator(model.name):
+        if _version.version == version1.version:
+            present1 = True
+        if _version.version == version2.version:
+            present2 = True
+
+    assert present1
+    assert present2
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+@pytest.mark.parametrize(
+    'stage', [stage for stage in ModelVersionStage]
+)
+def test_list_model_all_versions_with_stage(create_model, stage):
+    model = create_model
+
+    versions = client.list_model_all_versions(model.name, stages=stage)
+    assert len(versions) == 0
+
+    version1 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version1.version, stage)
+
+    for _stage in ModelVersionStage:
+        versions = client.list_model_all_versions(model.name, stages=_stage)
+        if _stage == stage:
+            assert version1 in versions
+        else:
+            assert version1 not in versions
+
+
+    version2 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version2.version, stage)
+
+    for _stage in ModelVersionStage:
+        versions = client.list_model_all_versions(model.name, stages=_stage)
+        if _stage == stage:
+            assert version1 in versions
+            assert version2 in versions
+        else:
+            assert version1 not in versions
+            assert version2 not in versions
+
+
+@pytest.mark.timeout(DEFAULT_TIMEOUT)
+@pytest.mark.parametrize(
+    'stage', [stage for stage in ModelVersionStage]
+)
+def test_list_model_all_versions_iterator(create_model, stage):
+    model = create_model
+
+    is_empty = True
+    for _version in client.list_model_all_versions_iterator(model.name, stages=stage):
+        is_empty = False
+    assert is_empty
+
+    version1 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version1.version, stage)
+
+    for _stage in ModelVersionStage:
+        present1 = False
+        for _version in client.list_model_all_versions_iterator(model.name, stages=_stage):
+            if _version.version == version1.version:
+                present1 = True
+
+        if _stage == stage:
+            assert present1
+        else:
+            assert not present1
+
+    version2 = client.create_model_version(model.name)
+    client.transition_model_version_stage(model.name, version2.version, stage)
+
+
+    for _stage in ModelVersionStage:
+        present1 = False
+        present2 = False
+
+        for _version in client.list_model_all_versions_iterator(model.name, stages=_stage):
+            if _version.version == version1.version:
+                present1 = True
+            if _version.version == version2.version:
+                present2 = True
+
+        if _stage == stage:
+            assert present1
+            assert present2
+        else:
+            assert not present1
+            assert not present2
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -1071,9 +1316,7 @@ def test_search_model_versions_iterator(create_model_version):
 
     query = "name='{}'".format(version.name)
     exist = False
-    print(version)
     for _version in client.search_model_versions_iterator(query=query):
-        print(_version)
         if _version == version:
             exist = True
     assert exist
