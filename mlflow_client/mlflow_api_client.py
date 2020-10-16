@@ -1740,7 +1740,7 @@ class MLflowApiClient(object):
 
     def list_model_versions(self, name, stages=None):
         """
-        List model versions
+        List model versions (only latest version of each stage)
 
         Parameters
         ----------
@@ -1760,7 +1760,7 @@ class MLflowApiClient(object):
         .. code:: python
 
             model_versions_list = client.list_model_versions('some_model')
-            model_versions_list = client.list_models('some_model', stages=[ModelVersionStage.prod])
+            model_versions_list = client.list_model_versions('some_model', stages=[ModelVersionStage.prod])
         """
         params = {}
         if stages:
@@ -1776,7 +1776,7 @@ class MLflowApiClient(object):
 
     def list_model_versions_iterator(self, name, stages=None):
         """
-        Iterate by models versions
+        Iterate by models versions (only latest version of each stage)
 
         Parameters
         ----------
@@ -1795,15 +1795,97 @@ class MLflowApiClient(object):
         --------
         .. code:: python
 
-            for model_version in client.list_model_versions('some_model'):
+            for model_version in client.list_model_versions_iterator('some_model'):
                 print(model_version)
 
-            or model_version in client.list_models('some_model', stages=[ModelVersionStage.prod]):
+            or model_version in client.list_model_versions_iterator('some_model', stages=[ModelVersionStage.prod]):
                 print(model_version)
         """
         versions = self.list_model_versions(name=name, stages=stages)
         for version in versions:
             yield version
+
+
+    def list_model_all_versions(self, name, stages=None):
+        """
+        List model versions (all versions of each stage)
+
+        Parameters
+        ----------
+        name : str
+            Model name
+
+        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+            Model stages to fetch
+
+        Returns
+        ----------
+        model_versions_list : :obj:`mlflow_client.model.ModelVersionList`
+            Model versions list
+
+        Examples
+        --------
+        .. code:: python
+
+            model_versions_list = client.list_model_all_versions('some_model')
+            model_versions_list = client.list_model_all_versions('some_model', stages=[ModelVersionStage.prod])
+        """
+
+        return ModelVersion.from_list(self.list_model_all_versions_iterator(name=name, stages=stages))
+
+
+    def list_model_all_versions_iterator(self, name, stages=None):
+        """
+        Iterate by models versions (all versions of each stage)
+
+        Parameters
+        ----------
+        name : str
+            Model name
+
+        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+            Model stages to fetch
+
+        Returns
+        ----------
+        model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_client.model.ModelVersion`
+            Model versions iterator
+
+        Examples
+        --------
+        .. code:: python
+
+            for model_version in client.list_model_all_versions_iterator('some_model'):
+                print(model_version)
+
+            or model_version in client.list_model_all_versions_iterator('some_model', stages=[ModelVersionStage.prod]):
+                print(model_version)
+        """
+
+        _stages = None
+        if stages:
+            if isinstance(stages, list):
+                _stages = [ModelVersionStage(stage) if not isinstance(stage, ModelVersionStage) else stage for stage in stages]
+            else:
+                _stages = [stages]
+
+        max_version = -1
+        for version in self.list_model_versions_iterator(name, stages):
+            if version.version > max_version:
+                max_version = version.version
+
+        versions = ModelVersion.from_list([])
+        for i in range(0, max_version+1):
+            try:
+                version = self.get_model_version(name, i)
+                if _stages:
+                    if version.stage in _stages:
+                        yield version
+                else:
+                    yield version
+
+            except Exception:
+                pass
 
 
     def create_model_version(self, name, source=None, run_id=None, tags=None):
