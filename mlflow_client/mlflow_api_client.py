@@ -1765,7 +1765,11 @@ class MLflowApiClient(object):
         params = {}
         if stages:
             if isinstance(stages, list):
-                params['stages'] = [stage.value if isinstance(stage, ModelVersionStage) else stage for stage in stages]
+                params['stages'] = [
+                    stage.value
+                    if isinstance(stage, ModelVersionStage) else stage
+                    for stage in stages
+                ]
             elif isinstance(stages, ModelVersionStage):
                 params['stages'] = [stages.value]
             else:
@@ -1865,7 +1869,11 @@ class MLflowApiClient(object):
         _stages = None
         if stages:
             if isinstance(stages, list):
-                _stages = [ModelVersionStage(stage) if not isinstance(stage, ModelVersionStage) else stage for stage in stages]
+                _stages = [
+                    ModelVersionStage(stage)
+                    if not isinstance(stage, ModelVersionStage) else stage
+                    for stage in stages
+                ]
             else:
                 _stages = [stages]
 
@@ -1874,7 +1882,6 @@ class MLflowApiClient(object):
             if version.version > max_version:
                 max_version = version.version
 
-        versions = ModelVersion.from_list([])
         for i in range(0, max_version+1):
             try:
                 version = self.get_model_version(name, i)

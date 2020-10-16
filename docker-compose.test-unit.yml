@@ -8,7 +8,7 @@ services:
       NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
-      dockerfile: Dockerfile.integration
+      dockerfile: Dockerfile.unit
     volumes:
       - ./mlflow_client:/app/mlflow_client
       - ./tests/unit:/app/tests/unit:ro
@@ -21,4 +21,6 @@ services:
       - ./README.rst:/app/README.rst
       - ./CHANGELOG.rst:/app/CHANGELOG.rst
       - ./MANIFEST.in:/app/MANIFEST.in
-    network_mode: host
+    extra_hosts:
+      - rep.msk.mts.ru:10.73.8.86
+      - repo.msk.mts.ru:10.73.8.86
