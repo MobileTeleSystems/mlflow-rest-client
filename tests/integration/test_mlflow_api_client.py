@@ -1119,7 +1119,7 @@ def test_list_model_all_versions_with_stage(create_model, stage):
 @pytest.mark.parametrize(
     'stage', [stage for stage in ModelVersionStage]
 )
-def test_list_model_all_versions_iterator(create_model, stage):
+def test_list_model_all_versions_iterator_with_stage(create_model, stage):
     model = create_model
 
     is_empty = True
