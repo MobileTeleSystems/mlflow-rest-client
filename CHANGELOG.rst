@@ -3,6 +3,14 @@ Changelog
 
 1.1
 --------------------
+.. changelog::
+    :version: 1.1.4
+
+    .. change::
+        :tags: ci
+        :tickets: DSX-66
+
+        Allow to build and deploy versions from non-master branch
 
 .. changelog::
     :version: 1.1.3
