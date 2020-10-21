@@ -14,6 +14,7 @@ String git_commit
 
 Boolean isMaster = false
 Boolean isDev = true
+Boolean isTagged = false
 Boolean isRelease = false
 
 String testTag
@@ -69,12 +70,13 @@ node('bdbuilder04') {
 
             isMaster  = git_branch == 'master'
             isDev     = git_branch == 'dev'
-            isRelease = isMaster && git_tag
+            isTagged  = !!git_tag
+            isRelease = isMaster && isTagged
             version = git_tag ? git_tag.replace('v', '') : null
             docker_version = version ? version.replace('.dev', '-dev') : null
 
-            testTag = isMaster ? 'test' : 'dev-test'
-            prodTag = isMaster ? 'latest' : 'dev'
+            testTag = isDev ? 'dev-test' : 'test'
+            prodTag = isDev ? 'dev'      : 'latest'
 
             withCredentials([string(credentialsId: 'vault_token_hdp_pipe', variable: 'vault_token')]) {
                 ansibleKey = vault("${env.vault_token}", "platform/ansible/ansible_ssh_key")
@@ -259,12 +261,15 @@ node('bdbuilder04') {
 
                     stage('Build documentation image') {
                         gitlabCommitStatus('Build documentation image') {
-                            if (isDev || isRelease) {
+                            if (isDev || isTagged) {
                                 ansiColor('xterm') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_images[docker_version] = docs_image
-                                        docs_images[prodTag] = docs_image
+
+                                        if (isDev || isRelease) {
+                                            docs_images[prodTag] = docs_image
+                                        }
                                     }
                                 }
                             }
@@ -284,7 +289,7 @@ node('bdbuilder04') {
 
                     stage('Publish images') {
                         gitlabCommitStatus('Publish images') {
-                            if (isDev || isRelease) {
+                            if (isDev || isTagged) {
                                 withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
                                     ansiColor('xterm') {
                                         docs_images.each { def tag, def image ->
@@ -298,7 +303,7 @@ node('bdbuilder04') {
 
                     stage('Publish package') {
                         gitlabCommitStatus('Publish package') {
-                            if (isDev || isRelease) {
+                            if (isDev || isTagged) {
                                 def uploadSpec = '''{
                                         "files": [
                                             {
@@ -317,7 +322,7 @@ node('bdbuilder04') {
 
                     stage ('Publish documentation') {
                         gitlabCommitStatus('Publish documentation') {
-                            if (isDev || isRelease) {
+                            if (isDev || isTagged) {
                                 def uploadSpec = '''{
                                         "files": [
                                             {
@@ -336,7 +341,7 @@ node('bdbuilder04') {
                     docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
                         stage ('Deploy documentation') {
                             gitlabCommitStatus('Deploy documentation') {
-                                if (isDev || isRelease) {
+                                if (isDev || isTagged) {
                                     ansiColor('xterm') {
                                         sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
 
@@ -394,7 +399,7 @@ node('bdbuilder04') {
             build['nginx'] = {
                 ansiColor('xterm') {
                     sh script: """
-                        docker rmi ${docker_registry}/${docker_image}.nginx:${docker_version}-${env.BUILD_TAG} || true
+                        docker rmi ${docker_registry}/${docker_image}.nginx:${env.BUILD_TAG} || true
                     """
                 }
             }
