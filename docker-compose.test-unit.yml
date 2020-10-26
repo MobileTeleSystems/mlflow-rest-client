@@ -12,7 +12,6 @@ services:
     volumes:
       - ./mlflow_client:/app/mlflow_client
       - ./tests/unit:/app/tests/unit:ro
-      - ./pytest.ini:/app/pytest.ini
       - ./pytest_runner.sh:/app/pytest_runner.sh
       - ./unit-tests.sh:/app/unit-tests.sh
       - ./docs:/app/docs
@@ -21,6 +20,4 @@ services:
       - ./README.rst:/app/README.rst
       - ./CHANGELOG.rst:/app/CHANGELOG.rst
       - ./MANIFEST.in:/app/MANIFEST.in
-    extra_hosts:
-      - rep.msk.mts.ru:10.73.8.86
-      - repo.msk.mts.ru:10.73.8.86
+    network_mode: host

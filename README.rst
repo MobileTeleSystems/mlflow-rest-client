@@ -17,7 +17,7 @@ MLflow Python Client
 .. |Documentation| image:: https://img.shields.io/badge/docs-latest-success
    :target: https://mlflow-client.msk.bd-cloud.mts.ru
 .. |PyPI| image:: https://img.shields.io/badge/pypi-download-orange
-   :target: http://docker.rep.msk.mts.ru/ui/packages/pypi:%2F%2Fmlflow-client?name=%2Amlflow-client%2A&type=packages
+   :target: http://docker.rep.msk.mts.ru/ui/packages/pypi:%2F%2Fmlflow-client
 
 A slightly opinionated Python client for `MLflow <https://mlflow.org>`_ REST API that implements all REST operations.
 
