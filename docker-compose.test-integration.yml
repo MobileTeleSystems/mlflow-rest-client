@@ -13,7 +13,6 @@ services:
     volumes:
       - ./mlflow_client:/app/mlflow_client
       - ./tests/integration:/app/tests/integration
-      - ./pytest.ini:/app/pytest.ini
       - ./pytest_runner.sh:/app/pytest_runner.sh
       - ./integration-tests.sh:/app/integration-tests.sh:ro
       - ./docs:/app/docs
