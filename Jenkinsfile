@@ -2,8 +2,11 @@
 
 @Library('jenkins_lib') _
 
+def project = 'mlflow-client'
+
 def docker_registry = 'docker.rep.msk.mts.ru'
-def docker_image = 'bigdata/platform/dsx/mlflow-client'
+def docker_image = "bigdata/platform/dsx/${project}"
+def nginx_image = "${docker_image}.nginx"
 
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
@@ -264,7 +267,7 @@ node('bdbuilder04') {
                             if (isDev || isTagged) {
                                 ansiColor('xterm') {
                                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        def docs_image = docker.build("${docker_registry}/${docker_image}.nginx:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        def docs_image = docker.build("${docker_registry}/${nginx_image}:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
                                         docs_images[docker_version] = docs_image
 
                                         if (isDev || isRelease) {
@@ -361,6 +364,36 @@ node('bdbuilder04') {
                             }
                         }
                     }
+
+                    stage('Cleanup Artifactory') {
+                        if (isDev || isTagged) {
+                            build job: 'artifactory-cleanup', wait: false, parameters: [
+                                [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',                         value: project],
+                                [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                         value: 'pypi'],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                          value: true],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',                 value: false],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS',                          value: true],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES',            value: true],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES_FROM_NODES', value: true],
+                                [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_ON_NODES',    value: true],
+                                [$class: 'StringParameterValue',  name: 'DOCS_DOCKER_IMAGES_NODES',             value: 'nginx'],
+                                [$class: 'BooleanParameterValue', name: 'DRY_RUN',                              value: false]
+                            ]
+
+                            build job: 'artifactory-cleanup', wait: false, parameters: [
+                                [$class: 'StringParameterValue',  name: 'IMAGE_NAME',                      value: nginx_image],
+                                [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                    value: 'docker'],
+                                [$class: 'StringParameterValue',  name: 'REMOVE_VERSIONS_TYPE',            value: 'any'],
+                                [$class: 'TextParameterValue',    name: 'REMOVE_VERSIONS_OPTIONS',         value: '--lt ${latest_any}'],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                     value: false],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',            value: true],
+                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES_FROM_NODES', value: true],
+                                [$class: 'StringParameterValue',  name: 'DOCKER_IMAGES_NODES',             value: 'nginx'],
+                                [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_ON_NODES',    value: true],
+                                [$class: 'BooleanParameterValue', name: 'DRY_RUN',                         value: false]
+                            ]
+                        }
+                    }
                 }
             }
         }
@@ -399,7 +432,7 @@ node('bdbuilder04') {
             build['nginx'] = {
                 ansiColor('xterm') {
                     sh script: """
-                        docker rmi ${docker_registry}/${docker_image}.nginx:${env.BUILD_TAG} || true
+                        docker rmi ${docker_registry}/${nginx_image}:${env.BUILD_TAG} || true
                     """
                 }
             }

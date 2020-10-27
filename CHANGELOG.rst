@@ -12,6 +12,12 @@ Changelog
 
         Allow to build and deploy versions from non-master branch
 
+    .. change::
+        :tags: ci
+        :tickets: DSX-72
+
+        Remove old dev versions from Artifactory
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
