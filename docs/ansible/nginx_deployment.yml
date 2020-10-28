@@ -20,6 +20,12 @@
       pip:
         name: ["docker"]
 
+    - name: "Remove docker image"
+      docker_image:
+        name: "{{ image }}:{{ image_version }}"
+        state: absent
+        force_absent: true
+
     - name: "Pull docker image"
       docker_image:
         name: "{{ image }}:{{ image_version }}"

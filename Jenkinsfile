@@ -40,14 +40,15 @@ node('bdbuilder04') {
             "Pylint",
             "Sonar Scan",
             "Retrieve Sonar Results",
-            "Build pip package",
             "Build documentation",
-            "Build documentation image",
             "Check ansible pipeline",
-            "Publish images",
             "Publish package",
             "Publish documentation",
-            "Deploy documentation"
+            "Cleanup Artifactory",
+            "Build documentation image",
+            "Publish documentation image",
+            "Deploy documentation",
+            "Cleanup Artifactory docs"
         ]) {
             stage('Checkout') {
                 def scmVars = checkout scm
@@ -262,43 +263,12 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage('Build documentation image') {
-                        gitlabCommitStatus('Build documentation image') {
-                            if (isDev || isTagged) {
-                                ansiColor('xterm') {
-                                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        def docs_image = docker.build("${docker_registry}/${nginx_image}:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
-                                        docs_images[docker_version] = docs_image
-
-                                        if (isDev || isRelease) {
-                                            docs_images[prodTag] = docs_image
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
                         stage ('Check ansible pipeline') {
                             gitlabCommitStatus('Check ansible pipeline') {
                                 ansiColor('xterm') {
                                     sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
                                     sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${docker_version} --syntax-check --list-tasks -vv"
-                                }
-                            }
-                        }
-                    }
-
-                    stage('Publish images') {
-                        gitlabCommitStatus('Publish images') {
-                            if (isDev || isTagged) {
-                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                    ansiColor('xterm') {
-                                        docs_images.each { def tag, def image ->
-                                            image.push(tag)
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -341,6 +311,57 @@ node('bdbuilder04') {
                         }
                     }
 
+                    stage('Cleanup Artifactory') {
+                        gitlabCommitStatus('Cleanup Artifactory') {
+                            if (isDev || isTagged) {
+                                build job: 'artifactory-cleanup', propagate: false, parameters: [
+                                    [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',                         value: project],
+                                    [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                         value: 'pypi'],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                          value: true],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',                 value: false],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS',                          value: true],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES',            value: true],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES_FROM_NODES', value: true],
+                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_ON_NODES',    value: true],
+                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_FORCE',       value: true],
+                                    [$class: 'StringParameterValue',  name: 'DOCS_DOCKER_IMAGES_NODES',             value: docs_target_host],
+                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',                              value: false]
+                                ]
+                            }
+                        }
+                    }
+
+                    stage('Build documentation image') {
+                        gitlabCommitStatus('Build documentation image') {
+                            if (isDev || isTagged) {
+                                ansiColor('xterm') {
+                                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                                        def docs_image = docker.build("${docker_registry}/${nginx_image}:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
+                                        docs_images[docker_version] = docs_image
+
+                                        if (isDev || isRelease) {
+                                            docs_images[prodTag] = docs_image
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    stage('Publish documentation image') {
+                        gitlabCommitStatus('Publish documentation image') {
+                            if (isDev || isTagged) {
+                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                                    ansiColor('xterm') {
+                                        docs_images.each { def tag, def image ->
+                                            image.push(tag)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
                         stage ('Deploy documentation') {
                             gitlabCommitStatus('Deploy documentation') {
@@ -365,33 +386,23 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage('Cleanup Artifactory') {
-                        if (isDev || isTagged) {
-                            build job: 'artifactory-cleanup', wait: false, parameters: [
-                                [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',                         value: project],
-                                [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                         value: 'pypi'],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                          value: true],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',                 value: false],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS',                          value: true],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES',            value: true],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES_FROM_NODES', value: true],
-                                [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_ON_NODES',    value: true],
-                                [$class: 'StringParameterValue',  name: 'DOCS_DOCKER_IMAGES_NODES',             value: 'nginx'],
-                                [$class: 'BooleanParameterValue', name: 'DRY_RUN',                              value: false]
-                            ]
-
-                            build job: 'artifactory-cleanup', wait: false, parameters: [
-                                [$class: 'StringParameterValue',  name: 'IMAGE_NAME',                      value: nginx_image],
-                                [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                    value: 'docker'],
-                                [$class: 'StringParameterValue',  name: 'REMOVE_VERSIONS_TYPE',            value: 'any'],
-                                [$class: 'TextParameterValue',    name: 'REMOVE_VERSIONS_OPTIONS',         value: '--lt ${latest_any}'],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                     value: false],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',            value: true],
-                                [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES_FROM_NODES', value: true],
-                                [$class: 'StringParameterValue',  name: 'DOCKER_IMAGES_NODES',             value: 'nginx'],
-                                [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_ON_NODES',    value: true],
-                                [$class: 'BooleanParameterValue', name: 'DRY_RUN',                         value: false]
-                            ]
+                    stage('Cleanup Artifactory docs') {
+                        gitlabCommitStatus('Cleanup Artifactory docs') {
+                            if (isDev || isTagged) {
+                                build job: 'artifactory-cleanup', propagate: false, parameters: [
+                                    [$class: 'StringParameterValue',  name: 'IMAGE_NAME',                      value: nginx_image],
+                                    [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                    value: 'docker'],
+                                    [$class: 'StringParameterValue',  name: 'REMOVE_VERSIONS_TYPE',            value: 'any'],
+                                    [$class: 'TextParameterValue',    name: 'REMOVE_VERSIONS_OPTIONS',         value: '--lt ${latest_any}'],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                     value: false],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',            value: true],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES_FROM_NODES', value: true],
+                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_ON_NODES',    value: true],
+                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_FORCE',       value: true],
+                                    [$class: 'StringParameterValue',  name: 'DOCKER_IMAGES_NODES',             value: docs_target_host],
+                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',                         value: false]
+                                ]
+                            }
                         }
                     }
                 }
