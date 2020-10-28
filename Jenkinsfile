@@ -6,7 +6,6 @@ def project = 'mlflow-client'
 
 def docker_registry = 'docker.rep.msk.mts.ru'
 def docker_image = "bigdata/platform/dsx/${project}"
-def nginx_image = "${docker_image}.nginx"
 
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
@@ -27,9 +26,6 @@ String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
-Map docs_images = [:]
-String docs_target_host = 'nginx'
-
 node('bdbuilder04') {
     try {
         gitlabBuilds(builds: [
@@ -41,14 +37,10 @@ node('bdbuilder04') {
             "Sonar Scan",
             "Retrieve Sonar Results",
             "Build documentation",
-            "Check ansible pipeline",
             "Publish package",
             "Publish documentation",
             "Cleanup Artifactory",
-            "Build documentation image",
-            "Publish documentation image",
-            "Deploy documentation",
-            "Cleanup Artifactory docs"
+            "Deploy documentation"
         ]) {
             stage('Checkout') {
                 def scmVars = checkout scm
@@ -263,17 +255,6 @@ node('bdbuilder04') {
                         }
                     }
 
-                    docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
-                        stage ('Check ansible pipeline') {
-                            gitlabCommitStatus('Check ansible pipeline') {
-                                ansiColor('xterm') {
-                                    sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
-                                    sh "ansible-playbook /app/docs/ansible/nginx_deployment.yml -i /app/docs/ansible/inventory.ini -e target_host=${docs_target_host} -e image_version=${docker_version} --syntax-check --list-tasks -vv"
-                                }
-                            }
-                        }
-                    }
-
                     stage('Publish package') {
                         gitlabCommitStatus('Publish package') {
                             if (isDev || isTagged) {
@@ -315,92 +296,25 @@ node('bdbuilder04') {
                         gitlabCommitStatus('Cleanup Artifactory') {
                             if (isDev || isTagged) {
                                 build job: 'artifactory-cleanup', propagate: false, parameters: [
-                                    [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',                         value: project],
-                                    [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                         value: 'pypi'],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                          value: true],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',                 value: false],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS',                          value: true],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES',            value: true],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS_DOCKER_IMAGES_FROM_NODES', value: true],
-                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_ON_NODES',    value: true],
-                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCS_DOCKER_IMAGES_FORCE',       value: true],
-                                    [$class: 'StringParameterValue',  name: 'DOCS_DOCKER_IMAGES_NODES',             value: docs_target_host],
-                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',                              value: false]
+                                    [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',         value: project],
+                                    [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',         value: 'pypi'],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',          value: true],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES', value: false],
+                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCS',          value: true],
+                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',              value: false]
                                 ]
                             }
                         }
                     }
 
-                    stage('Build documentation image') {
-                        gitlabCommitStatus('Build documentation image') {
+                    stage('Deploy documentation') {
+                        gitlabCommitStatus('Deploy documentation') {
                             if (isDev || isTagged) {
-                                ansiColor('xterm') {
-                                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                        def docs_image = docker.build("${docker_registry}/${nginx_image}:${env.BUILD_TAG}", "--build-arg VERSION=${version} --force-rm -f ./docs/nginx/Dockerfile_nginx .")
-                                        docs_images[docker_version] = docs_image
-
-                                        if (isDev || isRelease) {
-                                            docs_images[prodTag] = docs_image
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    stage('Publish documentation image') {
-                        gitlabCommitStatus('Publish documentation image') {
-                            if (isDev || isTagged) {
-                                withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
-                                    ansiColor('xterm') {
-                                        docs_images.each { def tag, def image ->
-                                            image.push(tag)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    docker.image("docker.rep.msk.mts.ru/base/ansible:2.9").inside("-u root --net=host --entrypoint='' -v ${env.WORKSPACE}/:/app/ -v /data/jenkins/.ansible.cfg:/root/.ansible.cfg -v /data/jenkins/.vault_password:/root/.vault_password") {
-                        stage ('Deploy documentation') {
-                            gitlabCommitStatus('Deploy documentation') {
-                                if (isDev || isTagged) {
-                                    ansiColor('xterm') {
-                                        sh "cp /app/ansible/ssh.key /root/.ssh/ansible.key && chmod 600 /root/.ssh/ansible.key"
-
-                                        ansiblePlaybook(
-                                            colorized: true,
-                                            installation: 'ansible',
-                                            playbook: '/app/docs/ansible/nginx_deployment.yml',
-                                            inventory: '/app/docs/ansible/inventory.ini',
-                                            extraVars: [
-                                                target_host: docs_target_host,
-                                                image_version: docker_version
-                                            ],
-                                            extras: '-vv'
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    stage('Cleanup Artifactory docs') {
-                        gitlabCommitStatus('Cleanup Artifactory docs') {
-                            if (isDev || isTagged) {
-                                build job: 'artifactory-cleanup', propagate: false, parameters: [
-                                    [$class: 'StringParameterValue',  name: 'IMAGE_NAME',                      value: nginx_image],
-                                    [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',                    value: 'docker'],
-                                    [$class: 'StringParameterValue',  name: 'REMOVE_VERSIONS_TYPE',            value: 'any'],
-                                    [$class: 'TextParameterValue',    name: 'REMOVE_VERSIONS_OPTIONS',         value: '--lt ${latest_any}'],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_PYPI',                     value: false],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES',            value: true],
-                                    [$class: 'BooleanParameterValue', name: 'REMOVE_DOCKER_IMAGES_FROM_NODES', value: true],
-                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_ON_NODES',    value: true],
-                                    [$class: 'BooleanParameterValue', name: 'PRUNE_DOCKER_IMAGES_FORCE',       value: true],
-                                    [$class: 'StringParameterValue',  name: 'DOCKER_IMAGES_NODES',             value: docs_target_host],
-                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',                         value: false]
+                                build job: 'nginx-build', parameters: [
+                                    [$class: 'StringParameterValue',  name: 'PROJECT_NAME', value: project],
+                                    [$class: 'StringParameterValue',  name: 'IMAGE_NAME',   value: docker_image],
+                                    [$class: 'StringParameterValue',  name: 'VERSION',      value: docker_version],
+                                    [$class: 'BooleanParameterValue', name: 'DRY_RUN',      value: false]
                                 ]
                             }
                         }
@@ -440,19 +354,11 @@ node('bdbuilder04') {
                 }
             }
 
-            build['nginx'] = {
-                ansiColor('xterm') {
-                    sh script: """
-                        docker rmi ${docker_registry}/${nginx_image}:${env.BUILD_TAG} || true
-                    """
-                }
-            }
-
             parallel build
 
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
-            docker.image('platform/python:2.7').inside("-u root") {
+            docker.image('platform/python:3.7').inside("-u root") {
                 ansiColor('xterm') {
                     sh script: ''' \
                         rm -rf .[A-z0-9]*

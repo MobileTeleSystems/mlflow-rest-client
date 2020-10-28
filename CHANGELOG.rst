@@ -18,6 +18,12 @@ Changelog
 
         Remove old dev versions from Artifactory
 
+    .. change::
+        :tags: ci
+        :tickets: DSX-80
+
+        Move documentation deployment step to separated Jenkins job
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
