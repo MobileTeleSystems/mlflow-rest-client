@@ -1,4 +1,0 @@
-image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client.nginx
-container: mlflow-client-docs
-proxy_container: nginx-proxy
-network: dsx_default
