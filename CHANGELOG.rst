@@ -7,22 +7,28 @@ Changelog
     :version: 1.1.4
 
     .. change::
-        :tags: ci
+        :tags: ci, feature
         :tickets: DSX-66
 
         Allow to build and deploy versions from non-master branch
 
     .. change::
-        :tags: ci
+        :tags: ci, feature
         :tickets: DSX-72
 
         Remove old dev versions from Artifactory
 
     .. change::
-        :tags: ci
+        :tags: ci, feature
         :tickets: DSX-80
 
         Move documentation deployment step to separated Jenkins job
+
+    .. change::
+        :tags: general, bug
+        :tickets: DSX-80
+
+        Include README.rst into PyPi package
 
 .. changelog::
     :version: 1.1.3
