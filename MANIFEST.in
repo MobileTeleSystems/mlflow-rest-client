@@ -1,4 +1,4 @@
-include README.md requirements.txt requirements-test.txt mlflow_client/VERSION
+include README.rst requirements.txt requirements-test.txt mlflow_client/VERSION
 recursive-exclude * __pycache__
 recursive-exclude * *.pyc
 recursive-exclude * *.pyo
