@@ -24,4 +24,4 @@ COPY tests/__init__.py /app/tests/
 COPY tests/unit /app/tests/unit
 
 SHELL ["/bin/bash", "-c"]
-CMD unit-tests.sh
+ENTRYPOINT ["unit-tests.sh"]

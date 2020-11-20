@@ -114,7 +114,7 @@ node('bdbuilder04') {
                         }
                     }
 
-                    docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
+                    docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside("--entrypoint=''") {
                         try {
                             version = sh script: "python setup.py --version", returnStdout: true
                             version = version.trim()
@@ -169,7 +169,7 @@ node('bdbuilder04') {
                             withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins-unit coverage.sh
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint coverage.sh mlflow-client-jenkins-unit
                                         docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
                                     """
                                 }
@@ -184,7 +184,7 @@ node('bdbuilder04') {
                             withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps mlflow-client-jenkins-unit bash -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
                                         docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
                                     """
                                 }
@@ -221,7 +221,7 @@ node('bdbuilder04') {
                             pythonVersions.each { def pythonVersion ->
                                 def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
 
-                                docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside() {
+                                docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside("--entrypoint=''") {
                                     ansiColor('xterm') {
                                         sh script: """
                                             python setup.py bdist_wheel sdist
@@ -234,7 +234,7 @@ node('bdbuilder04') {
 
                     stage ('Build documentation') {
                         gitlabCommitStatus('Build documentation') {
-                            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside() {
+                            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside("--entrypoint=''") {
                                 ansiColor('xterm') {
                                     sh script: """
                                         cd docs

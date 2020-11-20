@@ -30,6 +30,11 @@ Changelog
 
         Include README.rst into PyPi package
 
+    .. change::
+        :tags: ci
+        :tickets: DSX-89
+
+        Make test scripts a docker image entrypoints
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
