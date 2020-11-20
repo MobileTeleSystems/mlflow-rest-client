@@ -24,4 +24,4 @@ COPY tests/__init__.py /app/tests/
 COPY tests/integration /app/tests/integration
 
 SHELL ["/bin/bash", "-c"]
-CMD integration-tests.sh
+ENTRYPOINT ["integration-tests.sh"]
