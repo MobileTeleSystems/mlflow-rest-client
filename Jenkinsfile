@@ -37,8 +37,7 @@ node('bdbuilder04') {
             "Sonar Scan",
             "Retrieve Sonar Results",
             "Build documentation",
-            "Publish package",
-            "Publish documentation",
+            "Publish package & documentation",
             "Cleanup Artifactory",
             "Deploy documentation"
         ]) {
@@ -255,33 +254,19 @@ node('bdbuilder04') {
                         }
                     }
 
-                    stage('Publish package') {
-                        gitlabCommitStatus('Publish package') {
-                            if (isDev || isTagged) {
-                                def uploadSpec = '''{
-                                        "files": [
-                                            {
-                                                "pattern": "dist/.*(.tar.gz|.whl)",
-                                                "target": "pypi-local/mlflow-client/",
-                                                "regexp": "true"
-                                            }
-                                        ]
-                                    }'''
-
-                                def buildInfo = server.upload spec: uploadSpec
-                                server.publishBuildInfo buildInfo
-                            }
-                        }
-                    }
-
-                    stage ('Publish documentation') {
-                        gitlabCommitStatus('Publish documentation') {
+                    stage ('Publish package & documentation') {
+                        gitlabCommitStatus('Publish package & documentation') {
                             if (isDev || isTagged) {
                                 def uploadSpec = '''{
                                         "files": [
                                             {
                                                 "pattern": "docs/html-*.tar.gz",
                                                 "target": "files/mlflow-client-docs/"
+                                            },
+                                            {
+                                                "pattern": "dist/.*(.tar.gz|.whl)",
+                                                "target": "pypi-local/mlflow-client/",
+                                                "regexp": "true"
                                             }
                                         ]
                                     }'''
