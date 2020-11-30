@@ -160,7 +160,7 @@ node('adm-ci') {
                     withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint coverage.sh mlflow-client-jenkins-unit
+                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
                             """
                         }

@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   mlflow-client-jenkins-unit:
-    image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-integration}
+    image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-unit}
     build:
       context: .
       dockerfile: Dockerfile.unit

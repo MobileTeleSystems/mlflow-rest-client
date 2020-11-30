@@ -20,8 +20,7 @@ ENV PATH /app:$PATH
 
 COPY mlflow_client/ /app/mlflow_client/
 COPY integration-tests.sh coverage.sh wait-for-it.sh pytest_runner.sh /app/
-COPY tests/__init__.py /app/tests/
+COPY tests/*.py /app/tests/
 COPY tests/integration /app/tests/integration
 
-SHELL ["/bin/bash", "-c"]
 ENTRYPOINT ["integration-tests.sh"]
