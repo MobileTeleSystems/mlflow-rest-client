@@ -27,7 +27,7 @@ String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
 
-node('bdbuilder04') {
+node('adm-ci') {
     try {
         gitlabBuilds(builds: [
             "Build test images",
@@ -74,11 +74,6 @@ node('bdbuilder04') {
 
             testTag = isDev ? 'dev-test' : 'test'
             prodTag = isDev ? 'dev'      : 'latest'
-
-            withCredentials([string(credentialsId: 'vault_token_hdp_pipe', variable: 'vault_token')]) {
-                ansibleKey = vault("${env.vault_token}", "platform/ansible/ansible_ssh_key")
-                writeFile file: "${env.WORKSPACE}/ansible/ssh.key", text: "${ansibleKey['ansible_ssh_key']}"
-            }
 
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
