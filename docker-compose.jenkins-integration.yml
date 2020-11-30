@@ -3,10 +3,6 @@ services:
   mlflow-client-jenkins-integration:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
     env_file: .env.jenkins.integration
-    environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
       dockerfile: Dockerfile.integration
@@ -21,10 +17,6 @@ services:
   mlflow-jenkins:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.jenkins.integration
-    environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
     restart: unless-stopped
     depends_on:
         - "mlflow-jenkins-db"
@@ -34,10 +26,6 @@ services:
   mlflow-jenkins-db:
     image: postgres:11.8
     env_file: .env.jenkins.integration
-    environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
     restart: unless-stopped
     networks:
       - db

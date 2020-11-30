@@ -2,10 +2,6 @@ version: "3.5"
 services:
   mlflow-client-test-unit:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-unit}
-    environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
     build:
       context: .
       dockerfile: Dockerfile.unit
