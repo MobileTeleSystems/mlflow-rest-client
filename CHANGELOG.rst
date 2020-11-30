@@ -42,6 +42,11 @@ Changelog
 
         Publish package and documentation to Artifactory in one build info
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-34
+
+        Pass real project version to SonarQube
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
