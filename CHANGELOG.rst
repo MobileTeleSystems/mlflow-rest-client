@@ -60,6 +60,12 @@ Changelog
 
         Remove reduntant proxying from Jenkinsfile
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-111
+
+        Move CI/CD from bdbuilder04 to adm-ci
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
