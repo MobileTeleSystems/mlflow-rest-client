@@ -47,6 +47,13 @@ Changelog
         :tickets: DSX-34
 
         Pass real project version to SonarQube
+
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-34
+
+        Pass project links to SonarQube
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
