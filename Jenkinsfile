@@ -22,6 +22,7 @@ Boolean isRelease = false
 String testTag
 String prodTag
 String version
+String release
 String docker_version
 
 List pythonVersions = ['2.7', '3.6', '3.7']
@@ -69,6 +70,7 @@ node('bdbuilder04') {
             isRelease = isMaster && isTagged
             version = git_tag ? git_tag.replace('v', '') : null
             docker_version = version ? version.replace('.dev', '-dev') : null
+            release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
 
             testTag = isDev ? 'dev-test' : 'test'
             prodTag = isDev ? 'dev'      : 'latest'
@@ -118,6 +120,7 @@ node('bdbuilder04') {
                             version = sh script: "python setup.py --version", returnStdout: true
                             version = version.trim()
                             docker_version = version ? version.replace('.dev', '-dev') : null
+                            release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
                         } catch (Exception e) {}
                     }
 
@@ -196,7 +199,11 @@ node('bdbuilder04') {
                             withSonarQubeEnv('sonarqube') {
                                 withCredentials([string(credentialsId: 'SONAR_DB_PASSWD', variable: 'SONAR_DB_PASSWD')]) {
                                     ansiColor('xterm') {
-                                        sh "/data/sonar-scanner/bin/sonar-scanner"
+                                        if (isDev || isTagged) {
+                                            sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version}"
+                                        } else {
+                                            sh "/data/sonar-scanner/bin/sonar-scanner"
+                                        }
                                     }
                                 }
                             }
