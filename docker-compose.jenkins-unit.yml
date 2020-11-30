@@ -6,6 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile.unit
     volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # for running local test, can be removed
       - ./reports:/app/reports:rw
       - ./.coveragerc:/app/.coveragerc:ro
+      - ./.pylintrc:/app/.pylintrc:ro
     network_mode: host

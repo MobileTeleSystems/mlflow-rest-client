@@ -61,6 +61,7 @@ node('adm-ci') {
                 sh script: """
                     mkdir -p ./reports/junit
                     touch ./reports/pylint.txt
+                    chmod 777 -R ./reports
                 """
             }
 
@@ -162,6 +163,7 @@ node('adm-ci') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
+                                head -100 reports/coverage.xml
                             """
                         }
                     }
