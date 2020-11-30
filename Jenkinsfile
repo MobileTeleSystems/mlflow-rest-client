@@ -68,7 +68,7 @@ node('bdbuilder04') {
             isDev     = git_branch == 'dev'
             isTagged  = !!git_tag
             isRelease = isMaster && isTagged
-            version = git_tag ? git_tag.replace('v', '') : null
+            version = git_tag ? git_tag.replaceAll(/^v/, '') : null
             docker_version = version ? version.replace('.dev', '-dev') : null
             release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
 
