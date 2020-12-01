@@ -10,15 +10,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sys, os, re
+import sys
+import os
 import subprocess
 
-from collections import OrderedDict
 from setuptools_git_versioning import get_tag, get_all_tags, get_sha
 from packaging import version as Version
 
 sys.path.insert(0, os.path.abspath('..'))
-extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx.ext.autosummary', 'sphinx_rtd_theme', 'changelog']
+extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx_rtd_theme', 'changelog']
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
