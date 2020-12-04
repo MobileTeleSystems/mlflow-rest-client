@@ -1,3 +1,3 @@
 .. include:: ../README.rst
-    :start-after: install
+    :start-after: develop
     :end-before: usage

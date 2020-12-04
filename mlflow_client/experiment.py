@@ -1,7 +1,7 @@
 from enum import Enum
 
+from .internal import ComparableByStr, Listable, MakeableFromTupleStr
 from .tag import Tag
-from .internal import Listable, MakeableFromTupleStr, ComparableByStr
 
 
 class ExperimentStage(Enum):
@@ -38,7 +38,7 @@ class ExperimentTag(Tag):
     --------
     .. code:: python
 
-        tag = ExperimentTag('some.tag', 'some.val')
+        tag = ExperimentTag("some.tag", "some.val")
     """
 
 
@@ -83,7 +83,7 @@ class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
     --------
     .. code:: python
 
-        experiment = Experiment(id=123, name='some_name')
+        experiment = Experiment(id=123, name="some_name")
     """
 
     # pylint: disable=too-many-arguments

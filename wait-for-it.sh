@@ -72,62 +72,62 @@ while [[ $# -gt 0 ]]
 do
     case "$1" in
         *:* )
-        WAITFORIT_hostport=(${1//:/ })
-        WAITFORIT_HOST=${WAITFORIT_hostport[0]}
-        WAITFORIT_PORT=${WAITFORIT_hostport[1]}
-        shift 1
-        ;;
+            WAITFORIT_hostport=(${1//:/ })
+            WAITFORIT_HOST=${WAITFORIT_hostport[0]}
+            WAITFORIT_PORT=${WAITFORIT_hostport[1]}
+            shift 1
+            ;;
         --child)
-        WAITFORIT_CHILD=1
-        shift 1
-        ;;
+            WAITFORIT_CHILD=1
+            shift 1
+            ;;
         -q | --quiet)
-        WAITFORIT_QUIET=1
-        shift 1
-        ;;
+            WAITFORIT_QUIET=1
+            shift 1
+            ;;
         -s | --strict)
-        WAITFORIT_STRICT=1
-        shift 1
-        ;;
+            WAITFORIT_STRICT=1
+            shift 1
+            ;;
         -h)
-        WAITFORIT_HOST="$2"
-        if [[ $WAITFORIT_HOST == "" ]]; then break; fi
-        shift 2
-        ;;
+            WAITFORIT_HOST="$2"
+            if [[ $WAITFORIT_HOST == "" ]]; then break; fi
+            shift 2
+            ;;
         --host=*)
-        WAITFORIT_HOST="${1#*=}"
-        shift 1
-        ;;
+            WAITFORIT_HOST="${1#*=}"
+            shift 1
+            ;;
         -p)
-        WAITFORIT_PORT="$2"
-        if [[ $WAITFORIT_PORT == "" ]]; then break; fi
-        shift 2
-        ;;
+            WAITFORIT_PORT="$2"
+            if [[ $WAITFORIT_PORT == "" ]]; then break; fi
+            shift 2
+            ;;
         --port=*)
-        WAITFORIT_PORT="${1#*=}"
-        shift 1
-        ;;
+            WAITFORIT_PORT="${1#*=}"
+            shift 1
+            ;;
         -t)
-        WAITFORIT_TIMEOUT="$2"
-        if [[ $WAITFORIT_TIMEOUT == "" ]]; then break; fi
-        shift 2
-        ;;
+            WAITFORIT_TIMEOUT="$2"
+            if [[ $WAITFORIT_TIMEOUT == "" ]]; then break; fi
+            shift 2
+            ;;
         --timeout=*)
-        WAITFORIT_TIMEOUT="${1#*=}"
-        shift 1
-        ;;
+            WAITFORIT_TIMEOUT="${1#*=}"
+            shift 1
+            ;;
         --)
-        shift
-        WAITFORIT_CLI=("$@")
-        break
-        ;;
+            shift
+            WAITFORIT_CLI=("$@")
+            break
+            ;;
         --help)
-        usage
-        ;;
+            usage
+            ;;
         *)
-        echoerr "Unknown argument: $1"
-        usage
-        ;;
+            echoerr "Unknown argument: $1"
+            usage
+            ;;
     esac
 done
 

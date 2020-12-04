@@ -1,8 +1,10 @@
 import logging
+
 import pytest
 
 from mlflow_client.experiment import Experiment, ExperimentStage, ExperimentTag
-from .conftest import DEFAULT_TIMEOUT, rand_str, rand_int
+
+from .conftest import DEFAULT_TIMEOUT, rand_int, rand_str
 
 log = logging.getLogger(__name__)
 

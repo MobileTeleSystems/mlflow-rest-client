@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 services:
   mlflow-client-test-integration:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-integration}
@@ -7,37 +7,37 @@ services:
       context: .
       dockerfile: Dockerfile.integration
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./mlflow_client:/app/mlflow_client
-      - ./tests/integration:/app/tests/integration
-      - ./pytest_runner.sh:/app/pytest_runner.sh
-      - ./integration-tests.sh:/app/integration-tests.sh:ro
-      - ./docs:/app/docs
-      - ./setup.py:/app/setup.py
-      - ./setup.cfg:/app/setup.cfg
-      - ./README.rst:/app/README.rst
-      - ./CHANGELOG.rst:/app/CHANGELOG.rst
-      - ./MANIFEST.in:/app/MANIFEST.in
+    - /etc/localtime:/etc/localtime:ro
+    - ./mlflow_client:/app/mlflow_client
+    - ./tests/integration:/app/tests/integration
+    - ./pytest_runner.sh:/app/pytest_runner.sh
+    - ./integration-tests.sh:/app/integration-tests.sh:ro
+    - ./docs:/app/docs
+    - ./setup.py:/app/setup.py
+    - ./setup.cfg:/app/setup.cfg
+    - ./README.rst:/app/README.rst
+    - ./CHANGELOG.rst:/app/CHANGELOG.rst
+    - ./MANIFEST.in:/app/MANIFEST.in
     depends_on:
-        - "mlflow-test"
+    - mlflow-test
     networks:
-      - default
-      - mlflow
+    - default
+    - mlflow
   mlflow-test:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.test.integration
     restart: unless-stopped
     depends_on:
-        - "mlflow-test-db"
+    - mlflow-test-db
     networks:
-      - db
-      - mlflow
+    - db
+    - mlflow
   mlflow-test-db:
     image: postgres:11.8
     env_file: .env.test.integration
     restart: unless-stopped
     networks:
-      - db
+    - db
 networks:
   mlflow:
     internal: true

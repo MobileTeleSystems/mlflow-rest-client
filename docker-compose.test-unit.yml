@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 services:
   mlflow-client-test-unit:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-unit}
@@ -6,15 +6,15 @@ services:
       context: .
       dockerfile: Dockerfile.unit
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./mlflow_client:/app/mlflow_client
-      - ./tests/unit:/app/tests/unit:ro
-      - ./pytest_runner.sh:/app/pytest_runner.sh
-      - ./unit-tests.sh:/app/unit-tests.sh
-      - ./docs:/app/docs
-      - ./setup.py:/app/setup.py
-      - ./setup.cfg:/app/setup.cfg
-      - ./README.rst:/app/README.rst
-      - ./CHANGELOG.rst:/app/CHANGELOG.rst
-      - ./MANIFEST.in:/app/MANIFEST.in
+    - /etc/localtime:/etc/localtime:ro
+    - ./mlflow_client:/app/mlflow_client
+    - ./tests/unit:/app/tests/unit:ro
+    - ./pytest_runner.sh:/app/pytest_runner.sh
+    - ./unit-tests.sh:/app/unit-tests.sh
+    - ./docs:/app/docs
+    - ./setup.py:/app/setup.py
+    - ./setup.cfg:/app/setup.cfg
+    - ./README.rst:/app/README.rst
+    - ./CHANGELOG.rst:/app/CHANGELOG.rst
+    - ./MANIFEST.in:/app/MANIFEST.in
     network_mode: host

@@ -1,5 +1,4 @@
 import sys
-
 from textwrap import dedent
 
 import six
@@ -58,7 +57,7 @@ class Makeable(object):
         --------
         .. code:: python
 
-            {var} = {klass}.make({{'some': 'input'}})
+            {var} = {klass}.make({{"some": "input"}})
         """.format(
             klass=cls.__name__, var=cls.__name__.lower()
         )
@@ -121,11 +120,11 @@ class ListableMeta(type):
             --------
             .. code:: python
 
-                name = 123 # depends on class itself
+                name = 123  # depends on class itself
                 item = {klass}(id)
 
                 simple_list = [item]
-                this_list = {klass}.from_list([item]) # or {klass}List([item])
+                this_list = {klass}.from_list([item])  # or {klass}List([item])
 
                 assert item in simple_list
                 assert item in this_list
