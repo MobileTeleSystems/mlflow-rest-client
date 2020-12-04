@@ -69,7 +69,7 @@ Clone repo:
 
 .. code:: bash
 
-   git clone ssh://git@git.bd.msk.mts.ru:8022/bigdata/platform/dsx/ds-scorer-operator.git -b dev
+   git clone ssh://git@git.bd.msk.mts.ru:8022/bigdata/platform/dsx/mlflow-client.git -b dev
 
    cd ds-scorer-operator
 

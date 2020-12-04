@@ -14,8 +14,8 @@ WORKDIR /app
 # Ignore cached dependency layer, download new dependencies every time
 ARG CACHEBUST=1
 
-COPY requirements.txt requirements-test.txt /app/
-RUN pip install -r requirements.txt -r requirements-test.txt --no-cache-dir
+COPY requirements.txt requirements-test.txt requirements-dev.txt /app/
+RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt --no-cache-dir
 
 ENV PYTHONPATH "/app:$PYTHONPATH"
 ENV PATH /app:$PATH

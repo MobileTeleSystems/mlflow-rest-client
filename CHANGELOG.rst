@@ -5,6 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 1.1.4
+    :released: 05.12.2020 13:06
 
     .. change::
         :tags: ci, feature
@@ -79,13 +80,13 @@ Changelog
         Fix PyLint report upload to SonarQube
 
     .. change::
-        :tags: ci, bug
+        :tags: ci, feature
         :tickets: DSX-34
 
         Format source code with Black
 
     .. change::
-        :tags: ci, bug
+        :tags: ci, feature
         :tickets: DSX-34
 
         Check source code vulnerabilities with Bandit

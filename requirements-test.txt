@@ -1,4 +1,4 @@
-pylint
+coverage
 pytest
 pytest-logger
 pytest-rerunfailures<9.0; python_version == "2.7"

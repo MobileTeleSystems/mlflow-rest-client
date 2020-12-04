@@ -8,9 +8,17 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - ./mlflow_client:/app/mlflow_client
+    - ./.git:/app/.git
+    - ./.gitignore:/app/.gitignore
     - ./tests/unit:/app/tests/unit:ro
+    - ./.coveragerc:/app/.coveragerc
     - ./pytest_runner.sh:/app/pytest_runner.sh
+    - ./coverage.sh:/app/coverage.sh
     - ./unit-tests.sh:/app/unit-tests.sh
+    - ./reports:/app/reports
+    - ./.pre-commit-config.yaml:/app/.pre-commit-config.yaml
+    - ./.pylintrc:/app/.pylintrc
+    - ./pyproject.toml:/app/pyproject.toml
     - ./docs:/app/docs
     - ./setup.py:/app/setup.py
     - ./setup.cfg:/app/setup.cfg

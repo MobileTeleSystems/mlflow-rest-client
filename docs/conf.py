@@ -158,6 +158,7 @@ changelog_sections = [
     "samples",
     "ci",
     "tests",
+    "dev"
 ]
 
 changelog_inner_tag_sort = ["breaking", "deprecated", "feature", "bug", "refactor"]
