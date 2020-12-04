@@ -1784,7 +1784,7 @@ class MLflowApiClient(object):
                 else:
                     yield version
 
-            except Exception:
+            except Exception: # nosec
                 pass
 
     def create_model_version(self, name, source=None, run_id=None, tags=None):
