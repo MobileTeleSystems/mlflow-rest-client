@@ -13,7 +13,8 @@ class ExperimentStage(Enum):
     deleted = "deleted"
     """ Experiment was deleted"""
 
-#pylint: disable=too-many-ancestors
+
+# pylint: disable=too-many-ancestors
 class ExperimentTag(Tag):
     """Experiment tag
 
@@ -85,7 +86,7 @@ class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
         experiment = Experiment(id=123, name='some_name')
     """
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(self, id, name, artifact_location=None, stage=None, tags=None):
         self.id = int(id)
         self.name = str(name)

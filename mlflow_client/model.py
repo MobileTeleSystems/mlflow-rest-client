@@ -104,7 +104,8 @@ class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
     def __hash__(self):
         return hash(self.state.value)
 
-#pylint: disable=too-many-ancestors
+
+# pylint: disable=too-many-ancestors
 class ModelVersionTag(Tag):
     """Model version tag
 
@@ -163,7 +164,7 @@ class ModelVersionList(SearchableList):
         assert this_list[ModelVersionStage.prod] == item
     """
 
-    #pylint: disable=broad-except
+    # pylint: disable=broad-except
     def __contains__(self, item):
         for it in self:
             try:
@@ -172,7 +173,7 @@ class ModelVersionList(SearchableList):
                         return True
                     if it.stage == ModelVersionStage(item):
                         return True
-            except Exception: # nosec
+            except Exception:  # nosec
                 pass
 
         if isinstance(item, ModelVersionStage):
@@ -180,7 +181,7 @@ class ModelVersionList(SearchableList):
 
         return super(ModelVersionList, self).__contains__(item)
 
-    #pylint: disable=broad-except
+    # pylint: disable=broad-except
     def __getitem__(self, item):
         for it in self:
             try:
@@ -189,7 +190,7 @@ class ModelVersionList(SearchableList):
                         return it
                     if it.stage == ModelVersionStage(item):
                         return it
-            except Exception: # nosec
+            except Exception:  # nosec
                 pass
 
         if isinstance(item, ModelVersionStage):
@@ -198,7 +199,7 @@ class ModelVersionList(SearchableList):
         return super(ModelVersionList, self).__getitem__(item)
 
 
-#pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors
 class ModelTag(Tag):
     """Model tag
 
@@ -225,7 +226,8 @@ class ModelTag(Tag):
         tag = ModelTag('some.tag', 'some.val')
     """
 
-#pylint: disable=too-many-instance-attributes
+
+# pylint: disable=too-many-instance-attributes
 class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
     """Model version representation
 
@@ -305,7 +307,7 @@ class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
 
     list_class = ModelVersionList
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         name,
@@ -427,7 +429,7 @@ class Model(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
         model = Model(name='some_model', versions=[ModelVersion('some_model', 1)])
     """
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self, name, creation_timestamp=None, last_updated_timestamp=None, description=None, versions=None, tags=None
     ):

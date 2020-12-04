@@ -113,7 +113,7 @@ class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
         run_info = RunInfo('some_id')
     """
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self, id, experiment_id=None, status=None, stage=None, start_time=None, end_time=None, artifact_uri=None
     ):
@@ -151,7 +151,7 @@ class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
         return self.id
 
 
-#pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors
 class Param(Tag):
     """Run parameter
 
@@ -226,7 +226,7 @@ class MetricList(SearchableList):
         return super(MetricList, self).__getitem__(item)
 
 
-#pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors
 class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     """Run metric representation
 
@@ -289,7 +289,7 @@ class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
         return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
 
 
-#pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors
 class RunTag(Tag):
     """Run tag
 

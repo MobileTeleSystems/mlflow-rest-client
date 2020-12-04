@@ -1,7 +1,7 @@
 from .internal import Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr
 
 
-#pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors
 class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     """Generic tag class
 
@@ -36,7 +36,7 @@ class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     def _from_dict(cls, inp):
         return cls(key=inp.get("key"), value=inp.get("value"))
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     @classmethod
     def from_list(cls, inp, **kwargs):
         if isinstance(inp, dict):
