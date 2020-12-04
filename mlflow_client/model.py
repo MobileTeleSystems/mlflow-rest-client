@@ -172,7 +172,7 @@ class ModelVersionList(SearchableList):
                         return True
                     if it.stage == ModelVersionStage(item):
                         return True
-            except Exception:
+            except Exception: # nosec
                 pass
 
         if isinstance(item, ModelVersionStage):
@@ -189,7 +189,7 @@ class ModelVersionList(SearchableList):
                         return it
                     if it.stage == ModelVersionStage(item):
                         return it
-            except Exception:
+            except Exception: # nosec
                 pass
 
         if isinstance(item, ModelVersionStage):
