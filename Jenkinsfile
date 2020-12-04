@@ -185,6 +185,19 @@ node('adm-ci') {
                 }
             }
 
+            stage('Bandit') {
+                gitlabCommitStatus('Pylint') {
+                    withEnv(["TAG=${testTag}-${env.BUILD_TAG}"]) {
+                        ansiColor('xterm') {
+                            sh script: """
+                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m bandit -r mlflow_client -f json -o ./reports/bandit.json'
+                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v
+                            """
+                        }
+                    }
+                }
+            }
+
             stage('Sonar Scan') {
                 gitlabCommitStatus('Sonar Scan') {
                     withSonarQubeEnv('sonarqube') {
