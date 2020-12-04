@@ -39,13 +39,14 @@ def test_run_info_without_experiment_id():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'status', [
+    "status",
+    [
         RunStatus.scheduled,
         RunStatus.started,
         RunStatus.finished,
         RunStatus.failed,
         RunStatus.killed,
-    ]
+    ],
 )
 def test_run_info_with_status(status):
     id = rand_str()
@@ -65,12 +66,7 @@ def test_run_info_without_status():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [
-        RunStage.active,
-        RunStage.deleted
-    ]
-)
+@pytest.mark.parametrize("stage", [RunStage.active, RunStage.deleted])
 def test_run_info_with_stage(stage):
     id = rand_str()
 
@@ -142,7 +138,7 @@ def test_run_info_without_artifact_uri():
 
     run_info = RunInfo(id)
 
-    assert run_info.artifact_uri == ''
+    assert run_info.artifact_uri == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -156,58 +152,47 @@ def test_run_info_make_str():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict():
-    dct = {
-        'run_id': rand_str()
-    }
+    dct = {"run_id": rand_str()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.id == dct['run_id']
+    assert run_info.id == dct["run_id"]
 
-    dct = {
-        'run_uuid': rand_str()
-    }
+    dct = {"run_uuid": rand_str()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.id == dct['run_uuid']
+    assert run_info.id == dct["run_uuid"]
 
-    dct = {
-        'id': rand_str()
-    }
+    dct = {"id": rand_str()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.id == dct['id']
+    assert run_info.id == dct["id"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_experiment_id():
-    dct = {
-        'id': rand_str(),
-        'experiment_id': rand_int()
-    }
+    dct = {"id": rand_str(), "experiment_id": rand_int()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.experiment_id == dct['experiment_id']
+    assert run_info.experiment_id == dct["experiment_id"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'status', [
+    "status",
+    [
         RunStatus.scheduled,
         RunStatus.started,
         RunStatus.finished,
         RunStatus.failed,
         RunStatus.killed,
-    ]
+    ],
 )
 def test_run_info_make_dict_with_status(status):
-    dct = {
-        'id': rand_str(),
-        'status': status.value
-    }
+    dct = {"id": rand_str(), "status": status.value}
 
     run_info = RunInfo.make(dct)
 
@@ -215,26 +200,15 @@ def test_run_info_make_dict_with_status(status):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [
-        RunStage.active,
-        RunStage.deleted
-    ]
-)
+@pytest.mark.parametrize("stage", [RunStage.active, RunStage.deleted])
 def test_run_info_make_dict_with_stage(stage):
-    dct = {
-        'id': rand_str(),
-        'lifecycle_stage': stage.value
-    }
+    dct = {"id": rand_str(), "lifecycle_stage": stage.value}
 
     run_info = RunInfo.make(dct)
 
     assert run_info.stage == stage
 
-    dct = {
-        'id': rand_str(),
-        'stage': stage.value
-    }
+    dct = {"id": rand_str(), "stage": stage.value}
 
     run_info = RunInfo.make(dct)
 
@@ -243,38 +217,29 @@ def test_run_info_make_dict_with_stage(stage):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_start_time():
-    dct = {
-        'id': rand_str(),
-        'start_time': now()
-    }
+    dct = {"id": rand_str(), "start_time": now()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.start_time == dct['start_time']
+    assert run_info.start_time == dct["start_time"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_end_time():
-    dct = {
-        'id': rand_str(),
-        'end_time': now()
-    }
+    dct = {"id": rand_str(), "end_time": now()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.end_time == dct['end_time']
+    assert run_info.end_time == dct["end_time"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_artifact_uri():
-    dct = {
-        'id': rand_str(),
-        'artifact_uri': rand_str()
-    }
+    dct = {"id": rand_str(), "artifact_uri": rand_str()}
 
     run_info = RunInfo.make(dct)
 
-    assert run_info.artifact_uri == dct['artifact_uri']
+    assert run_info.artifact_uri == dct["artifact_uri"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -331,9 +296,7 @@ def test_run_info_in():
     run1 = RunInfo(id1)
     run2 = RunInfo(id2)
 
-    lst = RunInfo.from_list([
-        run1
-    ])
+    lst = RunInfo.from_list([run1])
 
     assert run1 in lst
     assert run2 not in lst
@@ -346,9 +309,7 @@ def test_run_info_in_by_id():
 
     run1 = RunInfo(id1)
 
-    lst = RunInfo.from_list([
-        run1
-    ])
+    lst = RunInfo.from_list([run1])
 
     assert id1 in lst
     assert id2 not in lst
@@ -361,9 +322,7 @@ def test_run_info_get_item_by_id():
 
     run1 = RunInfo(id1)
 
-    lst = RunInfo.from_list([
-        run1
-    ])
+    lst = RunInfo.from_list([run1])
 
     assert lst[id1] == run1
 
@@ -468,49 +427,38 @@ def test_metric_make_tuple():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_make_dict():
-    dct = {
-        'key': rand_str()
-    }
+    dct = {"key": rand_str()}
 
     metric = Metric.make(dct)
 
-    assert metric.key == dct['key']
+    assert metric.key == dct["key"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_make_dict_with_value():
-    dct = {
-        'key': rand_str(),
-        'value': rand_float()
-    }
+    dct = {"key": rand_str(), "value": rand_float()}
 
     metric = Metric.make(dct)
 
-    assert metric.value == dct['value']
+    assert metric.value == dct["value"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_make_dict_with_step():
-    dct = {
-        'key': rand_str(),
-        'step': rand_int()
-    }
+    dct = {"key": rand_str(), "step": rand_int()}
 
     metric = Metric.make(dct)
 
-    assert metric.step == dct['step']
+    assert metric.step == dct["step"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_metric_make_dict_with_timestamp():
-    dct = {
-        'key': rand_str(),
-        'timestamp': now()
-    }
+    dct = {"key": rand_str(), "timestamp": now()}
 
     metric = Metric.make(dct)
 
-    assert metric.timestamp == dct['timestamp']
+    assert metric.timestamp == dct["timestamp"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -524,11 +472,8 @@ def test_metric_str():
 
     assert str(metric)
     assert str(metric) == "{key}: {value} for {step} at {timestamp}".format(
-                                key=key,
-                                value=value,
-                                step=step,
-                                timestamp=timestamp
-                            )
+        key=key, value=value, step=step, timestamp=timestamp
+    )
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -575,9 +520,7 @@ def test_metric_in():
     metric1 = Metric(key1)
     metric2 = Metric(key2)
 
-    lst = Metric.from_list([
-        metric1
-    ])
+    lst = Metric.from_list([metric1])
 
     assert metric1 in lst
     assert metric2 not in lst
@@ -590,9 +533,7 @@ def test_metric_in_by_key():
 
     metric1 = Metric(key1)
 
-    lst = Metric.from_list([
-        metric1
-    ])
+    lst = Metric.from_list([metric1])
 
     assert key1 in lst
     assert key2 not in lst
@@ -607,9 +548,7 @@ def test_metric_in_by_value():
 
     metric1 = Metric(key1, value1)
 
-    lst = Metric.from_list([
-        metric1
-    ])
+    lst = Metric.from_list([metric1])
 
     assert value1 in lst
     assert value2 not in lst
@@ -622,9 +561,7 @@ def test_metric_get_item_by_key():
 
     metric1 = Metric(key1)
 
-    lst = Metric.from_list([
-        metric1
-    ])
+    lst = Metric.from_list([metric1])
 
     assert lst[key1] == metric1
 
@@ -642,9 +579,7 @@ def test_metric_get_item_by_value():
 
     metric1 = Metric(key1, value1)
 
-    lst = Metric.from_list([
-        metric1
-    ])
+    lst = Metric.from_list([metric1])
 
     assert lst[value1] == metric1
 
@@ -688,9 +623,7 @@ def test_run_data_without_metrics():
 def test_run_data_with_tags():
     key = rand_str()
     value = rand_str()
-    tags = {
-        key: value
-    }
+    tags = {key: value}
 
     run_data = RunData(tags=tags)
 
@@ -711,7 +644,7 @@ def test_run_data_make_dict_with_params():
     param = Param(rand_str())
 
     dct = {
-        'params': [param],
+        "params": [param],
     }
 
     run_data = RunData.make(dct)
@@ -723,9 +656,7 @@ def test_run_data_make_dict_with_params():
 def test_run_data_make_dict_with_metrics():
     metric = Metric(rand_str())
 
-    dct = {
-        'metrics': [metric]
-    }
+    dct = {"metrics": [metric]}
 
     run_data = RunData.make(dct)
 
@@ -736,11 +667,7 @@ def test_run_data_make_dict_with_metrics():
 def test_run_data_make_dict_with_tags():
     key = rand_str()
     value = rand_str()
-    dct = {
-        'tags': {
-            key: value
-        }
-    }
+    dct = {"tags": {key: value}}
 
     run_data = RunData.make(dct)
 
@@ -875,10 +802,7 @@ def test_run_make_dict():
     run_info = RunInfo(id)
     run_data = RunData()
 
-    dct = {
-        'info': run_info,
-        'data': run_data
-    }
+    dct = {"info": run_info, "data": run_data}
 
     run = Run.make(dct)
 
@@ -966,9 +890,7 @@ def test_run_in():
     run1 = Run(info=run_info1)
     run2 = Run(info=run_info2)
 
-    lst = Run.from_list([
-        run1
-    ])
+    lst = Run.from_list([run1])
 
     assert run1 in lst
     assert run2 not in lst
@@ -983,9 +905,7 @@ def test_run_in_by_id():
 
     run1 = Run(info=run_info1)
 
-    lst = Run.from_list([
-        run1
-    ])
+    lst = Run.from_list([run1])
 
     assert id1 in lst
     assert id2 not in lst
@@ -1000,9 +920,7 @@ def test_run_get_item_by_id():
 
     run1 = Run(info=run_info1)
 
-    lst = Run.from_list([
-        run1
-    ])
+    lst = Run.from_list([run1])
 
     assert lst[id1] == run1
 

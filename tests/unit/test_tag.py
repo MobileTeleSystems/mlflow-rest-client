@@ -25,7 +25,7 @@ def test_tag_without_value():
     tag = Tag(key)
 
     assert tag.key == key
-    assert tag.value == ''
+    assert tag.value == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -35,7 +35,7 @@ def test_tag_make_str():
     tag = Tag.make(key)
 
     assert tag.key == key
-    assert tag.value == ''
+    assert tag.value == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -52,26 +52,26 @@ def test_tag_make_tuple():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_tag_make_dict():
     dct = {
-        'key': rand_str(),
-        'value': rand_str(),
+        "key": rand_str(),
+        "value": rand_str(),
     }
 
     tag = Tag.make(dct)
 
-    assert tag.key == dct['key']
-    assert tag.value == dct['value']
+    assert tag.key == dct["key"]
+    assert tag.value == dct["value"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_tag_make_dict_without_value():
     dct = {
-        'key': rand_str(),
+        "key": rand_str(),
     }
 
     tag = Tag.make(dct)
 
-    assert tag.key == dct['key']
-    assert tag.value == ''
+    assert tag.key == dct["key"]
+    assert tag.value == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -120,9 +120,7 @@ def test_tag_list_in_by_key():
 
     tag1 = Tag(key1, value1)
 
-    lst = Tag.from_list([
-        tag1
-    ])
+    lst = Tag.from_list([tag1])
 
     assert key1 in lst
     assert key2 not in lst
@@ -137,9 +135,7 @@ def test_tag_list_get_item_by_key():
 
     tag1 = Tag(key1, value1)
 
-    lst = Tag.from_list([
-        tag1
-    ])
+    lst = Tag.from_list([tag1])
 
     assert lst[key1] == tag1
 

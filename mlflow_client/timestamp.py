@@ -3,6 +3,7 @@ import time
 
 from enum import Enum
 
+
 class Unit(Enum):
     nanosec = 1000
     msec = 1
@@ -18,11 +19,11 @@ def normalize_timestamp(timestamp):
         unit = Unit.nanosec
     else:
         unit = Unit.msec
-    return timestamp/unit.value
+    return timestamp / unit.value
 
 
 def mlflow_timestamp(timestamp):
-    return timestamp*1000
+    return timestamp * 1000
 
 
 def timestamp_2_time(timestamp):
@@ -37,7 +38,7 @@ def _remove_tz(inp):
     if inp.utcoffset() is not None:
         inp -= inp.utcoffset()
     if inp.tzinfo is not None:
-        if hasattr(datetime, 'timezone'):
+        if hasattr(datetime, "timezone"):
             inp = inp.replace(tzinfo=datetime.timezone.utc)
         else:
             inp = inp.replace(tzinfo=None)

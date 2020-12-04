@@ -13,8 +13,8 @@ from .conftest import DEFAULT_TIMEOUT, rand_str, rand_float, create_exp_name, cr
 
 log = logging.getLogger(__name__)
 
-host = os.environ['MLFLOW_HOST'] or 'localhost'
-port = os.environ['MLFLOW_PORT'] or '5000'
+host = os.environ["MLFLOW_HOST"] or "localhost"
+port = os.environ["MLFLOW_PORT"] or "5000"
 api_url = "http://{host}:{port}".format(host=host, port=port)
 client = MLflowApiClient(api_url)
 
@@ -488,9 +488,7 @@ def test_log_run_parameter_fail(create_run):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_log_run_parameters(create_run):
-    params = {
-        rand_str(): rand_str()
-    }
+    params = {rand_str(): rand_str()}
 
     run = create_run
     for key in params:
@@ -532,9 +530,7 @@ def test_log_run_metric(create_run):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_log_run_metrics(create_run):
-    metrics = {
-        rand_str(): rand_float()
-    }
+    metrics = {rand_str(): rand_float()}
 
     run = create_run
     for key in metrics:
@@ -568,9 +564,7 @@ def test_set_run_tag(create_run):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_set_run_tags(create_run):
-    tags = {
-        rand_str(): rand_str()
-    }
+    tags = {rand_str(): rand_str()}
 
     run = create_run
     for key in tags:
@@ -600,9 +594,7 @@ def test_delete_run_tag(create_run):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_delete_run_tags(create_run):
-    tags = {
-        rand_str(): rand_str()
-    }
+    tags = {rand_str(): rand_str()}
 
     run = create_run
     client.set_run_tags(run.id, tags)
@@ -618,12 +610,10 @@ def test_delete_run_tags(create_run):
 def test_list_run_metric_history(create_run):
     timestamp = now()
     key = rand_str()
-    values = [{
-        'key': key,
-        'value': rand_float(),
-        'step': i,
-        'timestamp': timestamp + timedelta(seconds=i*10)
-    } for i in range(1, 6)]
+    values = [
+        {"key": key, "value": rand_float(), "step": i, "timestamp": timestamp + timedelta(seconds=i * 10)}
+        for i in range(1, 6)
+    ]
 
     run = create_run
     client.log_run_metrics(run.id, values)
@@ -631,7 +621,7 @@ def test_list_run_metric_history(create_run):
     for metric in client.list_run_metric_history(run.id, key):
         found = None
         for _metric in values:
-            if _metric['key'] == metric.key and _metric['step'] == metric.step:
+            if _metric["key"] == metric.key and _metric["step"] == metric.step:
                 found = Metric.from_dict(_metric)
                 break
 
@@ -644,12 +634,10 @@ def test_list_run_metric_history(create_run):
 def test_list_run_metric_history_iterator(create_run):
     timestamp = now()
     key = rand_str()
-    values = [{
-        'key': key,
-        'value': rand_float(),
-        'step': i,
-        'timestamp': timestamp + timedelta(seconds=i*10)
-    } for i in range(1, 6)]
+    values = [
+        {"key": key, "value": rand_float(), "step": i, "timestamp": timestamp + timedelta(seconds=i * 10)}
+        for i in range(1, 6)
+    ]
 
     run = create_run
     client.log_run_metrics(run.id, values)
@@ -657,7 +645,7 @@ def test_list_run_metric_history_iterator(create_run):
     for metric in client.list_run_metric_history_iterator(run.id, key):
         found = None
         for _metric in values:
-            if _metric['key'] == metric.key and _metric['step'] == metric.step:
+            if _metric["key"] == metric.key and _metric["step"] == metric.step:
                 found = Metric.from_dict(_metric)
                 break
 
@@ -678,12 +666,10 @@ def test_list_run_artifacts(create_run):
 def test_search_runs(create_run):
     timestamp = now()
     key = rand_str()
-    values = [{
-        'key': key,
-        'value': rand_float(0, 1),
-        'step': i,
-        'timestamp': timestamp + timedelta(seconds=i*10)
-    } for i in range(1, 6)]
+    values = [
+        {"key": key, "value": rand_float(0, 1), "step": i, "timestamp": timestamp + timedelta(seconds=i * 10)}
+        for i in range(1, 6)
+    ]
 
     run = create_run
     client.log_run_metrics(run.id, values)
@@ -697,12 +683,10 @@ def test_search_runs(create_run):
 def test_search_runs_iterator(create_run):
     timestamp = now()
     key = rand_str()
-    values = [{
-        'key': key,
-        'value': rand_float(0, 1),
-        'step': i,
-        'timestamp': timestamp + timedelta(seconds=i*10)
-    } for i in range(1, 6)]
+    values = [
+        {"key": key, "value": rand_float(0, 1), "step": i, "timestamp": timestamp + timedelta(seconds=i * 10)}
+        for i in range(1, 6)
+    ]
 
     run = create_run
     client.log_run_metrics(run.id, values)
@@ -910,9 +894,7 @@ def test_list_model_versions(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [stage for stage in ModelVersionStage]
-)
+@pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
 def test_list_model_versions_with_stage(create_model, stage):
     model = create_model
 
@@ -928,7 +910,6 @@ def test_list_model_versions_with_stage(create_model, stage):
             assert version1 in versions
         else:
             assert version1 not in versions
-
 
     version2 = client.create_model_version(model.name)
     client.transition_model_version_stage(model.name, version2.version, stage)
@@ -978,9 +959,7 @@ def test_list_model_versions_iterator(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [stage for stage in ModelVersionStage]
-)
+@pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
 def test_list_model_versions_iterator_with_stage(create_model, stage):
     model = create_model
 
@@ -1005,7 +984,6 @@ def test_list_model_versions_iterator_with_stage(create_model, stage):
 
     version2 = client.create_model_version(model.name)
     client.transition_model_version_stage(model.name, version2.version, stage)
-
 
     for _stage in ModelVersionStage:
         present1 = False
@@ -1082,9 +1060,7 @@ def test_list_model_all_versions_iterator(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [stage for stage in ModelVersionStage]
-)
+@pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
 def test_list_model_all_versions_with_stage(create_model, stage):
     model = create_model
 
@@ -1101,7 +1077,6 @@ def test_list_model_all_versions_with_stage(create_model, stage):
         else:
             assert version1 not in versions
 
-
     version2 = client.create_model_version(model.name)
     client.transition_model_version_stage(model.name, version2.version, stage)
 
@@ -1116,9 +1091,7 @@ def test_list_model_all_versions_with_stage(create_model, stage):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [stage for stage in ModelVersionStage]
-)
+@pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
 def test_list_model_all_versions_iterator_with_stage(create_model, stage):
     model = create_model
 
@@ -1143,7 +1116,6 @@ def test_list_model_all_versions_iterator_with_stage(create_model, stage):
 
     version2 = client.create_model_version(model.name)
     client.transition_model_version_stage(model.name, version2.version, stage)
-
 
     for _stage in ModelVersionStage:
         present1 = False
@@ -1339,12 +1311,8 @@ def test_get_model_version_download_url(request, create_model):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    "old_stage, changed", [
-        (None,                       True),
-        (ModelVersionStage.test,     False),
-        (ModelVersionStage.prod,     True),
-        (ModelVersionStage.archived, True)
-    ]
+    "old_stage, changed",
+    [(None, True), (ModelVersionStage.test, False), (ModelVersionStage.prod, True), (ModelVersionStage.archived, True)],
 )
 def test_test_model_version(create_model_version, old_stage, changed):
     old_version = create_model_version
@@ -1362,20 +1330,16 @@ def test_test_model_version(create_model_version, old_stage, changed):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    "old_stage, changed", [
-        (None,                       False),
-        (ModelVersionStage.test,     True),
-        (ModelVersionStage.prod,     False),
-        (ModelVersionStage.archived, False)
-    ]
+    "old_stage, changed",
+    [
+        (None, False),
+        (ModelVersionStage.test, True),
+        (ModelVersionStage.prod, False),
+        (ModelVersionStage.archived, False),
+    ],
 )
 @pytest.mark.parametrize(
-    "new_stage", [
-        (None),
-        (ModelVersionStage.test),
-        (ModelVersionStage.prod),
-        (ModelVersionStage.archived)
-    ]
+    "new_stage", [(None), (ModelVersionStage.test), (ModelVersionStage.prod), (ModelVersionStage.archived)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_test_model_version_archive_existing(request, create_model_version, old_stage, new_stage, changed):
@@ -1403,15 +1367,10 @@ def test_test_model_version_archive_existing(request, create_model_version, old_
         assert new_version.stage == old_version.stage
 
 
-
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    "old_stage, changed", [
-        (None,                       True),
-        (ModelVersionStage.test,     True),
-        (ModelVersionStage.prod,     False),
-        (ModelVersionStage.archived, True)
-    ]
+    "old_stage, changed",
+    [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, False), (ModelVersionStage.archived, True)],
 )
 def test_promote_model_version(create_model_version, old_stage, changed):
     old_version = create_model_version
@@ -1429,20 +1388,16 @@ def test_promote_model_version(create_model_version, old_stage, changed):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    "old_stage, changed", [
-        (None,                       False),
-        (ModelVersionStage.test,     False),
-        (ModelVersionStage.prod,     True),
-        (ModelVersionStage.archived, False)
-    ]
+    "old_stage, changed",
+    [
+        (None, False),
+        (ModelVersionStage.test, False),
+        (ModelVersionStage.prod, True),
+        (ModelVersionStage.archived, False),
+    ],
 )
 @pytest.mark.parametrize(
-    "new_stage", [
-        (None),
-        (ModelVersionStage.test),
-        (ModelVersionStage.prod),
-        (ModelVersionStage.archived)
-    ]
+    "new_stage", [(None), (ModelVersionStage.test), (ModelVersionStage.prod), (ModelVersionStage.archived)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_promote_model_version_archive_existing(request, create_model_version, old_stage, new_stage, changed):
@@ -1472,12 +1427,8 @@ def test_promote_model_version_archive_existing(request, create_model_version, o
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    "old_stage, changed", [
-        (None,                       True),
-        (ModelVersionStage.test,     True),
-        (ModelVersionStage.prod,     True),
-        (ModelVersionStage.archived, False)
-    ]
+    "old_stage, changed",
+    [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, True), (ModelVersionStage.archived, False)],
 )
 def test_archive_model_version(create_model_version, old_stage, changed):
     old_version = create_model_version

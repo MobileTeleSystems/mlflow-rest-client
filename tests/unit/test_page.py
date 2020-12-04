@@ -41,76 +41,61 @@ def test_page_without_next_page_token():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_dict():
-    dct = {
-        'items': [rand_str()]
-    }
+    dct = {"items": [rand_str()]}
 
     page = Page.make(dct)
 
-    assert page.items == dct['items']
+    assert page.items == dct["items"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_dict_with_next_page_token():
-    dct = {
-        'items': [rand_str()],
-        'next_page_token': rand_str()
-    }
+    dct = {"items": [rand_str()], "next_page_token": rand_str()}
 
     page = Page.make(dct)
 
-    assert page.items == dct['items']
-    assert page.next_page_token == dct['next_page_token']
+    assert page.items == dct["items"]
+    assert page.next_page_token == dct["next_page_token"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_dict_with_items_key():
-    dct = {
-        'runs': [rand_str()]
-    }
+    dct = {"runs": [rand_str()]}
 
-    page = Page.make(dct, items_key='runs')
+    page = Page.make(dct, items_key="runs")
 
-    assert page.items == dct['runs']
+    assert page.items == dct["runs"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_item_class():
     dct = {
-        'items': [rand_str()],
+        "items": [rand_str()],
     }
 
     page = Page.make(dct, item_class=Model)
 
     assert page.items
     assert isinstance(page.items[0], Model)
-    assert page.items[0].name == dct['items'][0]
+    assert page.items[0].name == dct["items"][0]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_item_class_with_next_page_token():
-    dct = {
-        'items': [rand_str()],
-        'next_page_token': rand_str()
-    }
+    dct = {"items": [rand_str()], "next_page_token": rand_str()}
 
     page = Page.make(dct, item_class=Model)
 
     assert page.items
     assert isinstance(page.items[0], Model)
-    assert page.items[0].name == dct['items'][0]
-    assert page.next_page_token == dct['next_page_token']
+    assert page.items[0].name == dct["items"][0]
+    assert page.next_page_token == dct["next_page_token"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_make_item_class_with_kwargs():
     dct = {
-        'items': [{
-            'path': rand_str(),
-            'is_dir': True,
-            'root': rand_str(),
-            'file_size': rand_int()
-        }],
+        "items": [{"path": rand_str(), "is_dir": True, "root": rand_str(), "file_size": rand_int()}],
     }
     root = rand_str()
 
@@ -118,10 +103,10 @@ def test_page_make_item_class_with_kwargs():
 
     assert page.items
     assert isinstance(page.items[0], Artifact)
-    assert page.items[0].path == dct['items'][0]['path']
+    assert page.items[0].path == dct["items"][0]["path"]
     assert not page.items[0].is_dir
     assert page.items[0].root == root
-    assert page.items[0].file_size == dct['items'][0]['file_size']
+    assert page.items[0].file_size == dct["items"][0]["file_size"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -156,9 +141,7 @@ def test_page_in():
     item1 = rand_str()
     item2 = rand_str()
 
-    items = [
-        item1
-    ]
+    items = [item1]
 
     page = Page(items)
 
@@ -171,9 +154,7 @@ def test_page_get_item():
     item1 = rand_str()
     item2 = rand_str()
 
-    items = [
-        item1
-    ]
+    items = [item1]
 
     page = Page(items)
 
@@ -186,9 +167,7 @@ def test_page_add():
     item1 = rand_str()
     item2 = rand_str()
 
-    items = [
-        item1
-    ]
+    items = [item1]
 
     page = Page(items)
     assert item2 not in page
@@ -202,10 +181,7 @@ def test_page_del():
     item1 = rand_str()
     item2 = rand_str()
 
-    items = [
-        item1,
-        item2
-    ]
+    items = [item1, item2]
 
     page = Page(items)
     assert item2 in page

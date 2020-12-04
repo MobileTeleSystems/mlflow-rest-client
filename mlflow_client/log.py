@@ -2,6 +2,7 @@ import logging
 import logging.handlers
 import sys
 
+
 def init(level):
     # Setup logging
     logger = logging.getLogger(__name__)
@@ -19,5 +20,5 @@ def stdout_logger(level):
     if isinstance(level, str):
         level = level.upper()
     console.setLevel(level)
-    console.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    console.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
     return console

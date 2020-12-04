@@ -36,16 +36,11 @@ def test_experiment_without_artifact_location():
 
     experiment = Experiment(id, name)
 
-    assert experiment.artifact_location == ''
+    assert experiment.artifact_location == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [
-        ExperimentStage.active,
-        ExperimentStage.deleted
-    ]
-)
+@pytest.mark.parametrize("stage", [ExperimentStage.active, ExperimentStage.deleted])
 def test_experiment_with_stage(stage):
     id = rand_int()
     name = rand_str()
@@ -74,9 +69,7 @@ def test_experiment_with_tags():
 
     key = rand_str()
     value = rand_str()
-    tags = {
-        key: value
-    }
+    tags = {key: value}
 
     experiment = Experiment(id, name, tags=tags)
 
@@ -108,52 +101,41 @@ def test_experiment_make_tuple():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_experiment_make_dict():
-    dct = {
-        'id': rand_int(),
-        'name': rand_str()
-    }
+    dct = {"id": rand_int(), "name": rand_str()}
 
     experiment = Experiment.make(dct)
 
-    assert experiment.id == dct['id']
-    assert experiment.name == dct['name']
+    assert experiment.id == dct["id"]
+    assert experiment.name == dct["name"]
 
-    dct = {
-        'experiment_id': rand_int(),
-        'name': rand_str()
-    }
+    dct = {"experiment_id": rand_int(), "name": rand_str()}
 
     experiment = Experiment.make(dct)
 
-    assert experiment.id == dct['experiment_id']
-    assert experiment.name == dct['name']
+    assert experiment.id == dct["experiment_id"]
+    assert experiment.name == dct["name"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_experiment_make_dict_with_artifact_location():
     dct = {
-        'id': rand_int(),
-        'name': rand_str(),
-        'artifact_location': rand_str(),
+        "id": rand_int(),
+        "name": rand_str(),
+        "artifact_location": rand_str(),
     }
 
     experiment = Experiment.make(dct)
 
-    assert experiment.artifact_location == dct['artifact_location']
+    assert experiment.artifact_location == dct["artifact_location"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'stage', [
-        ExperimentStage.active,
-        ExperimentStage.deleted
-    ]
-)
+@pytest.mark.parametrize("stage", [ExperimentStage.active, ExperimentStage.deleted])
 def test_experiment_make_dict_with_stage(stage):
     dct = {
-        'id': rand_int(),
-        'name': rand_str(),
-        'lifecycle_stage': stage.value,
+        "id": rand_int(),
+        "name": rand_str(),
+        "lifecycle_stage": stage.value,
     }
 
     experiment = Experiment.make(dct)
@@ -161,9 +143,9 @@ def test_experiment_make_dict_with_stage(stage):
     assert experiment.stage == stage
 
     dct = {
-        'id': rand_int(),
-        'name': rand_str(),
-        'stage': stage.value,
+        "id": rand_int(),
+        "name": rand_str(),
+        "stage": stage.value,
     }
 
     experiment = Experiment.make(dct)
@@ -176,13 +158,7 @@ def test_experiment_make_dict_with_tags():
     key = rand_str()
     value = rand_str()
 
-    dct = {
-        'id': rand_int(),
-        'name': rand_str(),
-        'tags': {
-            key: value
-        }
-    }
+    dct = {"id": rand_int(), "name": rand_str(), "tags": {key: value}}
 
     experiment = Experiment.make(dct)
 
@@ -250,9 +226,7 @@ def test_experiment_in():
     experiment1 = Experiment(id1, name1)
     experiment2 = Experiment(id2, name2)
 
-    lst = Experiment.from_list([
-        experiment1
-    ])
+    lst = Experiment.from_list([experiment1])
 
     assert experiment1 in lst
     assert experiment2 not in lst
@@ -267,9 +241,7 @@ def test_experiment_in_by_name():
 
     experiment1 = Experiment(id1, name1)
 
-    lst = Experiment.from_list([
-        experiment1
-    ])
+    lst = Experiment.from_list([experiment1])
 
     assert name1 in lst
     assert name2 not in lst
@@ -284,9 +256,7 @@ def test_experiment_get_item_by_name():
 
     experiment1 = Experiment(id1, name1)
 
-    lst = Experiment.from_list([
-        experiment1
-    ])
+    lst = Experiment.from_list([experiment1])
 
     assert lst[name1] == experiment1
 

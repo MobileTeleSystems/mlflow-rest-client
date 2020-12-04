@@ -3,7 +3,15 @@ import pytest
 
 from datetime import timedelta
 
-from mlflow_client.model import Model, ModelTag, ModelVersion, ModelVersionStage, ModelVersionStatus, ModelVersionState, ModelVersionTag
+from mlflow_client.model import (
+    Model,
+    ModelTag,
+    ModelVersion,
+    ModelVersionStage,
+    ModelVersionStatus,
+    ModelVersionState,
+    ModelVersionTag,
+)
 from .conftest import DEFAULT_TIMEOUT, rand_str, rand_int, now
 
 log = logging.getLogger(__name__)
@@ -64,12 +72,7 @@ def test_model_version_without_last_updated_timestamp():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "stage", [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived]
 )
 def test_model_version_with_stage(stage):
     name = rand_str()
@@ -109,7 +112,7 @@ def test_model_version_without_description():
 
     model_version = ModelVersion(name, version)
 
-    assert model_version.description == ''
+    assert model_version.description == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -131,7 +134,7 @@ def test_model_version_without_source():
 
     model_version = ModelVersion(name, version)
 
-    assert model_version.source == ''
+    assert model_version.source == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -157,13 +160,7 @@ def test_model_version_without_run_id():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'state', [
-        ModelVersionState.ready,
-        ModelVersionState.pending,
-        ModelVersionState.failed
-    ]
-)
+@pytest.mark.parametrize("state", [ModelVersionState.ready, ModelVersionState.pending, ModelVersionState.failed])
 def test_model_version_with_state(state):
     name = rand_str()
     version = rand_int()
@@ -174,13 +171,7 @@ def test_model_version_with_state(state):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'state', [
-        ModelVersionState.ready,
-        ModelVersionState.pending,
-        ModelVersionState.failed
-    ]
-)
+@pytest.mark.parametrize("state", [ModelVersionState.ready, ModelVersionState.pending, ModelVersionState.failed])
 def test_model_version_with_state_message(state):
     name = rand_str()
     version = rand_int()
@@ -207,12 +198,9 @@ def test_model_version_with_tags():
     name = rand_str()
     version = rand_int()
 
-
     key = rand_str()
     value = rand_str()
-    tags = {
-        key: value
-    }
+    tags = {key: value}
 
     model_version = ModelVersion(name, version, tags=tags)
 
@@ -245,55 +233,50 @@ def test_model_version_make_tuple():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
+        "name": rand_str(),
+        "version": rand_int(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.name == dct['name']
+    assert model_version.name == dct["name"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict_with_creation_timestamp():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'creation_timestamp': now(),
+        "name": rand_str(),
+        "version": rand_int(),
+        "creation_timestamp": now(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.created_time == dct['creation_timestamp']
+    assert model_version.created_time == dct["creation_timestamp"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict_with_last_updated_timestamp():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'last_updated_timestamp': now(),
+        "name": rand_str(),
+        "version": rand_int(),
+        "last_updated_timestamp": now(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.updated_time == dct['last_updated_timestamp']
+    assert model_version.updated_time == dct["last_updated_timestamp"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "stage", [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived]
 )
 def test_model_version_make_dict_with_stage(stage):
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'current_stage': stage.value,
+        "name": rand_str(),
+        "version": rand_int(),
+        "current_stage": stage.value,
     }
 
     model_version = ModelVersion.make(dct)
@@ -301,9 +284,9 @@ def test_model_version_make_dict_with_stage(stage):
     assert model_version.stage == stage
 
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'stage': stage.value,
+        "name": rand_str(),
+        "version": rand_int(),
+        "stage": stage.value,
     }
 
     model_version = ModelVersion.make(dct)
@@ -314,55 +297,49 @@ def test_model_version_make_dict_with_stage(stage):
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict_with_description():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'description': rand_str(),
+        "name": rand_str(),
+        "version": rand_int(),
+        "description": rand_str(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.description == dct['description']
+    assert model_version.description == dct["description"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict_with_source():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'source': rand_str(),
+        "name": rand_str(),
+        "version": rand_int(),
+        "source": rand_str(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.source == dct['source']
+    assert model_version.source == dct["source"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_version_make_dict_with_run_id():
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'run_id': rand_str(),
+        "name": rand_str(),
+        "version": rand_int(),
+        "run_id": rand_str(),
     }
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.run_id == dct['run_id']
+    assert model_version.run_id == dct["run_id"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'state', [
-        ModelVersionState.ready,
-        ModelVersionState.pending,
-        ModelVersionState.failed
-    ]
-)
+@pytest.mark.parametrize("state", [ModelVersionState.ready, ModelVersionState.pending, ModelVersionState.failed])
 def test_model_version_make_dict_with_state(state):
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'status': state,
+        "name": rand_str(),
+        "version": rand_int(),
+        "status": state,
     }
 
     model_version = ModelVersion.make(dct)
@@ -370,9 +347,9 @@ def test_model_version_make_dict_with_state(state):
     assert model_version.status == ModelVersionStatus(state)
 
     dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'state': state,
+        "name": rand_str(),
+        "version": rand_int(),
+        "state": state,
     }
 
     model_version = ModelVersion.make(dct)
@@ -381,35 +358,19 @@ def test_model_version_make_dict_with_state(state):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-@pytest.mark.parametrize(
-    'state', [
-        ModelVersionState.ready,
-        ModelVersionState.pending,
-        ModelVersionState.failed
-    ]
-)
+@pytest.mark.parametrize("state", [ModelVersionState.ready, ModelVersionState.pending, ModelVersionState.failed])
 def test_model_version_make_dict_with_state_message(state):
-    dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'status': state,
-        'status_message': rand_str()
-    }
+    dct = {"name": rand_str(), "version": rand_int(), "status": state, "status_message": rand_str()}
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.status == ModelVersionStatus(state, dct['status_message'])
+    assert model_version.status == ModelVersionStatus(state, dct["status_message"])
 
-    dct = {
-        'name': rand_str(),
-        'version': rand_int(),
-        'state': state,
-        'state_message': rand_str()
-    }
+    dct = {"name": rand_str(), "version": rand_int(), "state": state, "state_message": rand_str()}
 
     model_version = ModelVersion.make(dct)
 
-    assert model_version.status == ModelVersionStatus(state, dct['state_message'])
+    assert model_version.status == ModelVersionStatus(state, dct["state_message"])
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -417,14 +378,7 @@ def test_model_version_make_dict_with_tags():
     key = rand_str()
     value = rand_str()
 
-    dct = {
-        'id': rand_int(),
-        'version': rand_int(),
-        'name': rand_str(),
-        'tags': {
-            key: value
-        }
-    }
+    dct = {"id": rand_int(), "version": rand_int(), "name": rand_str(), "tags": {key: value}}
 
     model_version = ModelVersion.make(dct)
 
@@ -441,7 +395,7 @@ def test_model_version_str():
     model_version = ModelVersion(name, version)
 
     assert str(model_version)
-    assert str(model_version) == '{name} v{version}'.format(name=name, version=version)
+    assert str(model_version) == "{name} v{version}".format(name=name, version=version)
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -469,9 +423,7 @@ def test_model_version_in():
     model1 = ModelVersion(name1, version1)
     model2 = ModelVersion(name2, version2)
 
-    lst = ModelVersion.from_list([
-        model1
-    ])
+    lst = ModelVersion.from_list([model1])
 
     assert model1 in lst
     assert model2 not in lst
@@ -479,20 +431,11 @@ def test_model_version_in():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "stage", [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived]
 )
 @pytest.mark.parametrize(
-    'other_stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "other_stage",
+    [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived],
 )
 def test_model_version_in_by_stage(stage, other_stage):
     name1 = rand_str()
@@ -501,9 +444,7 @@ def test_model_version_in_by_stage(stage, other_stage):
 
     model1 = ModelVersion(name1, version1, stage=stage)
 
-    lst = ModelVersion.from_list([
-        model1
-    ])
+    lst = ModelVersion.from_list([model1])
 
     assert stage in lst
 
@@ -513,20 +454,11 @@ def test_model_version_in_by_stage(stage, other_stage):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
-    'stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "stage", [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived]
 )
 @pytest.mark.parametrize(
-    'other_stage', [
-        ModelVersionStage.unknown,
-        ModelVersionStage.prod,
-        ModelVersionStage.test,
-        ModelVersionStage.archived
-    ]
+    "other_stage",
+    [ModelVersionStage.unknown, ModelVersionStage.prod, ModelVersionStage.test, ModelVersionStage.archived],
 )
 def test_model_version_get_item_by_stage(stage, other_stage):
     name1 = rand_str()
@@ -535,9 +467,7 @@ def test_model_version_get_item_by_stage(stage, other_stage):
 
     model1 = ModelVersion(name1, version1, stage=stage)
 
-    lst = ModelVersion.from_list([
-        model1
-    ])
+    lst = ModelVersion.from_list([model1])
 
     assert lst[stage].version == version1
     assert lst[stage].stage == stage
@@ -612,7 +542,7 @@ def test_model_without_description():
 
     model = Model(name)
 
-    assert model.description == ''
+    assert model.description == ""
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -634,9 +564,7 @@ def test_model_with_tags():
 
     key = rand_str()
     value = rand_str()
-    tags = {
-        key: value
-    }
+    tags = {key: value}
 
     model = Model(name, tags=tags)
 
@@ -674,62 +602,54 @@ def test_model_make_str():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_make_dict():
-    dct = {
-        'name': rand_str()
-    }
+    dct = {"name": rand_str()}
 
     model = Model.make(dct)
 
-    assert model.name == dct['name']
+    assert model.name == dct["name"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_make_dict_with_creation_timestamp():
     dct = {
-        'name': rand_str(),
-        'creation_timestamp': now(),
+        "name": rand_str(),
+        "creation_timestamp": now(),
     }
 
     model = Model.make(dct)
 
-    assert model.created_time == dct['creation_timestamp']
+    assert model.created_time == dct["creation_timestamp"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_make_dict_with_last_updated_timestamp():
     dct = {
-        'name': rand_str(),
-        'last_updated_timestamp': now(),
+        "name": rand_str(),
+        "last_updated_timestamp": now(),
     }
 
     model = Model.make(dct)
 
-    assert model.updated_time == dct['last_updated_timestamp']
+    assert model.updated_time == dct["last_updated_timestamp"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_make_dict_with_description():
     dct = {
-        'name': rand_str(),
-        'description': rand_str(),
+        "name": rand_str(),
+        "description": rand_str(),
     }
 
     model = Model.make(dct)
 
-    assert model.description == dct['description']
+    assert model.description == dct["description"]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_model_make_dict_with_versions():
     name = rand_str()
     version = rand_int()
-    dct = {
-        'name': name,
-        'latest_versions': [{
-            'name': name,
-            'version': version
-        }]
-    }
+    dct = {"name": name, "latest_versions": [{"name": name, "version": version}]}
 
     model = Model.make(dct)
 
@@ -744,13 +664,7 @@ def test_model_make_dict_with_tags():
     key = rand_str()
     value = rand_str()
 
-    dct = {
-        'id': rand_int(),
-        'name': rand_str(),
-        'tags': {
-            key: value
-        }
-    }
+    dct = {"id": rand_int(), "name": rand_str(), "tags": {key: value}}
 
     model = Model.make(dct)
 
@@ -795,9 +709,7 @@ def test_model_in():
     model1 = Model(name1)
     model2 = Model(name2)
 
-    lst = Model.from_list([
-        model1
-    ])
+    lst = Model.from_list([model1])
 
     assert model1 in lst
     assert model2 not in lst
@@ -810,9 +722,7 @@ def test_model_in_by_name():
 
     model1 = Model(name1)
 
-    lst = Model.from_list([
-        model1
-    ])
+    lst = Model.from_list([model1])
 
     assert name1 in lst
     assert name2 not in lst
@@ -825,9 +735,7 @@ def test_model_get_item_by_name():
 
     model1 = Model(name1)
 
-    lst = Model.from_list([
-        model1
-    ])
+    lst = Model.from_list([model1])
 
     assert lst[name1] == model1
 
