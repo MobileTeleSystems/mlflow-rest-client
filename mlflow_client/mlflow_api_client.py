@@ -1,4 +1,4 @@
-#pylint: disable=too-many-lines
+# pylint: disable=too-many-lines
 
 import json
 import requests
@@ -12,7 +12,7 @@ from .run import Run, RunInfo, RunViewType, RunStatus, Metric
 from .timestamp import current_timestamp, time_2_timestamp
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class MLflowApiClient(object):
     """HTTP Client for MLflow API
 
@@ -56,7 +56,7 @@ class MLflowApiClient(object):
 
     MAX_RESULTS = 100
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
         self.base_url = api_url
         self.user = user
@@ -1732,7 +1732,7 @@ class MLflowApiClient(object):
 
         return ModelVersion.from_list(self.list_model_all_versions_iterator(name=name, stages=stages))
 
-    #pylint: disable=broad-except
+    # pylint: disable=broad-except
     def list_model_all_versions_iterator(self, name, stages=None):
         """
         Iterate by models versions (all versions of each stage)
@@ -1784,7 +1784,7 @@ class MLflowApiClient(object):
                 else:
                     yield version
 
-            except Exception: # nosec
+            except Exception:  # nosec
                 pass
 
     def create_model_version(self, name, source=None, run_id=None, tags=None):
@@ -2265,7 +2265,7 @@ class MLflowApiClient(object):
     def _delete(self, url, **data):
         self._request("delete", url, json=data)
 
-    #pylint: disable=logging-format-interpolation
+    # pylint: disable=logging-format-interpolation
     def _request(self, method, url, log_response=True, **params):
         url = self._url(url)
 

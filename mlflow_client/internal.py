@@ -5,7 +5,7 @@ from textwrap import dedent
 import six
 
 
-#pylint: disable=isinstance-second-argument-not-valid-type
+# pylint: disable=isinstance-second-argument-not-valid-type
 class SearchableList(list):
     _compare_with_class = None
 
@@ -19,7 +19,7 @@ class SearchableList(list):
 
         return super(SearchableList, self).__contains__(item)
 
-    #pylint: disable=missing-format-attribute
+    # pylint: disable=missing-format-attribute
     def __getitem__(self, item):
         for it in self:
             if isinstance(it, self._compare_with_class) and it == item:
@@ -163,7 +163,7 @@ class ListableMeta(type):
 
 @six.add_metaclass(ListableMeta)
 class Listable(Makeable):
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     @classmethod
     def from_list(cls, inp, **kwargs):
         """
@@ -189,7 +189,7 @@ class Listable(Makeable):
 
 
 class Comparable(object):
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     def __eq__(self, other):
         if other is not None and not isinstance(other, self.__class__):
             other = self.__class__.make(other)
