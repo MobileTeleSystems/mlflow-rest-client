@@ -21,9 +21,9 @@ class Page(object):
     --------
     .. code:: python
 
-        model = Page(items=[Model(name='some_model')])
+        model = Page(items=[Model(name="some_model")])
 
-        model = Page(items=[Model(name='some_model')], next_page_token='some_token')
+        model = Page(items=[Model(name="some_model")], next_page_token="some_token")
     """
 
     def __init__(self, items=None, next_page_token=None):
@@ -47,7 +47,7 @@ class Page(object):
         item_class : class, optional
             Item class to be called
 
-            Should implement `from_list` or `make` methods, overwise constructor will be used
+            Should implement `from_list` or `make` methods, otherwise constructor will be used
 
         **kwargs : dict, optional
             Additional params for item constructor
@@ -61,9 +61,9 @@ class Page(object):
         --------
         .. code:: python
 
-            model = Page.make([Model(name='some_model')])
+            model = Page.make([Model(name="some_model")])
 
-            model = Page.make([ModelVersion(name='some_model', version=1)], name='another_model')
+            model = Page.make([ModelVersion(name="some_model", version=1)], name="another_model")
         """
 
         items = inp.copy()

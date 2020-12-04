@@ -1,18 +1,19 @@
 import logging
-import pytest
-
 from datetime import timedelta
+
+import pytest
 
 from mlflow_client.model import (
     Model,
     ModelTag,
     ModelVersion,
     ModelVersionStage,
-    ModelVersionStatus,
     ModelVersionState,
+    ModelVersionStatus,
     ModelVersionTag,
 )
-from .conftest import DEFAULT_TIMEOUT, rand_str, rand_int, now
+
+from .conftest import DEFAULT_TIMEOUT, now, rand_int, rand_str
 
 log = logging.getLogger(__name__)
 

@@ -2,17 +2,17 @@ from enum import Enum
 
 import six
 
-from .tag import Tag
-from .timestamp import timestamp_2_time
 from .internal import (
-    SearchableList,
-    Listable,
     Comparable,
     ComparableByStr,
-    MakeableFromTupleStr,
-    MakeableFromStr,
     HashableByStr,
+    Listable,
+    MakeableFromStr,
+    MakeableFromTupleStr,
+    SearchableList,
 )
+from .tag import Tag
+from .timestamp import timestamp_2_time
 
 
 class RunStage(Enum):
@@ -110,7 +110,7 @@ class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        run_info = RunInfo('some_id')
+        run_info = RunInfo("some_id")
     """
 
     # pylint: disable=too-many-arguments
@@ -186,12 +186,12 @@ class MetricList(SearchableList):
     --------
     .. code:: python
 
-        name = 'some_metric'
+        name = "some_metric"
         value = 1.23
         item = Metric(name, value)
 
         simple_list = [item]
-        this_list = Metric.from_list([item]) # or MetricList([item])
+        this_list = Metric.from_list([item])  # or MetricList([item])
 
         assert item in simple_list
         assert item in this_list
@@ -262,10 +262,12 @@ class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        metric = Metric(name='some.metric')
-        metric = Metric(name='some.metric', value=1.23)
-        metric = Metric(name='some.metric', value=1.23, step=2)
-        metric = Metric(name='some.metric', value=1.23, step=2, timestamp=datetime.datetime.now())
+        metric = Metric(name="some.metric")
+        metric = Metric(name="some.metric", value=1.23)
+        metric = Metric(name="some.metric", value=1.23, step=2)
+        metric = Metric(
+            name="some.metric", value=1.23, step=2, timestamp=datetime.datetime.now()
+        )
     """
 
     list_class = MetricList
@@ -313,7 +315,7 @@ class RunTag(Tag):
     --------
     .. code:: python
 
-        tag = RunTag('some.tag', 'some.val')
+        tag = RunTag("some.tag", "some.val")
     """
 
 
@@ -346,9 +348,9 @@ class RunData(Listable, Comparable):
     --------
     .. code:: python
 
-        param = Param('some.param', 'some_value')
-        metric = Metric('some.metric', value=1.23)
-        tag = RunTag('some.tag', 'some.val')
+        param = Param("some.param", "some_value")
+        metric = Metric("some.metric", value=1.23)
+        tag = RunTag("some.tag", "some.val")
 
         run_data = RunData(params=[param], metrics=[metric], tags=[tag])
     """
@@ -402,7 +404,7 @@ class Run(Listable, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        run_info = RunInfo('some_id')
+        run_info = RunInfo("some_id")
         run_data = RunData(params=..., metrics=..., tags=...)
 
         run = Run(run_info, run_data)

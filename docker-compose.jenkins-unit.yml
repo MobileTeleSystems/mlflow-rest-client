@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 services:
   mlflow-client-jenkins-unit:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-unit}
@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile.unit
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./reports:/app/reports:rw
-      - ./.coveragerc:/app/.coveragerc:ro
-      - ./.pylintrc:/app/.pylintrc:ro
+    - /etc/localtime:/etc/localtime:ro
+    - ./reports:/app/reports:rw
+    - ./.coveragerc:/app/.coveragerc:ro
+    - ./.pylintrc:/app/.pylintrc:ro
     network_mode: host

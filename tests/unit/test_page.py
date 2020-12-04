@@ -1,10 +1,12 @@
 import logging
+
 import pytest
 
-from mlflow_client.page import Page
-from mlflow_client.model import Model
 from mlflow_client.artifact import Artifact
-from .conftest import DEFAULT_TIMEOUT, rand_str, rand_int
+from mlflow_client.model import Model
+from mlflow_client.page import Page
+
+from .conftest import DEFAULT_TIMEOUT, rand_int, rand_str
 
 log = logging.getLogger(__name__)
 

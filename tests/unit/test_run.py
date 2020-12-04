@@ -1,10 +1,20 @@
 import logging
-import pytest
-
 from datetime import timedelta
 
-from mlflow_client.run import Run, RunData, RunInfo, RunStage, RunStatus, Metric, Param, RunTag
-from .conftest import DEFAULT_TIMEOUT, rand_str, rand_int, rand_float, now
+import pytest
+
+from mlflow_client.run import (
+    Metric,
+    Param,
+    Run,
+    RunData,
+    RunInfo,
+    RunStage,
+    RunStatus,
+    RunTag,
+)
+
+from .conftest import DEFAULT_TIMEOUT, now, rand_float, rand_int, rand_str
 
 log = logging.getLogger(__name__)
 

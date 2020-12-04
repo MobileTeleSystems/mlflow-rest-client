@@ -1,0 +1,8 @@
+bandit
+changelog
+numpydoc
+pre-commit
+pylint
+setuptools-git-versioning
+sphinx
+sphinx_rtd_theme

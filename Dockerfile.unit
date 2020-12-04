@@ -2,7 +2,9 @@ ARG PYTHON_VERSION=3.7
 FROM python:${PYTHON_VERSION}-slim as base
 
 ADD http://bdreposdev01.msk.mts.ru/artifactory/files/repofiles/debian_sources.list /etc/apt/sources.list
-RUN apt-get update && apt-get install make git -fy --no-install-recommends
+RUN apt-get update && \
+    apt-get install make git -fy --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY docker/pip.conf /etc/pip.conf
 RUN pip install -U pip --no-cache-dir
@@ -12,8 +14,8 @@ WORKDIR /app
 # Ignore cached dependency layer, download new dependencies every time
 ARG CACHEBUST=1
 
-COPY requirements.txt requirements-test.txt /app/
-RUN pip install -r requirements.txt -r requirements-test.txt --no-cache-dir
+COPY requirements.txt requirements-test.txt requirements-dev.txt /app/
+RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt --no-cache-dir
 
 ENV PYTHONPATH "/app:$PYTHONPATH"
 ENV PATH /app:$PATH

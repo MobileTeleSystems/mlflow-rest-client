@@ -1,8 +1,8 @@
-from __future__ import print_function
-
 """
 Calls API operations on the hard-coded Python scikit-learn run in experiment 0 executed in the docker container.
 """
+
+from __future__ import print_function
 
 import sys
 from mlflow_api_client import MLflowApiClient

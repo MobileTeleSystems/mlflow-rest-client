@@ -1,6 +1,6 @@
 import os
 
-from .internal import Listable, MakeableFromStr, ComparableByStr, HashableByStr
+from .internal import ComparableByStr, HashableByStr, Listable, MakeableFromStr
 
 
 class Artifact(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
@@ -24,7 +24,7 @@ class Artifact(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        artifact = Artifact(path='some/path')
+        artifact = Artifact(path="some/path")
     """
 
     def __init__(self, path, root=None, is_dir=False, file_size=None):

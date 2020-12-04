@@ -1,15 +1,23 @@
-import os
 import logging
-import pytest
-
-from requests import HTTPError
+import os
 from datetime import timedelta
+
+import pytest
+from requests import HTTPError
 
 from mlflow_client import MLflowApiClient
 from mlflow_client.experiment import ExperimentStage
-from mlflow_client.run import RunStatus, RunStage, Metric
 from mlflow_client.model import ModelVersionStage
-from .conftest import DEFAULT_TIMEOUT, rand_str, rand_float, create_exp_name, create_model_name, now
+from mlflow_client.run import Metric, RunStage, RunStatus
+
+from .conftest import (
+    DEFAULT_TIMEOUT,
+    create_exp_name,
+    create_model_name,
+    now,
+    rand_float,
+    rand_str,
+)
 
 log = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-version: "3.5"
+version: '3.5'
 services:
   mlflow-client-jenkins-integration:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
@@ -7,29 +7,29 @@ services:
       context: .
       dockerfile: Dockerfile.integration
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./reports:/app/reports:rw
-      - ./.coveragerc:/app/.coveragerc:ro
+    - /etc/localtime:/etc/localtime:ro
+    - ./reports:/app/reports:rw
+    - ./.coveragerc:/app/.coveragerc:ro
     depends_on:
-        - "mlflow-jenkins"
+    - mlflow-jenkins
     networks:
-      - default
-      - mlflow
+    - default
+    - mlflow
   mlflow-jenkins:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow:${MLFLOW_TAG:-latest}
     env_file: .env.jenkins.integration
     restart: unless-stopped
     depends_on:
-        - "mlflow-jenkins-db"
+    - mlflow-jenkins-db
     networks:
-      - db
-      - mlflow
+    - db
+    - mlflow
   mlflow-jenkins-db:
     image: postgres:11.8
     env_file: .env.jenkins.integration
     restart: unless-stopped
     networks:
-      - db
+    - db
 networks:
   mlflow:
     internal: true

@@ -1,7 +1,6 @@
+import logging
 import random
 import string
-import logging
-
 from datetime import datetime
 
 log = logging.getLogger(__name__)

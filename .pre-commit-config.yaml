@@ -1,0 +1,87 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.3.0
+  hooks:
+  - id: check-ast
+  - id: check-case-conflict
+  - id: check-docstring-first
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-toml
+  - id: check-vcs-permalinks
+  - id: check-yaml
+  - id: file-contents-sorter
+    files: ^(\.env.*|\.gitignore|\.dockerignore)$
+  - id: requirements-txt-fixer
+    files: ^(requirements.*\.txt)$
+  - id: end-of-file-fixer
+    exclude: ^.*/VERSION$
+  - id: fix-byte-order-marker
+  - id: fix-encoding-pragma
+    args: [--remove]
+  - id: name-tests-test
+    files: ^tests/integration/.*\.py$
+    args: [--django]
+  - id: trailing-whitespace
+- repo: https://github.com/Lucas-C/pre-commit-hooks
+  rev: v1.1.9
+  hooks:
+  - id: remove-tabs
+    exclude: ^docs/(make.bat|Makefile)$
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.0.0
+  hooks:
+  - id: codespell
+    args: [-w]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v1.6.1
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix, --indent, '2']
+- repo: https://github.com/lovesegfault/beautysh
+  rev: 6.0.1
+  hooks:
+  - id: beautysh
+- repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
+  rev: v0.1.0
+  hooks:
+  - id: dockerfilelint
+- repo: https://github.com/IamTheFij/docker-pre-commit
+  rev: v2.0.0
+  hooks:
+  - id: docker-compose-check
+    files: ^docker-compose.*\.(yaml|yml)$
+- repo: https://github.com/pycqa/isort
+  rev: 5.5.2
+  hooks:
+  - id: isort
+    files: mlflow_client/.*
+  - id: isort
+    files: tests/.*
+- repo: https://github.com/pre-commit/pygrep-hooks
+  rev: v1.7.0    # Use the ref you want to point at
+  hooks:
+  - id: python-no-log-warn
+  - id: python-no-eval
+  - id: rst-backticks
+  - id: rst-directive-colons
+  - id: rst-inline-touching-normal
+  - id: text-unicode-replacement-char
+- repo: https://github.com/ambv/black
+  rev: 20.8b1
+  hooks:
+  - id: black
+    language_version: python3
+- repo: https://github.com/asottile/blacken-docs
+  rev: v1.8.0
+  hooks:
+  - id: blacken-docs
+- repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+  rev: v1.0.4
+  hooks:
+  - id: python-bandit-vulnerability-check
+    exclude: ^tests/.*$
+- repo: meta
+  hooks:
+  - id: check-hooks-apply
+  - id: check-useless-excludes

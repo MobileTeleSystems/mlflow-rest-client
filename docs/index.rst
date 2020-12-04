@@ -15,6 +15,7 @@
     :name: howto
 
     install
+    develop
     usage
 
 .. toctree::

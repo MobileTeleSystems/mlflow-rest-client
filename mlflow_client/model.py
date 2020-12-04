@@ -1,16 +1,16 @@
 from enum import Enum
 
-from .tag import Tag
-from .timestamp import timestamp_2_time
 from .internal import (
-    SearchableList,
-    Listable,
-    MakeableFromStr,
-    MakeableFromTupleStr,
     Comparable,
     ComparableByStr,
     HashableByStr,
+    Listable,
+    MakeableFromStr,
+    MakeableFromTupleStr,
+    SearchableList,
 )
+from .tag import Tag
+from .timestamp import timestamp_2_time
 
 
 class ModelVersionStage(Enum):
@@ -72,7 +72,7 @@ class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
     --------
     .. code:: python
 
-        status = ModelVersionStatus(state='READY')
+        status = ModelVersionStatus(state="READY")
 
         status = ModelVersionStatus(state=ModelVersionState.ready)
 
@@ -129,7 +129,7 @@ class ModelVersionTag(Tag):
     --------
     .. code:: python
 
-        tag = ModelVersionTag('some.tag', 'some.val')
+        tag = ModelVersionTag("some.tag", "some.val")
     """
 
 
@@ -146,11 +146,11 @@ class ModelVersionList(SearchableList):
     --------
     .. code:: python
 
-        name = 'some_metric'
+        name = "some_metric"
         item = ModelVersion(name)
 
         simple_list = [item]
-        this_list = ModelVersion.from_list([item]) # or ModelVersionList([item])
+        this_list = ModelVersion.from_list([item])  # or ModelVersionList([item])
 
         assert item in simple_list
         assert item in this_list
@@ -223,7 +223,7 @@ class ModelTag(Tag):
     --------
     .. code:: python
 
-        tag = ModelTag('some.tag', 'some.val')
+        tag = ModelTag("some.tag", "some.val")
     """
 
 
@@ -302,7 +302,7 @@ class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
     --------
     .. code:: python
 
-        model_version = ModelVersion(name='some_model', version=1)
+        model_version = ModelVersion(name="some_model", version=1)
     """
 
     list_class = ModelVersionList
@@ -424,9 +424,9 @@ class Model(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        model = Model(name='some_model')
+        model = Model(name="some_model")
 
-        model = Model(name='some_model', versions=[ModelVersion('some_model', 1)])
+        model = Model(name="some_model", versions=[ModelVersion("some_model", 1)])
     """
 
     # pylint: disable=too-many-arguments

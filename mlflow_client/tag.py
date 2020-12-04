@@ -1,4 +1,4 @@
-from .internal import Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr
+from .internal import ComparableByStr, HashableByStr, Listable, MakeableFromTupleStr
 
 
 # pylint: disable=too-many-ancestors
@@ -25,7 +25,7 @@ class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
     --------
     .. code:: python
 
-        tag = Tag('some.tag', 'some.val')
+        tag = Tag("some.tag", "some.val")
     """
 
     def __init__(self, key, value=None):
