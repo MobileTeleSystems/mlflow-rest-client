@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile.integration
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # for running local test, can be removed
       - ./reports:/app/reports:rw
       - ./.coveragerc:/app/.coveragerc:ro
     depends_on:

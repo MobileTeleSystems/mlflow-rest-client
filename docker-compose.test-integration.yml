@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile.integration
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # for running local test, can be removed
       - ./mlflow_client:/app/mlflow_client
       - ./tests/integration:/app/tests/integration
       - ./pytest_runner.sh:/app/pytest_runner.sh
