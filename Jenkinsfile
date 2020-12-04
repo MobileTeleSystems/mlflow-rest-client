@@ -167,7 +167,7 @@ node('adm-ci') {
                             """
                         }
                     }
-
+ 
                     junit 'reports/junit/*.xml'
                 }
             }
