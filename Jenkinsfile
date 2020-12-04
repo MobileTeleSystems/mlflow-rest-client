@@ -125,7 +125,7 @@ node('adm-ci') {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-unit
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" down
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" down -v
                                     """
                                 }
                             }
@@ -146,7 +146,7 @@ node('adm-ci') {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-integration
-                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" down
+                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" down -v
                                     """
                                 }
                             }
@@ -162,12 +162,12 @@ node('adm-ci') {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
-                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
+                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v
                                 sed -i 's#/app#${env.WORKSPACE}#g' reports/coverage*.xml
                             """
                         }
                     }
- 
+
                     junit 'reports/junit/*.xml'
                 }
             }
@@ -178,7 +178,7 @@ node('adm-ci') {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m pylint .mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
-                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down
+                                docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v
                             """
                         }
                     }
@@ -315,7 +315,7 @@ node('adm-ci') {
                         withEnv(["TAG=${testTag}-${suffix}-python${pythonVersion}-${env.BUILD_TAG}"]) {
                             ansiColor('xterm') {
                                 sh script: """
-                                    docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${pythonVersion}" down || true
+                                    docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${pythonVersion}" down -v || true
                                     docker rmi ${docker_registry}/${docker_image}:\$TAG || true
                                 """
                             }
@@ -327,7 +327,7 @@ node('adm-ci') {
                     withEnv(["TAG=${testTag}-${suffix}-${env.BUILD_TAG}"]) {
                         ansiColor('xterm') {
                             sh script: """
-                                docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down || true
+                                docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down -v || true
                                 docker rmi ${docker_registry}/${docker_image}:\$TAG || true
                             """
                         }
