@@ -78,6 +78,12 @@ Changelog
 
         Fix PyLint report upload to SonarQube
 
+    .. change::
+        :tags: ci, bug
+        :tickets: DSX-34
+
+        Format source code with Black
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40

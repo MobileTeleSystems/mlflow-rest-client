@@ -17,26 +17,26 @@ import subprocess
 from setuptools_git_versioning import get_tag, get_all_tags, get_sha
 from packaging import version as Version
 
-sys.path.insert(0, os.path.abspath('..'))
-extensions = ['sphinx.ext.autodoc', 'numpydoc', 'sphinx_rtd_theme', 'changelog']
+sys.path.insert(0, os.path.abspath(".."))
+extensions = ["sphinx.ext.autodoc", "numpydoc", "sphinx_rtd_theme", "changelog"]
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'mlflow-client'
-copyright = '2020, msmarty4'
-author = 'msmarty4'
+project = "mlflow-client"
+copyright = "2020, msmarty4"
+author = "msmarty4"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -44,7 +44,9 @@ author = 'msmarty4'
 #
 # The short X.Y version.
 
-ver = Version.parse(subprocess.check_output('python ../setup.py --version', shell=True, universal_newlines=True).strip())
+ver = Version.parse(
+    subprocess.check_output("python ../setup.py --version", shell=True, universal_newlines=True).strip()
+)
 version = ver.base_version
 # The full version, including alpha/beta/rc tags.
 release = ver.public
@@ -59,10 +61,10 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -73,7 +75,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -84,13 +86,13 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mlflow-client-doc'
+htmlhelp_basename = "mlflow-client-doc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -99,15 +101,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -117,8 +116,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'mlflow-client.tex', 'mlflow-client Documentation',
-     'msmarty4', 'manual'),
+    (master_doc, "mlflow-client.tex", "mlflow-client Documentation", "msmarty4", "manual"),
 ]
 
 
@@ -126,10 +124,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'mlflow-client', u'mlflow-client Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "mlflow-client", u"mlflow-client Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -138,12 +133,32 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'mlflow-client', u'mlflow-client documentation',
-     author, 'mlflow-client', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "mlflow-client",
+        u"mlflow-client documentation",
+        author,
+        "mlflow-client",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
-changelog_sections = ["general", "client", "artifact", "experiment", "model", "page", "run", "tag", "dependency", "docs", "samples", "ci", "tests"]
+changelog_sections = [
+    "general",
+    "client",
+    "artifact",
+    "experiment",
+    "model",
+    "page",
+    "run",
+    "tag",
+    "dependency",
+    "docs",
+    "samples",
+    "ci",
+    "tests",
+]
 
 changelog_inner_tag_sort = ["breaking", "deprecated", "feature", "bug", "refactor"]
 
@@ -165,27 +180,30 @@ versions.extend([(tag, "/{}/".format(tag)) for tag in tags])
 
 tag = get_tag()
 tag_sha = get_sha(tag)
-head_sha = get_sha('HEAD')
+head_sha = get_sha("HEAD")
 on_tag = tag and head_sha is not None and head_sha == tag_sha
 
 context = {
-    'current_version': release,
-    'version_slug': release,
-    'versions': versions,
-    'downloads': [
-        ("html", "http://rep.msk.mts.ru/artifactory/files/mlflow-client-docs/html-{release}.tar.gz".format(release=release))
+    "current_version": release,
+    "version_slug": release,
+    "versions": versions,
+    "downloads": [
+        (
+            "html",
+            "http://rep.msk.mts.ru/artifactory/files/mlflow-client-docs/html-{release}.tar.gz".format(release=release),
+        )
     ],
-    'single_version': False,
-    'gitlab_host': 'git.bd.msk.mts.ru',
-    'gitlab_user': 'bigdata/platform/dsx',
-    'gitlab_repo': 'mlflow-client',
-    'gitlab_version': version if on_tag else 'master',
-    'conf_py_path': '/docs/',
-    'display_gitlab': True,
-    'commit': head_sha[:8] if head_sha is not None else None
+    "single_version": False,
+    "gitlab_host": "git.bd.msk.mts.ru",
+    "gitlab_user": "bigdata/platform/dsx",
+    "gitlab_repo": "mlflow-client",
+    "gitlab_version": version if on_tag else "master",
+    "conf_py_path": "/docs/",
+    "display_gitlab": True,
+    "commit": head_sha[:8] if head_sha is not None else None,
 }
 
-if 'html_context' in globals():
+if "html_context" in globals():
     html_context.update(context)
 
 else:

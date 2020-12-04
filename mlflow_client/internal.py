@@ -5,6 +5,7 @@ from textwrap import dedent
 import six
 
 
+#pylint: disable=isinstance-second-argument-not-valid-type
 class SearchableList(list):
     _compare_with_class = None
 
@@ -18,17 +19,18 @@ class SearchableList(list):
 
         return super(SearchableList, self).__contains__(item)
 
-
+    #pylint: disable=missing-format-attribute
     def __getitem__(self, item):
         for it in self:
             if isinstance(it, self._compare_with_class) and it == item:
                 return it
 
         if not isinstance(item, int):
-            raise KeyError('{klass.__name__} not found in list by {item.__class__.__name__} {item}'.format(
-                    klass=self._compare_with_class,
-                    item=item
-                ))
+            raise KeyError(
+                "{klass.__name__} not found in list by {item.__class__.__name__} {item}".format(
+                    klass=self._compare_with_class, item=item
+                )
+            )
 
         return super(SearchableList, self).__getitem__(item)
 
@@ -57,7 +59,9 @@ class Makeable(object):
         .. code:: python
 
             {var} = {klass}.make({{'some': 'input'}})
-        """.format(klass=cls.__name__, var=cls.__name__.lower())
+        """.format(
+            klass=cls.__name__, var=cls.__name__.lower()
+        )
 
         if isinstance(inp, cls):
             return inp
@@ -69,7 +73,6 @@ class Makeable(object):
             return cls.from_dict(vars(inp), **kwargs)
         except TypeError:
             return None
-
 
     @classmethod
     def from_dict(cls, inp, **kwargs):
@@ -88,13 +91,14 @@ class Makeable(object):
         ----------
         item : {klass}
             Item with certain class
-        """.format(klass=cls.__name__)
+        """.format(
+            klass=cls.__name__
+        )
 
         dct = inp.copy()
         dct.update(kwargs)
 
         return cls._from_dict(dct)
-
 
     @classmethod
     def _from_dict(cls, inp):
@@ -104,7 +108,8 @@ class Makeable(object):
 class ListableMeta(type):
     @staticmethod
     def _class_doc(klass):
-        return dedent("""
+        return dedent(
+            """
             List of :ref:`{klass}` with extended functions
 
             Parameters
@@ -128,33 +133,37 @@ class ListableMeta(type):
                 assert name not in simple_list
                 assert name in this_list
 
-        """.format(klass=klass))
+        """.format(
+                klass=klass
+            )
+        )
 
-    def __new__(metacls, name, bases, attrs):
-        list_class = attrs.get('list_class', None)
+    def __new__(cls, name, bases, attrs):
+        list_class = attrs.get("list_class", None)
 
         if list_class is None:
             list_class_name = "{}List".format(name)
-            list_class = type(list_class_name, (SearchableList, ), {})
+            list_class = type(list_class_name, (SearchableList,), {})
             try:
-                list_class.__doc__ = metacls._class_doc(name)
+                list_class.__doc__ = cls._class_doc(name)
             except AttributeError:
                 pass
 
-        attrs['list_class'] = list_class
-        result = type.__new__(metacls, name, bases, attrs)
+        attrs["list_class"] = list_class
+        result = type.__new__(cls, name, bases, attrs)
 
         list_class.__module__ = result.__module__
         list_class._compare_with_class = result
 
         setattr(sys.modules[result.__module__], list_class.__name__, list_class)
 
-        setattr(result, 'list_class', list_class)
+        setattr(result, "list_class", list_class)
         return result
 
 
 @six.add_metaclass(ListableMeta)
 class Listable(Makeable):
+    #pylint: disable=no-member
     @classmethod
     def from_list(cls, inp, **kwargs):
         """
@@ -172,12 +181,15 @@ class Listable(Makeable):
         ----------
         list : {klass}
             Items class list
-        """.format(klass=cls.list_class)
+        """.format(
+            klass=cls.list_class
+        )
 
         return cls.list_class(cls.make(item, **kwargs) for item in inp)
 
 
 class Comparable(object):
+    #pylint: disable=no-member
     def __eq__(self, other):
         if other is not None and not isinstance(other, self.__class__):
             other = self.__class__.make(other)

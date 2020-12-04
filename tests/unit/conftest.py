@@ -11,7 +11,7 @@ DEFAULT_TIMEOUT = 60
 
 def rand_str(length=8):
     letters = string.ascii_lowercase
-    return ''.join(random.sample(letters, length))
+    return "".join(random.sample(letters, length))
 
 
 def rand_int(a=0, b=100):
