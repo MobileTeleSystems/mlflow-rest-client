@@ -66,6 +66,12 @@ Changelog
 
         Move CI/CD from bdbuilder04 to adm-ci
 
+    .. change::
+        :tags: ci, bug
+        :tickets: DSX-34
+
+        Remove volumes after stopping test container
+
 .. changelog::
     :version: 1.1.3
     :released: 17.10.2020 03:40
