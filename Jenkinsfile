@@ -25,7 +25,7 @@ String version
 String release
 String docker_version
 
-List pythonVersions = ['2.7', '3.6', '3.7']
+List pythonVersions = ['2.7', '3.6', '3.7', '3.8', '3.9']
 
 node('adm-ci') {
     try {
@@ -82,7 +82,7 @@ node('adm-ci') {
                         failFast: true
                     ]
 
-                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: 'https://docker.rep.msk.mts.ru']) {
+                    withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: "https://${docker_registry}"]) {
                         pythonVersions.each { def pythonVersion ->
                             ['unit', 'integration'].each { String suffix ->
                                 def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"

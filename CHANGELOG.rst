@@ -12,6 +12,12 @@ Changelog
 
         Pass project urls into setup.py
 
+    .. change::
+        :tags: general, feature
+        :tickets: DSX-34
+
+        Test python 3.8 and 3.9 compatibility
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06

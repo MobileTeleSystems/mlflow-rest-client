@@ -20,7 +20,7 @@ repos:
   - id: fix-encoding-pragma
     args: [--remove]
   - id: name-tests-test
-    files: ^tests/integration/.*\.py$
+    files: ^tests/(integration|unit)/.*\.py$
     args: [--django]
   - id: trailing-whitespace
   - id: detect-private-key
