@@ -4,6 +4,15 @@ Changelog
 1.1
 --------------------
 .. changelog::
+    :version: 1.1.5
+
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-34
+
+        Pass project urls into setup.py
+
+.. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06
 

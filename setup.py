@@ -25,7 +25,7 @@ setup(
     description="Low-level Python client for MLflow API",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    url="https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-python-client",
+    url="https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client",
     author="msmarty4",
     author_email="msmarty4@mts.ru",
     classifiers=[
@@ -39,6 +39,12 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
     ],
+    project_urls={
+        "Documentation": "https://mlflow-client.msk.bd-cloud.mts.ru",
+        "Source": "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client",
+        "CI/CD": "https://jenkins.bd.msk.mts.ru/job/Platform/job/DSX/job/mlflow-client/",
+        "Tracker": "https://jira.bd.msk.mts.ru/projects/DSX/issues",
+    },
     keywords="MLflow REST API",
     packages=find_packages(exclude=["docs", "docs.*", "tests", "tests.*"]),
     install_requires=requirements,
