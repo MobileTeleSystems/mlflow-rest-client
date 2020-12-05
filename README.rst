@@ -71,7 +71,7 @@ Clone repo:
 
    git clone ssh://git@git.bd.msk.mts.ru:8022/bigdata/platform/dsx/mlflow-client.git -b dev
 
-   cd ds-scorer-operator
+   cd mlflow-client
 
 Install dependencies for development:
 
