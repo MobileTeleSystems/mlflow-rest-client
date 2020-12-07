@@ -18,6 +18,12 @@ Changelog
 
         Test python 3.8 and 3.9 compatibility
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-34
+
+        Improve Jenkinsfile
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06

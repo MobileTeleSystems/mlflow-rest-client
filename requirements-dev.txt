@@ -1,4 +1,4 @@
-bandit
+bandit; python_version >= "3"
 changelog
 numpydoc
 pre-commit
