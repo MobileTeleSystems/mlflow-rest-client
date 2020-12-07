@@ -2,10 +2,10 @@
 
 @Library('jenkins_lib') _
 
-def project = 'mlflow-client'
+String project = 'mlflow-client'
 
-def docker_registry = 'docker.rep.msk.mts.ru'
-def docker_image = "bigdata/platform/dsx/${project}"
+String docker_registry = 'docker.rep.msk.mts.ru'
+String docker_image = "bigdata/platform/dsx/${project}"
 
 def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
@@ -14,18 +14,25 @@ String git_tag
 String git_branch
 String git_commit
 
-Boolean isMaster = false
-Boolean isDev = true
-Boolean isTagged = false
-Boolean isRelease = false
+Boolean is_master = false
+Boolean is_dev = false
+Boolean is_prerelease = false
+Boolean is_bug = false
+Boolean is_hotfix = false
+Boolean is_feature = false
 
-String testTag
-String prodTag
+Boolean is_tagged = false
+Boolean is_release_branch=false
+Boolean is_release = false
+
+String test_tag
+String prod_tag
 String version
 String release
 String docker_version
+String jira_task
 
-List pythonVersions = ['2.7', '3.6', '3.7', '3.8', '3.9']
+List python_versions = ['2.7', '3.6', '3.7', '3.8', '3.9']
 
 node('adm-ci') {
     try {
@@ -52,7 +59,7 @@ node('adm-ci') {
                 }
 
                 git_branch = scmVars.CHANGE_BRANCH ?: env.BRANCH_NAME ?: scmVars.GIT_BRANCH
-                git_branch = git_branch.replace('origin/', '').replace('feature/', '').trim()
+                git_branch = git_branch.replace('origin/', '').trim()
 
                 println(git_tag)
                 println(git_branch)
@@ -65,16 +72,25 @@ node('adm-ci') {
                 """
             }
 
-            isMaster  = git_branch == 'master'
-            isDev     = git_branch == 'dev'
-            isTagged  = !!git_tag
-            isRelease = isMaster && isTagged
+            is_master     = git_branch == 'master'
+            is_dev        = git_branch in ['dev', 'develop']
+            is_bug        = git_branch.contains('bug')
+            is_feature    = git_branch.contains('feature')
+            is_prerelease = git_branch.contains('release')
+            is_hotfix     = git_branch.contains('hotfix')
+
+            is_tagged  = !!git_tag
+            is_release_branch = is_master
+            is_release = is_release_branch && is_tagged
+
+            jira_task = git_branch.split('/').size() > 1 ? git_branch.split('/')[-1] : null
+
             version = git_tag ? git_tag.replaceAll(/^v/, '') : null
             docker_version = version ? version.replace('.dev', '-dev') : null
             release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
 
-            testTag = isDev ? 'dev-test' : 'test'
-            prodTag = isDev ? 'dev'      : 'latest'
+            test_tag = is_dev ? 'dev-test' : 'test'
+            prod_tag = is_dev ? 'dev'      : 'latest'
 
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
@@ -83,13 +99,13 @@ node('adm-ci') {
                     ]
 
                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: "https://${docker_registry}"]) {
-                        pythonVersions.each { def pythonVersion ->
+                        python_versions.each { def python_version ->
                             ['unit', 'integration'].each { String suffix ->
-                                def testTagVersioned = "${testTag}-${suffix}-python${pythonVersion}"
+                                def test_tag_versioned = "${test_tag}-${suffix}-python${python_version}"
 
-                                build["${pythonVersion}-${suffix}"] = {
+                                build["${python_version}-${suffix}"] = {
                                     ansiColor('xterm') {
-                                        docker.build("${docker_registry}/${docker_image}:${testTagVersioned}-${env.BUILD_TAG}", "--build-arg CACHEBUST=\$(date +%s) --build-arg PYTHON_VERSION=${pythonVersion} --force-rm -f Dockerfile.${suffix} .")
+                                        docker.build("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --build-arg PYTHON_VERSION=${python_version} --force-rm -f Dockerfile.${suffix} .")
                                     }
                                 }
                             }
@@ -98,14 +114,14 @@ node('adm-ci') {
 
                         ['unit', 'integration'].each { String suffix ->
                             ansiColor('xterm') {
-                                docker.build("${docker_registry}/${docker_image}:${testTag}-${suffix}-${env.BUILD_TAG}", "--build-arg CACHEBUST=\$(date +%s) --force-rm -f Dockerfile.${suffix} .")
+                                docker.build("${docker_registry}/${docker_image}:${test_tag}-${suffix}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --force-rm -f Dockerfile.${suffix} .")
                             }
                         }
                     }
                 }
             }
 
-            docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside("--entrypoint=''") {
+            docker.image("${docker_registry}/${docker_image}:${test_tag}-unit-${env.BUILD_ID}").inside("--entrypoint=''") {
                 try {
                     version = sh script: "python setup.py --version", returnStdout: true
                     version = version.trim()
@@ -119,13 +135,13 @@ node('adm-ci') {
                     def build = [
                         failFast: true
                     ]
-                    pythonVersions.each { def pythonVersion ->
-                        build[pythonVersion] = {
-                            withEnv(["TAG=${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                    python_versions.each { def python_version ->
+                        build[python_version] = {
+                            withEnv(["TAG=${test_tag}-unit-python${python_version}-${env.BUILD_ID}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-unit
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${pythonVersion}" down -v
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-unit
+                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${python_version}" down -v
                                     """
                                 }
                             }
@@ -140,13 +156,13 @@ node('adm-ci') {
                     def build = [
                         failFast: true
                     ]
-                    pythonVersions.each { def pythonVersion ->
-                        build[pythonVersion] = {
-                            withEnv(["TAG=${testTag}-integration-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                    python_versions.each { def python_version ->
+                        build[python_version] = {
+                            withEnv(["TAG=${test_tag}-integration-python${python_version}-${env.BUILD_ID}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
-                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" run --rm mlflow-client-jenkins-integration
-                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${pythonVersion}" down -v
+                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-integration
+                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${python_version}" down -v
                                     """
                                 }
                             }
@@ -158,7 +174,7 @@ node('adm-ci') {
 
             stage('Check coverage') {
                 gitlabCommitStatus('Check coverage') {
-                    withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
+                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
@@ -174,7 +190,7 @@ node('adm-ci') {
 
             stage('Pylint') {
                 gitlabCommitStatus('Pylint') {
-                    withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
+                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
@@ -187,7 +203,7 @@ node('adm-ci') {
 
             stage('Bandit') {
                 gitlabCommitStatus('Bandit') {
-                    withEnv(["TAG=${testTag}-unit-${env.BUILD_TAG}"]) {
+                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true'
@@ -203,7 +219,7 @@ node('adm-ci') {
                     withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'SONAR_DB_PASSWD', variable: 'SONAR_DB_PASSWD')]) {
                             ansiColor('xterm') {
-                                if (isDev || isTagged) {
+                                if (is_dev || is_tagged) {
                                     sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version}"
                                 } else {
                                     sh "/data/sonar-scanner/bin/sonar-scanner"
@@ -228,10 +244,10 @@ node('adm-ci') {
             stage('Build pip package') {
                 gitlabCommitStatus('Build pip package') {
                     //Build wheels for each version
-                    pythonVersions.each { def pythonVersion ->
-                        def testTagVersioned = "${testTag}-unit-python${pythonVersion}-${env.BUILD_TAG}"
+                    python_versions.each { def python_version ->
+                        def test_tag_versioned = "${test_tag}-unit-python${python_version}-${env.BUILD_ID}"
 
-                        docker.image("${docker_registry}/${docker_image}:${testTagVersioned}").inside("--entrypoint=''") {
+                        docker.image("${docker_registry}/${docker_image}:${test_tag_versioned}").inside("--entrypoint=''") {
                             ansiColor('xterm') {
                                 sh script: """
                                     python setup.py bdist_wheel sdist
@@ -244,7 +260,7 @@ node('adm-ci') {
 
             stage ('Build documentation') {
                 gitlabCommitStatus('Build documentation') {
-                    docker.image("${docker_registry}/${docker_image}:${testTag}-unit-${env.BUILD_TAG}").inside("--entrypoint=''") {
+                    docker.image("${docker_registry}/${docker_image}:${test_tag}-unit-${env.BUILD_ID}").inside("--entrypoint=''") {
                         ansiColor('xterm') {
                             sh script: """
                                 cd docs
@@ -253,7 +269,7 @@ node('adm-ci') {
                             """
                         }
 
-                        if (isRelease) {
+                        if (is_release) {
                             ansiColor('xterm') {
                                 sh script: """
                                     cd docs
@@ -267,7 +283,7 @@ node('adm-ci') {
 
             stage ('Publish package & documentation') {
                 gitlabCommitStatus('Publish package & documentation') {
-                    if (isDev || isTagged) {
+                    if (is_dev || is_tagged) {
                         def uploadSpec = '''{
                                 "files": [
                                     {
@@ -290,7 +306,7 @@ node('adm-ci') {
 
             stage('Cleanup Artifactory') {
                 gitlabCommitStatus('Cleanup Artifactory') {
-                    if (isDev || isTagged) {
+                    if (is_dev || is_tagged) {
                         build job: 'artifactory-cleanup', propagate: false, parameters: [
                             [$class: 'StringParameterValue',  name: 'PACKAGE_NAME',         value: project],
                             [$class: 'StringParameterValue',  name: 'PACKAGE_TYPE',         value: 'pypi'],
@@ -305,7 +321,7 @@ node('adm-ci') {
 
             stage('Deploy documentation') {
                 gitlabCommitStatus('Deploy documentation') {
-                    if (isDev || isTagged) {
+                    if (is_dev || is_tagged) {
                         build job: 'nginx-build', parameters: [
                             [$class: 'StringParameterValue',  name: 'PROJECT_NAME', value: project],
                             [$class: 'StringParameterValue',  name: 'IMAGE_NAME',   value: docker_image],
@@ -323,12 +339,12 @@ node('adm-ci') {
             ]
 
             ['unit', 'integration'].each { String suffix ->
-                pythonVersions.each { def pythonVersion ->
-                    build["${suffix}-${pythonVersion}"] = {
-                        withEnv(["TAG=${testTag}-${suffix}-python${pythonVersion}-${env.BUILD_TAG}"]) {
+                python_versions.each { def python_version ->
+                    build["${suffix}-${python_version}"] = {
+                        withEnv(["TAG=${test_tag}-${suffix}-python${python_version}-${env.BUILD_ID}"]) {
                             ansiColor('xterm') {
                                 sh script: """
-                                    docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${pythonVersion}" down -v || true
+                                    docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${python_version}" down -v || true
                                     docker rmi ${docker_registry}/${docker_image}:\$TAG || true
                                 """
                             }
@@ -337,7 +353,7 @@ node('adm-ci') {
                 }
 
                 build[suffix] = {
-                    withEnv(["TAG=${testTag}-${suffix}-${env.BUILD_TAG}"]) {
+                    withEnv(["TAG=${test_tag}-${suffix}-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down -v || true
@@ -352,7 +368,7 @@ node('adm-ci') {
 
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
-            docker.image('platform/python:3.7').inside("-u root") {
+            docker.image('python:3.7-alpine').inside("-u root") {
                 ansiColor('xterm') {
                     sh script: ''' \
                         rm -rf .[A-z0-9]*
