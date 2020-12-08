@@ -3,7 +3,7 @@ FROM python:${PYTHON_VERSION}-slim as base
 
 ADD http://bdreposdev01.msk.mts.ru/artifactory/files/repofiles/debian_sources.list /etc/apt/sources.list
 RUN apt-get update && \
-    apt-get install make git -fy --no-install-recommends && \
+    apt-get install gcc make git python-dev -fy --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 COPY docker/pip.conf /etc/pip.conf

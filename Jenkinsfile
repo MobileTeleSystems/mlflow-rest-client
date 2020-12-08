@@ -25,8 +25,6 @@ Boolean is_tagged = false
 Boolean is_release_branch=false
 Boolean is_release = false
 
-String test_tag
-String prod_tag
 String version
 String release
 String docker_version
@@ -89,9 +87,6 @@ node('adm-ci') {
             docker_version = version ? version.replace('.dev', '-dev') : null
             release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
 
-            test_tag = is_dev ? 'dev-test' : 'test'
-            prod_tag = is_dev ? 'dev'      : 'latest'
-
             stage('Build test images') {
                 gitlabCommitStatus('Build test images') {
                     def build = [
@@ -101,7 +96,7 @@ node('adm-ci') {
                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: "https://${docker_registry}"]) {
                         python_versions.each { def python_version ->
                             ['unit', 'integration'].each { String suffix ->
-                                def test_tag_versioned = "${test_tag}-${suffix}-python${python_version}"
+                                def test_tag_versioned = "${suffix}-python${python_version}"
 
                                 build["${python_version}-${suffix}"] = {
                                     ansiColor('xterm') {
@@ -114,14 +109,14 @@ node('adm-ci') {
 
                         ['unit', 'integration'].each { String suffix ->
                             ansiColor('xterm') {
-                                docker.build("${docker_registry}/${docker_image}:${test_tag}-${suffix}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --force-rm -f Dockerfile.${suffix} .")
+                                docker.build("${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --force-rm -f Dockerfile.${suffix} .")
                             }
                         }
                     }
                 }
             }
 
-            docker.image("${docker_registry}/${docker_image}:${test_tag}-unit-${env.BUILD_ID}").inside("--entrypoint=''") {
+            docker.image("${docker_registry}/${docker_image}:unit-${env.BUILD_ID}").inside("--entrypoint=''") {
                 try {
                     version = sh script: "python setup.py --version", returnStdout: true
                     version = version.trim()
@@ -137,7 +132,7 @@ node('adm-ci') {
                     ]
                     python_versions.each { def python_version ->
                         build[python_version] = {
-                            withEnv(["TAG=${test_tag}-unit-python${python_version}-${env.BUILD_ID}"]) {
+                            withEnv(["TAG=unit-python${python_version}-${env.BUILD_ID}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-unit
@@ -158,7 +153,7 @@ node('adm-ci') {
                     ]
                     python_versions.each { def python_version ->
                         build[python_version] = {
-                            withEnv(["TAG=${test_tag}-integration-python${python_version}-${env.BUILD_ID}"]) {
+                            withEnv(["TAG=integration-python${python_version}-${env.BUILD_ID}"]) {
                                 ansiColor('xterm') {
                                     sh script: """
                                         docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-integration
@@ -174,7 +169,7 @@ node('adm-ci') {
 
             stage('Check coverage') {
                 gitlabCommitStatus('Check coverage') {
-                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
+                    withEnv(["TAG=unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
@@ -190,7 +185,7 @@ node('adm-ci') {
 
             stage('Pylint') {
                 gitlabCommitStatus('Pylint') {
-                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
+                    withEnv(["TAG=unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
@@ -203,7 +198,7 @@ node('adm-ci') {
 
             stage('Bandit') {
                 gitlabCommitStatus('Bandit') {
-                    withEnv(["TAG=${test_tag}-unit-${env.BUILD_ID}"]) {
+                    withEnv(["TAG=unit-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true'
@@ -245,9 +240,9 @@ node('adm-ci') {
                 gitlabCommitStatus('Build pip package') {
                     //Build wheels for each version
                     python_versions.each { def python_version ->
-                        def test_tag_versioned = "${test_tag}-unit-python${python_version}-${env.BUILD_ID}"
+                        def test_tag_versioned = "unit-python${python_version}"
 
-                        docker.image("${docker_registry}/${docker_image}:${test_tag_versioned}").inside("--entrypoint=''") {
+                        docker.image("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}").inside("--entrypoint=''") {
                             ansiColor('xterm') {
                                 sh script: """
                                     python setup.py bdist_wheel sdist
@@ -260,7 +255,7 @@ node('adm-ci') {
 
             stage ('Build documentation') {
                 gitlabCommitStatus('Build documentation') {
-                    docker.image("${docker_registry}/${docker_image}:${test_tag}-unit-${env.BUILD_ID}").inside("--entrypoint=''") {
+                    docker.image("${docker_registry}/${docker_image}:unit-${env.BUILD_ID}").inside("--entrypoint='' -u root") {
                         ansiColor('xterm') {
                             sh script: """
                                 cd docs
@@ -341,7 +336,7 @@ node('adm-ci') {
             ['unit', 'integration'].each { String suffix ->
                 python_versions.each { def python_version ->
                     build["${suffix}-${python_version}"] = {
-                        withEnv(["TAG=${test_tag}-${suffix}-python${python_version}-${env.BUILD_ID}"]) {
+                        withEnv(["TAG=${suffix}-python${python_version}-${env.BUILD_ID}"]) {
                             ansiColor('xterm') {
                                 sh script: """
                                     docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}-${python_version}" down -v || true
@@ -353,7 +348,7 @@ node('adm-ci') {
                 }
 
                 build[suffix] = {
-                    withEnv(["TAG=${test_tag}-${suffix}-${env.BUILD_ID}"]) {
+                    withEnv(["TAG=${suffix}-${env.BUILD_ID}"]) {
                         ansiColor('xterm') {
                             sh script: """
                                 docker-compose -f docker-compose.jenkins-${suffix}.yml -p "${suffix}-${env.BUILD_TAG}" down -v || true
@@ -368,7 +363,7 @@ node('adm-ci') {
 
             //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
             //So use a small hack here
-            docker.image('python:3.7-alpine').inside("-u root") {
+            docker.image('alpine').inside("-u root") {
                 ansiColor('xterm') {
                     sh script: ''' \
                         rm -rf .[A-z0-9]*
