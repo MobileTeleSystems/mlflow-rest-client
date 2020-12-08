@@ -24,6 +24,12 @@ Changelog
 
         Improve Jenkinsfile
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-111
+
+        Move CI/CD from bdbuilder04 to adm-ci
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06
