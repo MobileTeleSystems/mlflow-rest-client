@@ -30,6 +30,12 @@ Changelog
 
         Move CI/CD from bdbuilder04 to adm-ci
 
+    .. change::
+        :tags: dev, feature
+        :tickets: DSX-34
+
+        Add requirements-dev.txt as ``dev`` extras into ``setup.py``
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06
