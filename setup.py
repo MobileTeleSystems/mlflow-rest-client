@@ -10,6 +10,9 @@ with open(os.path.join(here, "requirements.txt"), "r") as f:
 with open(os.path.join(here, "requirements-test.txt"), "r") as f:
     test_requirements = f.readlines()
 
+with open(os.path.join(here, "requirements-dev.txt"), "r") as f:
+    dev_requirements = f.readlines()
+
 with open(os.path.join(here, "README.rst"), "r") as f:
     long_description = f.read()
 
@@ -52,6 +55,7 @@ setup(
     packages=find_packages(exclude=["docs", "docs.*", "tests", "tests.*"]),
     install_requires=requirements,
     tests_require=test_requirements,
+    extras_require={"test": test_requirements, "dev": dev_requirements},
     setup_requires=["setuptools-git-versioning"],
     test_suite="tests",
     include_package_data=True,
