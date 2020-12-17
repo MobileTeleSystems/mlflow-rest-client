@@ -61,7 +61,7 @@ Version example: ``1.1.3.dev5``
 
 .. code:: bash
 
-    pip install mlflow-client==1.1.3.dev5 # exact version
+    pip install mlflow-client==1.1.3.dev5 # exact dev version
 
     pip install --pre mlflow-client # latest dev version
 
