@@ -36,6 +36,12 @@ Changelog
 
         Add requirements-dev.txt as ``dev`` extras into ``setup.py``
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-128
+
+        Download base python images before build
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06
