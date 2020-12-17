@@ -96,6 +96,10 @@ node('adm-ci') {
                     withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: "https://${docker_registry}"]) {
                         python_versions.each { def python_version ->
                             ['unit', 'integration'].each { String suffix ->
+                                try {
+                                    docker.image("python:${python_version}-slim").pull()
+                                } catch (Exception e) {}
+
                                 def test_tag_versioned = "${suffix}-python${python_version}"
 
                                 build["${python_version}-${suffix}"] = {
