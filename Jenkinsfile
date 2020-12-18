@@ -40,6 +40,7 @@ node('adm-ci') {
             "Run integration tests",
             "Check coverage",
             "Pylint",
+            "Bandit",
             "Sonar Scan",
             "Retrieve Sonar Results",
             "Build documentation",
