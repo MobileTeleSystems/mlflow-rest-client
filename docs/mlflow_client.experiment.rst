@@ -1,10 +1,21 @@
 Experiment
 =================================================================
 
-.. autoclass:: mlflow_client.experiment.ExperimentStage
-    :members:
+.. currentmodule:: mlflow_client.experiment
+
+.. autosummary::
+    :nosignatures:
+
+    Experiment
+    ExperimentStage
+    ExperimentList
+    ExperimentTag
+    ExperimentTagList
 
 .. autoclass:: mlflow_client.experiment.Experiment
+    :members:
+
+.. autoclass:: mlflow_client.experiment.ExperimentStage
     :members:
 
 .. autoclass:: mlflow_client.experiment.ExperimentList

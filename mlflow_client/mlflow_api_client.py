@@ -90,7 +90,7 @@ class MLflowApiClient(object):
 
     def list_experiments_iterator(self, view_type=RunViewType.active):
         """
-        List all existing experiments in MLflow database
+        Iterate by all existing experiments in MLflow database
 
         Parameters
         ----------
@@ -967,7 +967,7 @@ class MLflowApiClient(object):
 
     def list_run_metric_history(self, id, key):
         """
-        LIst metric history
+        List metric history
 
         Parameters
         ----------
@@ -1547,7 +1547,7 @@ class MLflowApiClient(object):
 
     def search_models_iterator(self, query="", max_results=MAX_RESULTS, order_by=None, page_token=None):
         """
-        Iterate by models
+        Iterate models found by search query
 
         Like `search_models`, but automatically fetches next page while iteration, until no pages left.
 
