@@ -42,6 +42,12 @@ Changelog
 
         Download base python images before build
 
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-130
+
+        Fix requirements caching in Docker image
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06

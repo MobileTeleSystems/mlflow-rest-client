@@ -105,7 +105,7 @@ node('adm-ci') {
 
                                 build["${python_version}-${suffix}"] = {
                                     ansiColor('xterm') {
-                                        docker.build("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --build-arg PYTHON_VERSION=${python_version} --force-rm -f Dockerfile.${suffix} .")
+                                        docker.build("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}", "--build-arg BUILD_ID=\$BUILD_ID --build-arg PYTHON_VERSION=${python_version} --force-rm -f Dockerfile.${suffix} .")
                                     }
                                 }
                             }
@@ -114,7 +114,7 @@ node('adm-ci') {
 
                         ['unit', 'integration'].each { String suffix ->
                             ansiColor('xterm') {
-                                docker.build("${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID}", "--build-arg CACHEBUST=\$(date +%s) --force-rm -f Dockerfile.${suffix} .")
+                                docker.build("${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID}", "--build-arg BUILD_ID=\$BUILD_ID --force-rm -f Dockerfile.${suffix} .")
                             }
                         }
                     }
