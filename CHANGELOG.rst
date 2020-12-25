@@ -48,6 +48,12 @@ Changelog
 
         Fix requirements caching in Docker image
 
+    .. change::
+        :tags: docs, feature
+        :tickets: DSX-130
+
+        Add summary to documentation pages
+
 .. changelog::
     :version: 1.1.4
     :released: 05.12.2020 13:06

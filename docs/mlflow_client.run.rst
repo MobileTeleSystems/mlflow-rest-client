@@ -1,19 +1,72 @@
 Run
 =================================================================
 
+.. currentmodule:: mlflow_client.run
+
+.. autosummary::
+    :nosignatures:
+
+    Run
+    RunList
+    RunStage
+    RunStatus
+
+.. autosummary::
+    :nosignatures:
+
+    RunInfo
+    RunInfoList
+    RunViewType
+
+.. autosummary::
+    :nosignatures:
+
+    RunData
+    RunDataList
+
+.. autosummary::
+    :nosignatures:
+
+    Param
+    ParamList
+
+.. autosummary::
+    :nosignatures:
+
+    Metric
+    MetricList
+
+.. autosummary::
+    :nosignatures:
+
+    RunTag
+    RunTagList
+
+.. autoclass:: mlflow_client.run.Run
+    :members:
+
+.. autoclass:: mlflow_client.run.RunList
+    :members:
+
 .. autoclass:: mlflow_client.run.RunStage
     :members:
 
 .. autoclass:: mlflow_client.run.RunStatus
     :members:
 
-.. autoclass:: mlflow_client.run.RunViewType
-    :members:
-
 .. autoclass:: mlflow_client.run.RunInfo
     :members:
 
 .. autoclass:: mlflow_client.run.RunInfoList
+    :members:
+
+.. autoclass:: mlflow_client.run.RunViewType
+    :members:
+
+.. autoclass:: mlflow_client.run.RunData
+    :members:
+
+.. autoclass:: mlflow_client.run.RunDataList
     :members:
 
 .. autoclass:: mlflow_client.run.Param
@@ -34,16 +87,4 @@ Run
     :show-inheritance:
 
 .. autoclass:: mlflow_client.run.RunTagList
-    :members:
-
-.. autoclass:: mlflow_client.run.RunData
-    :members:
-
-.. autoclass:: mlflow_client.run.RunDataList
-    :members:
-
-.. autoclass:: mlflow_client.run.Run
-    :members:
-
-.. autoclass:: mlflow_client.run.RunList
     :members:
