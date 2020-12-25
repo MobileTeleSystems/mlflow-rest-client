@@ -5,6 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 1.1.5
+    :released: 25.12.2020 15:55
 
     .. change::
         :tags: ci, feature
