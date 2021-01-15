@@ -11,7 +11,7 @@ def server = Artifactory.server "rep.msk.mts.ru"
 server.setBypassProxy(true)
 
 String git_tag
-String git_branch
+List git_branches
 String git_commit
 
 Boolean is_master = false
@@ -57,11 +57,16 @@ node('adm-ci') {
                     git_tag = null
                 }
 
-                git_branch = scmVars.CHANGE_BRANCH ?: env.BRANCH_NAME ?: scmVars.GIT_BRANCH
-                git_branch = git_branch.replace('origin/', '').trim()
+                List branches = sh(script: """
+                    git branch -a --no-abbrev --contains $git_commit | egrep -v "(detached|->)" | cut -c 3-
+                """, returnStdout: true).trim().split('\n')
+
+                git_branches = [scmVars.CHANGE_BRANCH, env.BRANCH_NAME, scmVars.GIT_BRANCH] + branches
+                git_branches = git_branches.findAll{ it }.collect{ it.replace('remotes/', '').replace('origin/', '').trim() }
+                git_branches.unique()
 
                 println(git_tag)
-                println(git_branch)
+                println(git_branches)
                 println(git_commit)
 
                 sh script: """
@@ -71,18 +76,18 @@ node('adm-ci') {
                 """
             }
 
-            is_master     = git_branch == 'master'
-            is_dev        = git_branch in ['dev', 'develop']
-            is_bug        = git_branch.contains('bug')
-            is_feature    = git_branch.contains('feature')
-            is_prerelease = git_branch.contains('release')
-            is_hotfix     = git_branch.contains('hotfix')
+            is_master     = 'master' in git_branches || 'main' in git_branches
+            is_dev        = 'dev' in git_branches || 'develop' in git_branches
+            is_bug        = git_branches.collect{ it.contains('bug') }
+            is_feature    = git_branches.collect{ it.contains('feature') }
+            is_prerelease = git_branches.collect{ it.contains('release') }
+            is_hotfix     = git_branches.collect{ it.contains('hotfix') }
 
             is_tagged  = !!git_tag
             is_release_branch = is_master
             is_release = is_release_branch && is_tagged
 
-            jira_task = git_branch.split('/').size() > 1 ? git_branch.split('/')[-1] : null
+            jira_task = git_branches.collect{ it.split('/').size() > 1 ? it.split('/')[-1] : null }.find { it }
 
             version = git_tag ? git_tag.replaceAll(/^v/, '') : null
             docker_version = version ? version.replace('.dev', '-dev') : null
