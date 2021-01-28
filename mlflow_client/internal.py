@@ -1,7 +1,8 @@
 import sys
 from textwrap import dedent
 
-import six
+from six import add_metaclass, string_types
+from six.moves.collections_abc import Mapping
 
 
 # pylint: disable=isinstance-second-argument-not-valid-type
@@ -65,7 +66,7 @@ class Makeable(object):
         if isinstance(inp, cls):
             return inp
 
-        if isinstance(inp, dict):
+        if isinstance(inp, Mapping):
             return cls.from_dict(inp, **kwargs)
 
         try:
@@ -160,7 +161,7 @@ class ListableMeta(type):
         return result
 
 
-@six.add_metaclass(ListableMeta)
+@add_metaclass(ListableMeta)
 class Listable(Makeable):
     # pylint: disable=no-member
     @classmethod
@@ -198,7 +199,7 @@ class Comparable(object):
 
 class ComparableByStr(Comparable):
     def __eq__(self, other):
-        if isinstance(other, six.string_types):
+        if isinstance(other, string_types):
             return other == str(self)
 
         return super(ComparableByStr, self).__eq__(other)
@@ -215,7 +216,7 @@ class MakeableFromTuple(Makeable):
 class MakeableFromStr(Makeable):
     @classmethod
     def make(cls, inp, **kwargs):
-        if isinstance(inp, six.string_types):
+        if isinstance(inp, string_types):
             return cls(inp, **kwargs)
         return super(MakeableFromStr, cls).make(inp, **kwargs)
 
@@ -223,7 +224,7 @@ class MakeableFromStr(Makeable):
 class MakeableFromTupleStr(MakeableFromTuple):
     @classmethod
     def make(cls, inp, **kwargs):
-        if isinstance(inp, six.string_types):
+        if isinstance(inp, string_types):
             return cls(inp, **kwargs)
         return super(MakeableFromTupleStr, cls).make(inp, **kwargs)
 

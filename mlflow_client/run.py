@@ -1,6 +1,6 @@
 from enum import Enum
 
-import six
+from six import string_types
 
 from .internal import (
     Comparable,
@@ -208,7 +208,7 @@ class MetricList(SearchableList):
     def __contains__(self, item):
         for it in self:
             if isinstance(it, Metric):
-                if isinstance(item, six.string_types) and it.key == item:
+                if isinstance(item, string_types) and it.key == item:
                     return True
                 if isinstance(item, float) and it.value == item:
                     return True
@@ -218,7 +218,7 @@ class MetricList(SearchableList):
     def __getitem__(self, item):
         for it in self:
             if isinstance(it, Metric):
-                if isinstance(item, six.string_types) and it.key == item:
+                if isinstance(item, string_types) and it.key == item:
                     return it
                 if isinstance(item, float) and it.value == item:
                     return it
