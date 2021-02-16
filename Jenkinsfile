@@ -352,7 +352,7 @@ pipeline {
                 gitlabCommitStatus('Publish package & documentation') {
                     rtUpload (
                         serverId: 'rep.msk.mts.ru',
-                        spec: '''
+                        spec: '''{
                             "files": [
                                 {
                                     "pattern": "docs/html-*.tar.gz",
@@ -365,10 +365,6 @@ pipeline {
                                 }
                             ]
                         }'''
-                    )
-
-                    rtPublishBuildInfo (
-                        serverId: 'rep.msk.mts.ru'
                     )
                 }
             }
@@ -412,6 +408,11 @@ pipeline {
     }
 
     post {
+        success {
+            rtPublishBuildInfo (
+                serverId: 'rep.msk.mts.ru'
+            )
+        }
         cleanup {
             script {
                 def build = [
