@@ -4,6 +4,15 @@ Changelog
 1.1
 --------------------
 .. changelog::
+    :version: 1.1.6
+
+    .. change::
+        :tags: ci, feature
+        :tickets: DSX-134
+
+        Use Jenkins declarative pipeline
+
+.. changelog::
     :version: 1.1.5
     :released: 25.12.2020 15:55
 
