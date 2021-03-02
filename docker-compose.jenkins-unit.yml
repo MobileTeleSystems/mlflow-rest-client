@@ -9,5 +9,4 @@ services:
     - /etc/localtime:/etc/localtime:ro
     - ./reports:/app/reports:rw
     - ./.coveragerc:/app/.coveragerc:ro
-    - ./.pylintrc:/app/.pylintrc:ro
     network_mode: host
