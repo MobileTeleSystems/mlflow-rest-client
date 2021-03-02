@@ -7,26 +7,10 @@ String project = 'mlflow-client'
 String docker_registry = 'docker.rep.msk.mts.ru'
 String docker_image = "bigdata/platform/dsx/${project}"
 
-String git_tag
-List git_branches
-String git_commit
+Map git_info = [:]
+Map version_info = [:]
 
-Boolean is_master = false
-Boolean is_dev = false
-Boolean is_prerelease = false
-Boolean is_bug = false
-Boolean is_hotfix = false
-Boolean is_feature = false
-
-Boolean is_tagged = false
-Boolean is_release_branch=false
-Boolean is_release = false
-
-String version
-String release
-String docker_version
-String jira_task
-
+List suffixes = ['unit', 'integration']
 List python_versions = ['2.7', '3.6', '3.7', '3.8', '3.9']
 
 pipeline {
@@ -36,164 +20,176 @@ pipeline {
 
     options {
         ansiColor('xterm')
+        parallelsAlwaysFailFast()
     }
 
     stages {
+        stage('Cleanup workdir') {
+            steps {
+                script {
+                    deleteDirRoot onlyContent: true
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 script {
                     def scmVars = checkout scm
-                    git_commit = scmVars.GIT_COMMIT
-
-                    git_tag = sh(script: "git describe --tags --abbrev=0 --exact-match || exit 0", returnStdout: true).trim()
-                    if (git_tag == 'null' || git_tag == '') {
-                        git_tag = null
-                    }
-
-                    List branches = sh(script: """
-                        git branch -a --no-abbrev --contains $git_commit | egrep -v "(detached|->)" | cut -c 3-
-                    """, returnStdout: true).trim().split('\n')
-
-                    git_branches = [scmVars.CHANGE_BRANCH, env.BRANCH_NAME, scmVars.GIT_BRANCH] + branches
-                    git_branches = git_branches.findAll{ it }.collect{ it.replace('remotes/', '').replace('origin/', '').trim() }
-                    git_branches.unique()
-
-                    println(git_tag)
-                    println(git_branches)
-                    println(git_commit)
+                    git_info = getGitInfo(scmVars)
+                    version_info = getVersionInfo(git_info.tag)
 
                     sh script: """
                         mkdir -p ./reports/junit
                         touch ./reports/pylint.txt
                         chmod 777 -R ./reports
                     """
-
-                    is_master     = 'master' in git_branches || 'main' in git_branches
-                    is_dev        = 'dev' in git_branches || 'develop' in git_branches
-                    is_bug        = git_branches.collect{ it.contains('bug') }
-                    is_feature    = git_branches.collect{ it.contains('feature') }
-                    is_prerelease = git_branches.collect{ it.contains('release') }
-                    is_hotfix     = git_branches.collect{ it.contains('hotfix') }
-
-                    is_tagged  = !!git_tag
-                    is_release_branch = is_master
-                    is_release = is_release_branch && is_tagged
-
-                    jira_task = git_branches.collect{ it.split('/').size() > 1 ? it.split('/')[-1] : null }.find { it }
-
-                    version = git_tag ? git_tag.replaceAll(/^v/, '') : null
-                    docker_version = version ? version.replace('.dev', '-dev') : null
-                    release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
                 }
             }
         }
 
         stage('Build test images') {
-            steps {
-                gitlabCommitStatus('Build test images') {
-                    script {
-                        def build = [
-                            failFast: true
-                        ]
-
-                        withDockerRegistry([credentialsId: 'tech_jenkins_artifactory', url: "https://${docker_registry}"]) {
-                            python_versions.each { def python_version ->
-                                ['unit', 'integration'].each { String suffix ->
+            matrix {
+                axes {
+                    axis {
+                        name 'SUFFIX'
+                        // TODO: replace with suffixes variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values 'unit', 'integration'
+                    }
+                    axis {
+                        name 'PYTHON_VERSION'
+                        // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                    }
+                }
+                stages {
+                    stage('Build test images') {
+                        steps {
+                            gitlabCommitStatus('Build test images') {
+                                script {
                                     try {
-                                        docker.image("python:${python_version}-slim").pull()
+                                        docker.image("python:${env.PYTHON_VERSION}-slim").pull()
                                     } catch (Exception e) {}
 
-                                    def test_tag_versioned = "${suffix}-python${python_version}"
-
-                                    build["${python_version}-${suffix}"] = {
-                                        docker.build("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}", "--build-arg BUILD_ID=\$BUILD_ID --build-arg PYTHON_VERSION=${python_version} --force-rm -f Dockerfile.${suffix} .")
-                                    }
+                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --build-arg PYTHON_VERSION=${env.PYTHON_VERSION} --force-rm -f Dockerfile.${env.SUFFIX} .")
                                 }
                             }
-                            parallel build
-
-                            ['unit', 'integration'].each { String suffix ->
-                                docker.build("${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID}", "--build-arg BUILD_ID=\$BUILD_ID --force-rm -f Dockerfile.${suffix} .")
-                            }
-                        }
-
-                        docker.image("${docker_registry}/${docker_image}:unit-${env.BUILD_ID}").inside("--entrypoint=''") {
-                            try {
-                                version = sh script: "python setup.py --version", returnStdout: true
-                                version = version.trim()
-                                docker_version = version ? version.replace('.dev', '-dev') : null
-                                release = version ? version.replaceAll(/\.dev[\d]+/, '') : null
-                            } catch (Exception e) {}
                         }
                     }
                 }
             }
         }
 
-        stage('Run unit tests') {
-            steps {
-                gitlabCommitStatus('Run unit tests') {
-                    script {
-                        def build = [
-                            failFast: true
-                        ]
-                        python_versions.each { def python_version ->
-                            build[python_version] = {
-                                withEnv(["TAG=unit-python${python_version}-${env.BUILD_ID}"]) {
-                                    sh script: """
-                                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-unit
-                                    """
-                                }
+        stage('Build default test images') {
+            matrix {
+                axes {
+                    axis {
+                        name 'SUFFIX'
+                        // TODO: replace with suffixes variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values 'unit', 'integration'
+                    }
+                }
+                stages {
+                    stage('Build default test images') {
+                        steps {
+                            script {
+                                docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --force-rm -f Dockerfile.${env.SUFFIX} .")
                             }
                         }
-                        parallel build
                     }
                 }
             }
+        }
 
-            post {
-                cleanup {
-                    script {
-                        python_versions.each { def python_version ->
-                            withEnv(["TAG=unit-python${python_version}-${env.BUILD_ID}"]) {
+        stage('Get version') {
+            agent {
+                docker {
+                    reuseNode true
+                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
+                    args "--entrypoint=''"
+                }
+            }
+
+            steps {
+                script {
+                    String raw_version = ''
+
+                    try {
+                        raw_version = sh(script: "python setup.py --version", returnStdout: true)
+                    } catch (Exception e) {}
+
+                    version_info = getVersionInfo(raw_version)
+                }
+            }
+        }
+
+        stage('Tag release images') {
+            when {
+                allOf {
+                    expression { git_info.is_release }
+                    expression { version_info.docker_version }
+                }
+            }
+            matrix {
+                axes {
+                    axis {
+                        name 'SUFFIX'
+                        // TODO: replace with suffixes variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values 'unit', 'integration'
+                    }
+                    axis {
+                        name 'PYTHON_VERSION'
+                        // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                    }
+                }
+                stages {
+                    stage('Tag release images') {
+                        steps {
+                            script {
+                                docker.image("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}").tag("${env.SUFFIX}-python${env.PYTHON_VERSION}-${version_info.docker_version}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Run tests') {
+            matrix {
+                axes {
+                    axis {
+                        name 'SUFFIX'
+                        // TODO: replace with suffixes variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values 'unit', 'integration'
+                    }
+                    axis {
+                        name 'PYTHON_VERSION'
+                        // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
+                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                    }
+                }
+
+                environment {
+                    TAG = "${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}"
+                    COMPOSE_PROJECT_NAME = "${env.SUFFIX}-${env.BUILD_TAG}-${env.PYTHON_VERSION}"
+                    COMPOSE_FILE = "docker-compose.jenkins-${env.SUFFIX}.yml"
+                }
+
+                stages {
+                    stage('Run tests') {
+                        steps {
+                            gitlabCommitStatus('Run tests') {
                                 sh script: """
-                                    docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}-${python_version}" down -v || true
+                                    docker-compose run --rm mlflow-client-jenkins-${env.SUFFIX}
                                 """
                             }
                         }
-                    }
-                }
-            }
-        }
 
-        stage('Run integration tests') {
-            steps {
-                gitlabCommitStatus('Run integration tests') {
-                    script {
-                        def build = [
-                            failFast: true
-                        ]
-                        python_versions.each { def python_version ->
-                            build[python_version] = {
-                                withEnv(["TAG=integration-python${python_version}-${env.BUILD_ID}"]) {
-                                    sh script: """
-                                        docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${python_version}" run --rm mlflow-client-jenkins-integration
-                                    """
-                                }
-                            }
-                        }
-                        parallel build
-                    }
-                }
-            }
-
-            post {
-                cleanup {
-                    script {
-                        python_versions.each { def python_version ->
-                            withEnv(["TAG=integration-python${python_version}-${env.BUILD_ID}"]) {
+                        post {
+                            cleanup {
                                 sh script: """
-                                    docker-compose -f docker-compose.jenkins-integration.yml -p "integration-${env.BUILD_TAG}-${python_version}" down -v || true
+                                    docker-compose down -v || true
                                 """
                             }
                         }
@@ -203,69 +199,61 @@ pipeline {
         }
 
         stage('Check coverage') {
-            environment {
-                TAG = "unit-${env.BUILD_ID}"
+            agent {
+                docker {
+                    reuseNode true
+                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
+                    args "--entrypoint=''"
+                }
             }
 
             steps {
                 gitlabCommitStatus('Check coverage') {
                     sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit coverage.sh
+                        coverage.sh
                         sed -i 's#/app#${env.WORKSPACE}#g' reports/coverage*.xml
                     """
-
-                    junit 'reports/junit/*.xml'
                 }
             }
 
             post {
-                cleanup {
-                    sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v || true
-                    """
+                always {
+                    junit 'reports/junit/*.xml'
                 }
             }
         }
 
         stage('Pylint') {
-            environment {
-                TAG = "unit-${env.BUILD_ID}"
+            agent {
+                docker {
+                    reuseNode true
+                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
+                    args "--entrypoint='' -u root"
+                }
             }
 
             steps {
                 gitlabCommitStatus('Pylint') {
                     sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero' > ./reports/pylint.txt
-                    """
-                }
-            }
-
-            post {
-                cleanup {
-                    sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v || true
+                        python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > ./reports/pylint.txt
                     """
                 }
             }
         }
 
         stage('Bandit') {
-            environment {
-                TAG = "unit-${env.BUILD_ID}"
+            agent {
+                docker {
+                    reuseNode true
+                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
+                    args "--entrypoint=''"
+                }
             }
 
             steps {
                 gitlabCommitStatus('Bandit') {
                     sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" run --rm --no-deps --entrypoint bash mlflow-client-jenkins-unit -c 'python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true'
-                    """
-                }
-            }
-
-            post {
-                cleanup {
-                    sh script: """
-                        docker-compose -f docker-compose.jenkins-unit.yml -p "unit-${env.BUILD_TAG}" down -v || true
+                        python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true
                     """
                 }
             }
@@ -280,8 +268,8 @@ pipeline {
                 gitlabCommitStatus('Sonar Scan') {
                     withSonarQubeEnv('sonarqube') {
                         script {
-                            if (is_dev || is_tagged) {
-                                sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version}"
+                            if (git_info.is_dev || git_info.is_tagged) {
+                                sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version_info.version}"
                             } else {
                                 sh "/data/sonar-scanner/bin/sonar-scanner"
                             }
@@ -305,13 +293,12 @@ pipeline {
             steps {
                 gitlabCommitStatus('Build pip package') {
                     script {
-                        //Build wheels for each version
+                        // We do not use matrix + docker agent because parallel wheel build is not supported
                         python_versions.each { def python_version ->
-                            def test_tag_versioned = "unit-python${python_version}"
-
-                            docker.image("${docker_registry}/${docker_image}:${test_tag_versioned}-${env.BUILD_ID}").inside("--entrypoint=''") {
+                            docker.image("${docker_registry}/${docker_image}:unit-python${python_version}-${env.BUILD_ID}").inside("--entrypoint=''") {
                                 sh script: """
-                                    python setup.py bdist_wheel sdist
+                                    python setup.py bdist_wheel --build-number ${env.BUILD_ID}
+                                    python setup.py sdist
                                 """
                             }
                         }
@@ -321,22 +308,28 @@ pipeline {
         }
 
         stage ('Build documentation') {
+            agent {
+                docker {
+                    reuseNode true
+                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
+                    args "--entrypoint='' -u root"
+                }
+            }
+
             steps {
                 gitlabCommitStatus('Build documentation') {
                     script {
-                        docker.image("${docker_registry}/${docker_image}:unit-${env.BUILD_ID}").inside("--entrypoint='' -u root") {
+                        sh script: """
+                            cd docs
+                            make html
+                            tar cvzf html-${version_info.version}.tar.gz -C build/html .
+                        """
+
+                        if (git_info.is_release) {
                             sh script: """
                                 cd docs
-                                make html
-                                tar cvzf html-${version}.tar.gz -C build/html .
+                                cp html-${version_info.version}.tar.gz html-latest.tar.gz
                             """
-
-                            if (is_release) {
-                                sh script: """
-                                    cd docs
-                                    cp html-${version}.tar.gz html-latest.tar.gz
-                                """
-                            }
                         }
                     }
                 }
@@ -345,7 +338,10 @@ pipeline {
 
         stage ('Publish package & documentation') {
             when {
-                expression { is_dev || is_tagged }
+                anyOf {
+                    expression { git_info.is_dev }
+                    expression { git_info.is_tagged }
+                }
             }
 
             steps {
@@ -372,7 +368,10 @@ pipeline {
 
         stage('Cleanup Artifactory') {
             when {
-                expression { is_dev || is_tagged }
+                anyOf {
+                    expression { git_info.is_dev }
+                    expression { git_info.is_tagged }
+                }
             }
 
             steps {
@@ -391,7 +390,10 @@ pipeline {
 
         stage('Deploy documentation') {
             when {
-                expression { is_dev || is_tagged }
+                anyOf {
+                    expression { git_info.is_dev }
+                    expression { git_info.is_tagged }
+                }
             }
 
             steps {
@@ -399,7 +401,7 @@ pipeline {
                     build job: 'nginx-build', parameters: [
                         string(name: 'PROJECT_NAME',  value: project),
                         string(name: 'IMAGE_NAME',    value: docker_image),
-                        string(name: 'VERSION',       value: docker_version),
+                        string(name: 'VERSION',       value: version_info.docker_version),
                         booleanParam(name: 'DRY_RUN', value: false)
                     ]
                 }
@@ -415,41 +417,20 @@ pipeline {
         }
         cleanup {
             script {
-                def build = [
-                    failFast: false
-                ]
-
-                ['unit', 'integration'].each { String suffix ->
+                suffixes.each { String suffix ->
                     python_versions.each { def python_version ->
-                        build["${suffix}-${python_version}"] = {
-                            sh script: """
-                                docker rmi ${docker_registry}/${docker_image}:${suffix}-python${python_version}-${env.BUILD_ID} || true
-                            """
-                        }
-                    }
-
-                    build[suffix] = {
                         sh script: """
-                            docker rmi ${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID} || true
+                            docker rmi ${docker_registry}/${docker_image}:${suffix}-python${python_version}-${env.BUILD_ID} || true
                         """
                     }
+
+                    sh script: """
+                        docker rmi ${docker_registry}/${docker_image}:${suffix}-${env.BUILD_ID} || true
+                    """
                 }
 
-                parallel build
-
-                //Docker is running with root privileges, and Jenkins has no root permissions to delete folders correctly
-                //So use a small hack here
-                docker.image('alpine').inside("-u root") {
-                    ansiColor('xterm') {
-                        sh script: ''' \
-                            rm -rf .[A-z0-9]*
-                            rm -rf *
-                        ''', returnStdout: true
-                    }
-                }
-                deleteDir()
+                deleteDirRoot()
             }
-
         }
     }
 }
