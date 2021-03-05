@@ -8,7 +8,7 @@ Changelog
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-134
+        :tickets: DSX-166
 
         Use Jenkins declarative pipeline
 

@@ -24,17 +24,11 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup workdir') {
-            steps {
-                script {
-                    deleteDirRoot onlyContent: true
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
+                    deleteDirRoot onlyContent: true
+
                     def scmVars = checkout scm
                     git_info = getGitInfo(scmVars)
                     version_info = getVersionInfo(git_info.tag)
@@ -72,28 +66,8 @@ pipeline {
                                     } catch (Exception e) {}
 
                                     docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --build-arg PYTHON_VERSION=${env.PYTHON_VERSION} --force-rm -f Dockerfile.${env.SUFFIX} .")
+                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --force-rm -f Dockerfile.${env.SUFFIX} .")
                                 }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Build default test images') {
-            matrix {
-                axes {
-                    axis {
-                        name 'SUFFIX'
-                        // TODO: replace with suffixes variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values 'unit', 'integration'
-                    }
-                }
-                stages {
-                    stage('Build default test images') {
-                        steps {
-                            script {
-                                docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --force-rm -f Dockerfile.${env.SUFFIX} .")
                             }
                         }
                     }
@@ -198,32 +172,7 @@ pipeline {
             }
         }
 
-        stage('Check coverage') {
-            agent {
-                docker {
-                    reuseNode true
-                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
-                    args "--entrypoint=''"
-                }
-            }
-
-            steps {
-                gitlabCommitStatus('Check coverage') {
-                    sh script: """
-                        coverage.sh
-                        sed -i 's#/app#${env.WORKSPACE}#g' reports/coverage*.xml
-                    """
-                }
-            }
-
-            post {
-                always {
-                    junit 'reports/junit/*.xml'
-                }
-            }
-        }
-
-        stage('Pylint') {
+        stage('Prepare Sonar report data') {
             agent {
                 docker {
                     reuseNode true
@@ -233,28 +182,24 @@ pipeline {
             }
 
             steps {
-                gitlabCommitStatus('Pylint') {
+                gitlabCommitStatus('Prepare Sonar report data') {
                     sh script: """
+                        # Get coverage report
+                        coverage.sh
+                        sed -i 's#/app#${env.WORKSPACE}#g' reports/coverage*.xml
+
+                        # Get pylint report
                         python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > ./reports/pylint.txt
-                    """
-                }
-            }
-        }
 
-        stage('Bandit') {
-            agent {
-                docker {
-                    reuseNode true
-                    image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
-                    args "--entrypoint=''"
-                }
-            }
-
-            steps {
-                gitlabCommitStatus('Bandit') {
-                    sh script: """
+                        # Get bandit report
                         python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true
                     """
+                }
+            }
+
+            post {
+                always {
+                    junit 'reports/junit/*.xml'
                 }
             }
         }
