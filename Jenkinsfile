@@ -307,6 +307,10 @@ pipeline {
                             ]
                         }'''
                     )
+
+                    rtPublishBuildInfo (
+                        serverId: 'rep.msk.mts.ru'
+                    )
                 }
             }
         }
@@ -355,11 +359,6 @@ pipeline {
     }
 
     post {
-        success {
-            rtPublishBuildInfo (
-                serverId: 'rep.msk.mts.ru'
-            )
-        }
         cleanup {
             script {
                 suffixes.each { String suffix ->
