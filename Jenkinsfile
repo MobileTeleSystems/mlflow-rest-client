@@ -67,6 +67,10 @@ pipeline {
                 }
                 stages {
                     stage('Build test images') {
+                        options {
+                            retry(3)
+                        }
+
                         steps {
                             gitlabCommitStatus('Build test images') {
                                 script {
