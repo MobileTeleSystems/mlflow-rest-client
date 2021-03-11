@@ -21,6 +21,15 @@ pipeline {
     options {
         ansiColor('xterm')
         parallelsAlwaysFailFast()
+
+        // Mandatory steps only
+        gitlabBuilds(builds: [
+            "Build test images",
+            "Run tests",
+            "Sonar Scan",
+            "Build pip package",
+            "Build documentation"
+        ])
     }
 
     stages {
@@ -220,13 +229,7 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
 
-        stage('Retrieve Sonar Results') {
-            steps {
-                gitlabCommitStatus('Retrieve Sonar Results') {
                     timeout(time: 15, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
                     }
