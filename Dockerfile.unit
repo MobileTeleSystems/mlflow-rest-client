@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install gcc make git python-dev -fy --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-COPY docker/pip.conf /etc/pip.conf
+ADD http://bdreposdev01.msk.mts.ru/artifactory/files/pip/docker_pip.conf /etc/pip.conf
 RUN pip install -U pip
 
 WORKDIR /app
