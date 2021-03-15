@@ -3,7 +3,7 @@ FROM python:${PYTHON_VERSION}-slim as base
 
 ADD http://bdreposdev01.msk.mts.ru/artifactory/files/repofiles/debian_sources.list /etc/apt/sources.list
 RUN apt-get update && \
-    apt-get install gcc make git python-dev -fy --no-install-recommends && \
+    apt-get install wget gcc make git python-dev -fy --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 ADD http://bdreposdev01.msk.mts.ru/artifactory/files/pip/docker_pip.conf /etc/pip.conf
@@ -12,7 +12,15 @@ WORKDIR /app
 
 # Ignore cached dependency layer, download new dependencies every time
 ARG BUILD_ID=1
-RUN pip install -U pip
+RUN set -ex; \
+    wget -q http://rep.msk.mts.ru/artifactory/list/files/pip/get-pip-19.1.1.py -O get-pip.py; \
+    python get-pip.py \
+        --disable-pip-version-check \
+        -U \
+        pip setuptools wheel \
+    ; \
+    pip --version; \
+    rm -f get-pip.py
 
 COPY requirements.txt requirements-test.txt requirements-dev.txt /app/
 RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
