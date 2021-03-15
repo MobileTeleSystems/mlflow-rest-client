@@ -172,7 +172,7 @@ changelog_render_ticket = "https://jira.bd.msk.mts.ru/browse/%s"
 changelog_render_pullreq = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/merge_requests/%s"
 changelog_render_changeset = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/commit/%s"
 
-tags = set([ver])
+tags = {ver}
 tags.update(Version.parse(tag) for tag in get_all_tags())
 tags = [tag.public for tag in reversed(sorted(list(tags)))]
 
