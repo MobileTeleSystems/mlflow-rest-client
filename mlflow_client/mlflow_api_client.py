@@ -3,7 +3,7 @@
 import json
 
 import requests
-import urllib3x
+import urllib3
 
 from .artifact import Artifact
 from .experiment import Experiment
