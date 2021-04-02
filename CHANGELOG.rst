@@ -12,6 +12,12 @@ Changelog
 
         Use Jenkins declarative pipeline
 
+    .. change::
+        :tags: client, feature
+        :tickets: DSX-166
+
+        Disable SSL ignore warnings
+
 .. changelog::
     :version: 1.1.5
     :released: 25.12.2020 15:55

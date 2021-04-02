@@ -3,6 +3,7 @@
 import json
 
 import requests
+import urllib3
 
 from .artifact import Artifact
 from .experiment import Experiment
@@ -11,6 +12,8 @@ from .model import Model, ModelVersion, ModelVersionStage
 from .page import Page
 from .run import Metric, Run, RunInfo, RunStatus, RunViewType
 from .timestamp import current_timestamp, time_2_timestamp
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # pylint: disable=too-many-public-methods
