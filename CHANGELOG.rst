@@ -18,6 +18,12 @@ Changelog
 
         Disable SSL ignore warnings
 
+    .. change::
+        :tags: client, feature
+        :tickets: DSX-166
+
+        Create one session for all requests
+
 .. changelog::
     :version: 1.1.5
     :released: 25.12.2020 15:55

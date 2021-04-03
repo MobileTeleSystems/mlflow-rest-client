@@ -63,10 +63,18 @@ class MLflowApiClient(object):
     # pylint: disable=too-many-arguments
     def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
         self.base_url = api_url
-        self.user = user
-        self._password = password
-        self._ignore_ssl_check = ignore_ssl_check
         self.logger = logger if logger else get_logger()
+
+        self._session = requests.Session()
+        self._session.verify = not ignore_ssl_check
+        if user and password:
+            self._session.auth = (user, password)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._session.close()
 
     def list_experiments(self, view_type=RunViewType.active):
         """
@@ -2291,22 +2299,12 @@ class MLflowApiClient(object):
     def _request(self, method, url, log_response=True, **params):
         url = self._url(url)
 
-        if self._auth:
-            params["auth"] = self._auth
-        params["verify"] = not self._ignore_ssl_check
-
         self.logger.debug("api_client.{}: req: {}".format(method.upper(), params))
         self.logger.debug("api_client.{}: url: {}".format(method.upper(), url))
-        resp = getattr(requests, method)(url, **params)
+        resp = getattr(self._session, method)(url, **params)
         resp.raise_for_status()
 
         if log_response:
             self.logger.debug("api_client.{}: rsp: {}".format(method.upper(), resp.text))
 
         return resp
-
-    @property
-    def _auth(self):
-        if self.user and self._password:
-            return self.user, self._password
-        return None

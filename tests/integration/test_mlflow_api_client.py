@@ -1,11 +1,9 @@
 import logging
-import os
 from datetime import timedelta
 
 import pytest
 from requests import HTTPError
 
-from mlflow_client import MLflowApiClient
 from mlflow_client.experiment import ExperimentStage
 from mlflow_client.model import ModelVersionStage
 from mlflow_client.run import Metric, RunStage, RunStatus
@@ -21,94 +19,9 @@ from .conftest import (
 
 log = logging.getLogger(__name__)
 
-host = os.environ["MLFLOW_HOST"] or "localhost"
-port = os.environ["MLFLOW_PORT"] or "5000"
-api_url = "http://{host}:{port}".format(host=host, port=port)
-client = MLflowApiClient(api_url)
-
-
-@pytest.fixture(scope="function")
-def create_experiment(request):
-    exp_name = create_exp_name()
-    exp = client.create_experiment(exp_name)
-
-    def finalizer():
-        client.delete_experiment(exp.id)
-
-    request.addfinalizer(finalizer)
-
-    return exp
-
-
-@pytest.fixture(scope="function")
-def create_run(request, create_experiment):
-    exp = create_experiment
-    run = client.create_run(experiment_id=exp.id)
-
-    def finalizer():
-        client.delete_run(run.id)
-
-    request.addfinalizer(finalizer)
-
-    return run
-
-
-@pytest.fixture(scope="function")
-def create_model(request):
-    model_name = create_model_name()
-    model = client.create_model(model_name)
-
-    def finalizer():
-        client.delete_model(model.name)
-
-    request.addfinalizer(finalizer)
-
-    return model
-
-
-@pytest.fixture(scope="function")
-def create_model_version(request, create_model):
-    model = create_model
-
-    version = client.create_model_version(model.name)
-
-    def finalizer():
-        client.delete_model_version(version.name, version.version)
-
-    request.addfinalizer(finalizer)
-
-    return version
-
-
-@pytest.fixture(scope="function")
-def create_test_model_version(create_model_version):
-    version = create_model_version
-
-    new_version = client.test_model_version(version.name, version.version)
-
-    return new_version
-
-
-@pytest.fixture(scope="function")
-def create_prod_model_version(create_model_version):
-    version = create_model_version
-
-    new_version = client.promote_model_version(version.name, version.version)
-
-    return new_version
-
-
-@pytest.fixture(scope="function")
-def create_archived_model_version(create_model_version):
-    version = create_model_version
-
-    new_version = client.archive_model_version(version.name, version.version)
-
-    return new_version
-
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_experiments(create_experiment):
+def test_list_experiments(client, create_experiment):
     exp = create_experiment
 
     exps = client.list_experiments()
@@ -116,7 +29,7 @@ def test_list_experiments(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_experiments_iterator(create_experiment):
+def test_list_experiments_iterator(client, create_experiment):
     exp = create_experiment
 
     created = False
@@ -127,7 +40,7 @@ def test_list_experiments_iterator(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment(create_experiment):
+def test_get_experiment(client, create_experiment):
     exp = create_experiment
 
     exp2 = client.get_experiment(exp.id)
@@ -135,13 +48,13 @@ def test_get_experiment(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment_fail():
+def test_get_experiment_fail(client):
     with pytest.raises(HTTPError):
         client.get_experiment(rand_str())
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment_by_name(create_experiment):
+def test_get_experiment_by_name(client, create_experiment):
     exp = create_experiment
 
     exp2 = client.get_experiment_by_name(exp.name)
@@ -149,13 +62,13 @@ def test_get_experiment_by_name(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment_by_name_non_existing():
+def test_get_experiment_by_name_non_existing(client):
     non_existing = client.get_experiment_by_name(rand_str())
     assert non_existing is None
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_rename_experiment(create_experiment):
+def test_rename_experiment(client, create_experiment):
     exp = create_experiment
     exp_name2 = create_exp_name()
 
@@ -169,7 +82,7 @@ def test_rename_experiment(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_experiment(request):
+def test_create_experiment(client, request):
     exp_name = create_exp_name()
     exp = client.create_experiment(exp_name)
 
@@ -182,7 +95,7 @@ def test_create_experiment(request):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_experiment_existing(create_experiment):
+def test_create_experiment_existing(client, create_experiment):
     exp = create_experiment
 
     with pytest.raises(HTTPError):
@@ -190,7 +103,7 @@ def test_create_experiment_existing(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_experiment():
+def test_delete_experiment(client):
     exp_name = create_exp_name()
     exp = client.create_experiment(exp_name)
 
@@ -207,7 +120,7 @@ def test_delete_experiment():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_restore_experiment(create_experiment):
+def test_restore_experiment(client, create_experiment):
     exp = create_experiment
 
     client.delete_experiment(exp.id)
@@ -222,7 +135,7 @@ def test_restore_experiment(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_experiment_tag(create_experiment):
+def test_set_experiment_tag(client, create_experiment):
     exp = create_experiment
 
     key = rand_str()
@@ -239,7 +152,7 @@ def test_set_experiment_tag(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment_id(create_experiment):
+def test_get_experiment_id(client, create_experiment):
     exp = create_experiment
 
     exp_id = client.get_experiment_id(exp.name)
@@ -247,13 +160,13 @@ def test_get_experiment_id(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_experiment_id_non_existing():
+def test_get_experiment_id_non_existing(client):
     non_existing_id = client.get_experiment_id(rand_str())
     assert non_existing_id is None
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_or_create_experiment(create_experiment):
+def test_get_or_create_experiment(client, create_experiment):
     exp = create_experiment
     exp2 = client.get_or_create_experiment(exp.name)
 
@@ -261,7 +174,7 @@ def test_get_or_create_experiment(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_experiment_runs(request, create_experiment):
+def test_list_experiment_runs(client, request, create_experiment):
     exp = create_experiment
 
     empty_runs = client.list_experiment_runs(exp.id)
@@ -279,7 +192,7 @@ def test_list_experiment_runs(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_experiment_runs_iterator(request, create_experiment):
+def test_list_experiment_runs_iterator(client, request, create_experiment):
     exp = create_experiment
 
     is_empty = True
@@ -304,7 +217,7 @@ def test_list_experiment_runs_iterator(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_run(create_run):
+def test_get_run(client, create_run):
     run = create_run
 
     run2 = client.get_run(run.id)
@@ -312,13 +225,13 @@ def test_get_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_run_fail():
+def test_get_run_fail(client):
     with pytest.raises(HTTPError):
         client.get_run(rand_str())
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_run(request, create_experiment):
+def test_create_run(request, client, create_experiment):
     exp = create_experiment
     run = client.create_run(experiment_id=exp.id)
 
@@ -333,7 +246,7 @@ def test_create_run(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_run_without_start_time(request, create_experiment):
+def test_create_run_without_start_time(request, client, create_experiment):
     exp = create_experiment
     start_time = now()
 
@@ -350,7 +263,7 @@ def test_create_run_without_start_time(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_run_with_start_time(request, create_experiment):
+def test_create_run_with_start_time(request, client, create_experiment):
     exp = create_experiment
     start_time = now()
 
@@ -366,7 +279,7 @@ def test_create_run_with_start_time(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_run_with_tags(request, create_experiment):
+def test_create_run_with_tags(request, client, create_experiment):
     exp = create_experiment
     key = rand_str()
     value = rand_str()
@@ -383,7 +296,7 @@ def test_create_run_with_tags(request, create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_start_run(create_run):
+def test_start_run(create_run, client):
     run = create_run
 
     run_info = client.start_run(run.id)
@@ -392,7 +305,7 @@ def test_start_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_schedule_run(create_run):
+def test_schedule_run(create_run, client):
     run = create_run
 
     run_info = client.schedule_run(run.id)
@@ -401,7 +314,7 @@ def test_schedule_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_finish_run(create_run):
+def test_finish_run(create_run, client):
     run = create_run
 
     end_time = now()
@@ -411,7 +324,7 @@ def test_finish_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_fail_run(create_run):
+def test_fail_run(create_run, client):
     run = create_run
 
     end_time = now()
@@ -422,7 +335,7 @@ def test_fail_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_kill_run(create_run):
+def test_kill_run(create_run, client):
 
     run = create_run
 
@@ -434,7 +347,7 @@ def test_kill_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_run(create_experiment):
+def test_delete_run(create_experiment, client):
     exp = create_experiment
 
     run = client.create_run(experiment_id=exp.id)
@@ -445,7 +358,7 @@ def test_delete_run(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_run_fail(create_experiment):
+def test_delete_run_fail(create_experiment, client):
     exp = create_experiment
 
     run = client.create_run(experiment_id=exp.id)
@@ -456,7 +369,7 @@ def test_delete_run_fail(create_experiment):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_restore_run(create_run):
+def test_restore_run(create_run, client):
     run = create_run
 
     client.delete_run(run.id)
@@ -467,7 +380,7 @@ def test_restore_run(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_log_run_parameter(create_run):
+def test_log_run_parameter(create_run, client):
     key = rand_str()
     value = rand_str()
 
@@ -482,7 +395,7 @@ def test_log_run_parameter(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_log_run_parameter_fail(create_run):
+def test_log_run_parameter_fail(create_run, client):
     key = rand_str()
     value = rand_str()
 
@@ -495,7 +408,7 @@ def test_log_run_parameter_fail(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_log_run_parameters(create_run):
+def test_log_run_parameters(create_run, client):
     params = {rand_str(): rand_str()}
 
     run = create_run
@@ -511,7 +424,7 @@ def test_log_run_parameters(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_log_run_metric(create_run):
+def test_log_run_metric(create_run, client):
     key = rand_str()
     value = rand_float()
 
@@ -537,7 +450,7 @@ def test_log_run_metric(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_log_run_metrics(create_run):
+def test_log_run_metrics(create_run, client):
     metrics = {rand_str(): rand_float()}
 
     run = create_run
@@ -556,7 +469,7 @@ def test_log_run_metrics(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_run_tag(create_run):
+def test_set_run_tag(create_run, client):
     key = rand_str()
     value = rand_str()
 
@@ -571,7 +484,7 @@ def test_set_run_tag(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_run_tags(create_run):
+def test_set_run_tags(create_run, client):
     tags = {rand_str(): rand_str()}
 
     run = create_run
@@ -587,7 +500,7 @@ def test_set_run_tags(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_run_tag(create_run):
+def test_delete_run_tag(create_run, client):
     key = rand_str()
     value = rand_str()
 
@@ -601,7 +514,7 @@ def test_delete_run_tag(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_run_tags(create_run):
+def test_delete_run_tags(create_run, client):
     tags = {rand_str(): rand_str()}
 
     run = create_run
@@ -615,7 +528,7 @@ def test_delete_run_tags(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_run_metric_history(create_run):
+def test_list_run_metric_history(create_run, client):
     timestamp = now()
     key = rand_str()
     values = [
@@ -639,7 +552,7 @@ def test_list_run_metric_history(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_run_metric_history_iterator(create_run):
+def test_list_run_metric_history_iterator(create_run, client):
     timestamp = now()
     key = rand_str()
     values = [
@@ -663,7 +576,7 @@ def test_list_run_metric_history_iterator(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_run_artifacts(create_run):
+def test_list_run_artifacts(create_run, client):
     run = create_run
 
     artifacts = client.list_run_artifacts(run.id)
@@ -671,7 +584,7 @@ def test_list_run_artifacts(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_runs(create_run):
+def test_search_runs(create_run, client):
     timestamp = now()
     key = rand_str()
     values = [
@@ -688,7 +601,7 @@ def test_search_runs(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_runs_iterator(create_run):
+def test_search_runs_iterator(create_run, client):
     timestamp = now()
     key = rand_str()
     values = [
@@ -708,7 +621,7 @@ def test_search_runs_iterator(create_run):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model(request):
+def test_create_model(request, client):
     model_name = create_model_name()
 
     model = client.create_model(model_name)
@@ -722,7 +635,7 @@ def test_create_model(request):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_with_tags(request):
+def test_create_model_with_tags(request, client):
     model_name = create_model_name()
 
     key = rand_str()
@@ -740,7 +653,7 @@ def test_create_model_with_tags(request):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_already_exist(request):
+def test_create_model_already_exist(request, client):
     model_name = create_model_name()
 
     model = client.create_model(model_name)
@@ -755,7 +668,7 @@ def test_create_model_already_exist(request):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_model(create_model):
+def test_get_model(create_model, client):
     model = create_model
 
     model2 = client.get_model(model.name)
@@ -763,7 +676,7 @@ def test_get_model(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_or_create_model(create_model):
+def test_get_or_create_model(create_model, client):
     model = create_model
 
     model2 = client.get_or_create_model(model.name)
@@ -771,7 +684,7 @@ def test_get_or_create_model(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_rename_model(request, create_model):
+def test_rename_model(request, client, create_model):
     model = create_model
 
     new_name = create_model_name()
@@ -790,7 +703,7 @@ def test_rename_model(request, create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_model_description(create_model):
+def test_set_model_description(create_model, client):
     model = create_model
     assert not model.description
 
@@ -801,7 +714,7 @@ def test_set_model_description(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_model():
+def test_delete_model(client):
     model_name = create_model_name()
     model = client.create_model(model_name)
 
@@ -812,7 +725,7 @@ def test_delete_model():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_models(create_model):
+def test_list_models(client, create_model):
     model = create_model
 
     models = client.list_models()
@@ -820,7 +733,7 @@ def test_list_models(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_models_iterator(create_model):
+def test_list_models_iterator(client, create_model):
     model = create_model
 
     exist = False
@@ -831,7 +744,7 @@ def test_list_models_iterator(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_models(create_model):
+def test_search_models(client, create_model):
     model = create_model
 
     query = "name LIKE '{}%'".format(model.name)
@@ -840,7 +753,7 @@ def test_search_models(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_models_iterator(create_model):
+def test_search_models_iterator(client, create_model):
     model = create_model
 
     query = "name LIKE '{}%'".format(model.name)
@@ -852,7 +765,7 @@ def test_search_models_iterator(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_model_tag(create_model):
+def test_set_model_tag(client, create_model):
     key = rand_str()
     value = rand_str()
 
@@ -867,7 +780,7 @@ def test_set_model_tag(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_model_tag(create_model):
+def test_delete_model_tag(client, create_model):
     key = rand_str()
     value = rand_str()
 
@@ -881,7 +794,7 @@ def test_delete_model_tag(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_model_versions(create_model):
+def test_list_model_versions(client, create_model):
     model = create_model
 
     versions = client.list_model_versions(model.name)
@@ -903,7 +816,7 @@ def test_list_model_versions(create_model):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
-def test_list_model_versions_with_stage(create_model, stage):
+def test_list_model_versions_with_stage(client, create_model, stage):
     model = create_model
 
     versions = client.list_model_versions(model.name, stages=stage)
@@ -933,7 +846,7 @@ def test_list_model_versions_with_stage(create_model, stage):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_model_versions_iterator(create_model):
+def test_list_model_versions_iterator(client, create_model):
     model = create_model
 
     is_empty = True
@@ -968,7 +881,7 @@ def test_list_model_versions_iterator(create_model):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
-def test_list_model_versions_iterator_with_stage(create_model, stage):
+def test_list_model_versions_iterator_with_stage(client, create_model, stage):
     model = create_model
 
     is_empty = True
@@ -1012,7 +925,7 @@ def test_list_model_versions_iterator_with_stage(create_model, stage):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_model_all_versions(create_model):
+def test_list_model_all_versions(client, create_model):
     model = create_model
 
     versions = client.list_model_all_versions(model.name)
@@ -1033,7 +946,7 @@ def test_list_model_all_versions(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_list_model_all_versions_iterator(create_model):
+def test_list_model_all_versions_iterator(client, create_model):
     model = create_model
 
     is_empty = True
@@ -1069,7 +982,7 @@ def test_list_model_all_versions_iterator(create_model):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
-def test_list_model_all_versions_with_stage(create_model, stage):
+def test_list_model_all_versions_with_stage(client, create_model, stage):
     model = create_model
 
     versions = client.list_model_all_versions(model.name, stages=stage)
@@ -1100,7 +1013,7 @@ def test_list_model_all_versions_with_stage(create_model, stage):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
-def test_list_model_all_versions_iterator_with_stage(create_model, stage):
+def test_list_model_all_versions_iterator_with_stage(client, create_model, stage):
     model = create_model
 
     is_empty = True
@@ -1144,7 +1057,7 @@ def test_list_model_all_versions_iterator_with_stage(create_model, stage):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_version(request, create_model_version):
+def test_create_model_version(request, client, create_model_version):
     version1 = create_model_version
 
     version2 = client.create_model_version(version1.name)
@@ -1159,7 +1072,7 @@ def test_create_model_version(request, create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_version_above_existing(request, create_model):
+def test_create_model_version_above_existing(request, client, create_model):
     model = create_model
 
     version = client.create_model_version(model.name)
@@ -1174,7 +1087,7 @@ def test_create_model_version_above_existing(request, create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_version_with_source(request, create_model):
+def test_create_model_version_with_source(request, client, create_model):
     model = create_model
 
     source = rand_str()
@@ -1190,7 +1103,7 @@ def test_create_model_version_with_source(request, create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_version_with_tags(request, create_model):
+def test_create_model_version_with_tags(request, client, create_model):
     model = create_model
 
     key = rand_str()
@@ -1208,7 +1121,7 @@ def test_create_model_version_with_tags(request, create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_create_model_version_with_run_id(request, create_run, create_model):
+def test_create_model_version_with_run_id(request, client, create_run, create_model):
     model = create_model
     run = create_run
 
@@ -1223,7 +1136,7 @@ def test_create_model_version_with_run_id(request, create_run, create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_model_version(create_model_version):
+def test_get_model_version(client, create_model_version):
     version = create_model_version
 
     version1 = client.get_model_version(version.name, version.version)
@@ -1231,7 +1144,7 @@ def test_get_model_version(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_model_version_description(create_model_version):
+def test_set_model_version_description(client, create_model_version):
     version = create_model_version
     assert not version.description
 
@@ -1241,7 +1154,7 @@ def test_set_model_version_description(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_set_model_version_tag(create_model_version):
+def test_set_model_version_tag(client, create_model_version):
     key = rand_str()
     value = rand_str()
 
@@ -1256,7 +1169,7 @@ def test_set_model_version_tag(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_model_version_tag(create_model_version):
+def test_delete_model_version_tag(client, create_model_version):
     key = rand_str()
     value = rand_str()
 
@@ -1270,7 +1183,7 @@ def test_delete_model_version_tag(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_delete_model_version(create_model):
+def test_delete_model_version(client, create_model):
     model = create_model
 
     version = client.create_model_version(model.name)
@@ -1282,7 +1195,7 @@ def test_delete_model_version(create_model):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_model_versions(create_model_version):
+def test_search_model_versions(client, create_model_version):
     version = create_model_version
 
     query = "name='{}'".format(version.name)
@@ -1291,7 +1204,7 @@ def test_search_model_versions(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_search_model_versions_iterator(create_model_version):
+def test_search_model_versions_iterator(client, create_model_version):
     version = create_model_version
 
     query = "name='{}'".format(version.name)
@@ -1303,7 +1216,7 @@ def test_search_model_versions_iterator(create_model_version):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_model_version_download_url(request, create_model):
+def test_get_model_version_download_url(request, client, create_model):
     model = create_model
 
     version = client.create_model_version(model.name, source=rand_str())
@@ -1322,7 +1235,7 @@ def test_get_model_version_download_url(request, create_model):
     "old_stage, changed",
     [(None, True), (ModelVersionStage.test, False), (ModelVersionStage.prod, True), (ModelVersionStage.archived, True)],
 )
-def test_test_model_version(create_model_version, old_stage, changed):
+def test_test_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
     if old_stage is not None:
         old_version = client.transition_model_version_stage(old_version.name, old_version.version, old_stage)
@@ -1350,7 +1263,7 @@ def test_test_model_version(create_model_version, old_stage, changed):
     "new_stage", [(None), (ModelVersionStage.test), (ModelVersionStage.prod), (ModelVersionStage.archived)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_test_model_version_archive_existing(request, create_model_version, old_stage, new_stage, changed):
+def test_test_model_version_archive_existing(request, client, create_model_version, old_stage, new_stage, changed):
     old_version = create_model_version
     if old_stage is not None:
         old_version = client.transition_model_version_stage(old_version.name, old_version.version, old_stage)
@@ -1380,7 +1293,7 @@ def test_test_model_version_archive_existing(request, create_model_version, old_
     "old_stage, changed",
     [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, False), (ModelVersionStage.archived, True)],
 )
-def test_promote_model_version(create_model_version, old_stage, changed):
+def test_promote_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
     if old_stage is not None:
         old_version = client.transition_model_version_stage(old_version.name, old_version.version, old_stage)
@@ -1408,7 +1321,7 @@ def test_promote_model_version(create_model_version, old_stage, changed):
     "new_stage", [(None), (ModelVersionStage.test), (ModelVersionStage.prod), (ModelVersionStage.archived)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_promote_model_version_archive_existing(request, create_model_version, old_stage, new_stage, changed):
+def test_promote_model_version_archive_existing(request, client, create_model_version, old_stage, new_stage, changed):
     old_version = create_model_version
     if old_stage is not None:
         old_version = client.transition_model_version_stage(old_version.name, old_version.version, old_stage)
@@ -1438,7 +1351,7 @@ def test_promote_model_version_archive_existing(request, create_model_version, o
     "old_stage, changed",
     [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, True), (ModelVersionStage.archived, False)],
 )
-def test_archive_model_version(create_model_version, old_stage, changed):
+def test_archive_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
     if old_stage is not None:
         old_version = client.transition_model_version_stage(old_version.name, old_version.version, old_stage)
