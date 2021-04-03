@@ -5,6 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 1.1.6
+    :released: 03.04.2021 14:21
 
     .. change::
         :tags: ci, feature
