@@ -6,6 +6,7 @@ String project = 'mlflow-client'
 
 String docker_registry = 'docker.rep.msk.mts.ru'
 String docker_image = "bigdata/platform/dsx/${project}"
+String mlflow_image = 'bigdata/platform/dsx/mlflow'
 
 Map git_info = [:]
 Map version_info = [:]
@@ -76,6 +77,7 @@ pipeline {
                                 script {
                                     try {
                                         docker.image("python:${env.PYTHON_VERSION}-slim").pull()
+                                        docker.image("${docker_registry}/${mlflow_image}:latest").pull()
                                     } catch (Exception e) {}
 
                                     docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --build-arg PYTHON_VERSION=${env.PYTHON_VERSION} --force-rm -f Dockerfile.${env.SUFFIX} .")
