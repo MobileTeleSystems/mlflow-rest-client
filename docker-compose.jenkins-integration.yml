@@ -9,7 +9,6 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - ./reports:/app/reports:rw
-    - ./.coveragerc:/app/.coveragerc:ro
     depends_on:
     - mlflow-jenkins
     networks:

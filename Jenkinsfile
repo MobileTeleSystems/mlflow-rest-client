@@ -192,7 +192,7 @@ pipeline {
                 docker {
                     reuseNode true
                     image "${docker_registry}/${docker_image}:unit-${env.BUILD_ID}"
-                    args "--entrypoint='' -u root"
+                    args "--entrypoint='' -u root -v ${env.WORKSPACE}/reports:/app/reports"
                 }
             }
 
@@ -201,13 +201,13 @@ pipeline {
                     sh script: """
                         # Get coverage report
                         coverage.sh
-                        sed -i 's#/app#${env.WORKSPACE}#g' reports/coverage*.xml
+                        sed -i 's#/app#${env.WORKSPACE}#g' /app/reports/coverage*.xml
 
                         # Get pylint report
-                        python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > ./reports/pylint.txt
+                        python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > /app/reports/pylint.txt
 
                         # Get bandit report
-                        python -m bandit -r mlflow_client -f json -o ./reports/bandit.json || true
+                        python -m bandit -r mlflow_client -f json -o /app/reports/bandit.json || true
                     """
                 }
             }
