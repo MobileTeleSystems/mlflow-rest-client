@@ -4,6 +4,15 @@ Changelog
 1.1
 --------------------
 .. changelog::
+    :version: 1.1.7
+
+    .. change::
+        :tags: tests, bug
+        :tickets: DSX-166
+
+        Do not use relative paths to run tests
+
+.. changelog::
     :version: 1.1.6
     :released: 03.04.2021 14:21
 

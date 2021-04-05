@@ -8,5 +8,4 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - ./reports:/app/reports:rw
-    - ./.coveragerc:/app/.coveragerc:ro
     network_mode: host
