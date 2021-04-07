@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v3.3.0
+  rev: v3.4.0
   hooks:
   - id: check-ast
   - id: check-case-conflict
@@ -35,7 +35,7 @@ repos:
   - id: codespell
     args: [-w]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v1.6.1
+  rev: v2.0.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
@@ -53,14 +53,14 @@ repos:
   - id: docker-compose-check
     files: ^docker-compose.*\.(yaml|yml)$
 - repo: https://github.com/pycqa/isort
-  rev: 5.6.4
+  rev: 5.8.0
   hooks:
   - id: isort
     files: mlflow_client/.*
   - id: isort
     files: tests/.*
 - repo: https://github.com/pre-commit/pygrep-hooks
-  rev: v1.7.0    # Use the ref you want to point at
+  rev: v1.8.0
   hooks:
   - id: python-no-log-warn
   - id: python-no-eval
@@ -69,7 +69,7 @@ repos:
   - id: rst-inline-touching-normal
   - id: text-unicode-replacement-char
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.10.0
+  rev: v2.11.0
   hooks:
   - id: pyupgrade
 - repo: https://github.com/ambv/black
@@ -78,7 +78,7 @@ repos:
   - id: black
     language_version: python3
 - repo: https://github.com/asottile/blacken-docs
-  rev: v1.8.0
+  rev: v1.10.0
   hooks:
   - id: blacken-docs
 - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
