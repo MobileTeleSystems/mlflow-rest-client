@@ -5,12 +5,19 @@ Changelog
 --------------------
 .. changelog::
     :version: 1.1.7
+    :released: 26.05.2021 17:47
 
     .. change::
         :tags: tests, bug
         :tickets: DSX-166
 
         Do not use relative paths to run tests
+
+    .. change::
+        :tags: client, bug
+        :tickets: DSX-262
+
+        Do not use `LIKE` operator while searching model by name in `get_or_create_model` function
 
 .. changelog::
     :version: 1.1.6
