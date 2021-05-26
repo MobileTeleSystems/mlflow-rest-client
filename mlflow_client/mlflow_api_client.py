@@ -1360,7 +1360,7 @@ class MLflowApiClient(object):
             model = client.get_or_create_model("some_model", tags=tags)
         """
 
-        for model in self.search_models_iterator("name LIKE '{name}'".format(name=name), max_results=1):
+        for model in self.search_models_iterator("name = '{name}'".format(name=name), max_results=1):
             return model
         return self.create_model(name, tags=tags)
 
@@ -1535,7 +1535,7 @@ class MLflowApiClient(object):
         --------
         .. code:: python
 
-            query = "name LIKE 'some_model%'"
+            query = "name = 'some_model%'"  # or "name LIKE "some-model%"'
 
             models_page = client.search_models(query)
 
@@ -1586,7 +1586,7 @@ class MLflowApiClient(object):
         --------
         .. code:: python
 
-            query = "name LIKE 'some_model%'"
+            query = "name = 'some_model%'"  # or "name LIKE "some-model%"'
 
             for model in client.search_models_iterator(query):
                 print(model)
