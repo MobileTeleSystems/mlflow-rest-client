@@ -27,11 +27,11 @@ def rand_float(a=0, b=100):
 
 
 def create_exp_name():
-    return "pyTestExp_" + rand_str()
+    return "pyTestExp-" + rand_str()
 
 
 def create_model_name():
-    return "pyTestModel_" + rand_str()
+    return "pyTestModel-" + rand_str()
 
 
 def now():

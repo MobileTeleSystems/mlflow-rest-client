@@ -676,11 +676,26 @@ def test_get_model(create_model, client):
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_get_or_create_model(create_model, client):
+def test_get_or_create_model(request, create_model, client):
     model = create_model
+    _models = []
 
-    model2 = client.get_or_create_model(model.name)
-    assert model == model2
+    def finalizer():
+        for _model in _models:
+            client.delete_model(_model.name)
+
+    request.addfinalizer(finalizer)
+
+    for name in [model.name, model.name.replace("-", "_")]:
+        _model = client.get_or_create_model(name)
+
+        if model.name == _model.name:
+            assert model == _model
+        else:
+            _models.append(_model)
+            assert model != _model
+
+        assert _model.name == name
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -747,21 +762,23 @@ def test_list_models_iterator(client, create_model):
 def test_search_models(client, create_model):
     model = create_model
 
-    query = "name LIKE '{}%'".format(model.name)
-    models = client.search_models(query=query)
-    assert model in models
+    for name in [model.name, model.name.replace("-", "_")]:
+        query = "name LIKE '{}%'".format(name)
+        models = client.search_models(query=query)
+        assert model in models
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_search_models_iterator(client, create_model):
     model = create_model
 
-    query = "name LIKE '{}%'".format(model.name)
-    exist = False
-    for _model in client.search_models(query=query):
-        if model.name == _model.name:
-            exist = True
-    assert exist
+    for name in [model.name, model.name.replace("-", "_")]:
+        query = "name LIKE '{}%'".format(name)
+        exist = False
+        for _model in client.search_models(query=query):
+            if model.name == _model.name:
+                exist = True
+        assert exist
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
