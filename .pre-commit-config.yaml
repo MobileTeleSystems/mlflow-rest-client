@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v3.4.0
+  rev: v4.0.1
   hooks:
   - id: check-ast
   - id: check-case-conflict
@@ -25,22 +25,22 @@ repos:
   - id: trailing-whitespace
   - id: detect-private-key
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.1.9
+  rev: v1.1.10
   hooks:
   - id: remove-tabs
     exclude: ^docs/(make.bat|Makefile)$
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.0.0
+  rev: v2.1.0
   hooks:
   - id: codespell
     args: [-w]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.0.0
+  rev: v2.1.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
 - repo: https://github.com/lovesegfault/beautysh
-  rev: 6.0.1
+  rev: v6.1.0
   hooks:
   - id: beautysh
 - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
@@ -48,19 +48,19 @@ repos:
   hooks:
   - id: dockerfilelint
 - repo: https://github.com/IamTheFij/docker-pre-commit
-  rev: v2.0.0
+  rev: v2.0.1
   hooks:
   - id: docker-compose-check
     files: ^docker-compose.*\.(yaml|yml)$
 - repo: https://github.com/pycqa/isort
-  rev: 5.8.0
+  rev: 5.9.2
   hooks:
   - id: isort
     files: mlflow_client/.*
   - id: isort
     files: tests/.*
 - repo: https://github.com/pre-commit/pygrep-hooks
-  rev: v1.8.0
+  rev: v1.9.0
   hooks:
   - id: python-no-log-warn
   - id: python-no-eval
@@ -69,11 +69,11 @@ repos:
   - id: rst-inline-touching-normal
   - id: text-unicode-replacement-char
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.11.0
+  rev: v2.21.0
   hooks:
   - id: pyupgrade
 - repo: https://github.com/ambv/black
-  rev: 20.8b1
+  rev: 21.6b0
   hooks:
   - id: black
     language_version: python3
@@ -82,10 +82,11 @@ repos:
   hooks:
   - id: blacken-docs
 - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
-  rev: v1.0.4
+  rev: v1.0.5
   hooks:
   - id: python-bandit-vulnerability-check
-    exclude: ^tests/.*$
+    # TODO: remove line below after https://github.com/PyCQA/bandit/issues/488
+    args: [-lll, --recursive, -x, './venv/*,./tests/*,./.pytest_cache/*', .]
 - repo: meta
   hooks:
   - id: check-hooks-apply
