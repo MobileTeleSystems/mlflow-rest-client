@@ -1,3 +1,6 @@
+from six import raise_from
+
+
 class Page(object):
     """Page representation
 
@@ -147,7 +150,7 @@ class Page(object):
     def __next__(self):
         try:
             result = self.items[self._index]
-        except IndexError:
-            raise StopIteration
+        except IndexError as e:
+            raise_from(StopIteration, e)
         self._index += 1
         return result

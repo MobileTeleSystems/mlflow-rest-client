@@ -13,8 +13,10 @@ from .tag import Tag
 from .timestamp import timestamp_2_time
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class ModelVersionStage(Enum):
-    """ Model version stage """
+    """Model version stage"""
 
     unknown = "None"
 
@@ -33,8 +35,10 @@ class ModelVersionStage(Enum):
         return hash(self.value)
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class ModelVersionState(Enum):
-    """ Model version stage """
+    """Model version stage"""
 
     pending = "PENDING_REGISTRATION"
     """ Model version registration is pending """

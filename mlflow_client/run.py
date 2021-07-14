@@ -15,8 +15,10 @@ from .tag import Tag
 from .timestamp import timestamp_2_time
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class RunStage(Enum):
-    """ Run stage """
+    """Run stage"""
 
     active = "active"
     """ Run is active """
@@ -25,8 +27,10 @@ class RunStage(Enum):
     """ Run was deleted """
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class RunStatus(Enum):
-    """ Run status """
+    """Run status"""
 
     started = "RUNNING"
     """ Run is running or created """
@@ -44,8 +48,10 @@ class RunStatus(Enum):
     """ Run was killed """
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class RunViewType(Enum):
-    """ Run view type """
+    """Run view type"""
 
     active = "ACTIVE_ONLY"
     """ Show only active runs """

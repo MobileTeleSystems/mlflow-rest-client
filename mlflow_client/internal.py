@@ -2,6 +2,8 @@ import sys
 from textwrap import dedent
 
 from six import add_metaclass, string_types
+
+# pylint: disable=no-name-in-module, import-error
 from six.moves.collections_abc import Mapping
 
 

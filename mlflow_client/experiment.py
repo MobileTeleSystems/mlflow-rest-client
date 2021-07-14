@@ -4,8 +4,10 @@ from .internal import ComparableByStr, Listable, MakeableFromTupleStr
 from .tag import Tag
 
 
+# TODO: change names to UPPERCASE in 2.0
+# pylint: disable=invalid-name
 class ExperimentStage(Enum):
-    """ Experiment stage """
+    """Experiment stage"""
 
     active = "active"
     """ Experiment is active """

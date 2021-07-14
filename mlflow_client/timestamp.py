@@ -4,8 +4,8 @@ from enum import Enum
 
 
 class Unit(Enum):
-    nanosec = 1000
-    msec = 1
+    NANOSEC = 1000
+    MSEC = 1
 
 
 def current_timestamp():
@@ -15,9 +15,9 @@ def current_timestamp():
 def normalize_timestamp(timestamp):
     timestamp = int(timestamp)
     if timestamp >= 1000000000000:
-        unit = Unit.nanosec
+        unit = Unit.NANOSEC
     else:
-        unit = Unit.msec
+        unit = Unit.MSEC
     return timestamp / unit.value
 
 

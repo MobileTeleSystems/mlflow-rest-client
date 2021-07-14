@@ -148,7 +148,8 @@ disable=print-statement,
         bad-continuation,
         useless-object-inheritance,
         too-few-public-methods,
-        duplicate-code
+        duplicate-code,
+        super-with-arguments
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -448,14 +449,19 @@ function-naming-style=snake_case
 good-names=i,
            j,
            k,
+           f,
            ex,
+           e,
+           db,
            Run,
            _,
            df,
            pd,
            np,
            it,
-           id
+           id,
+           ip,
+           dt
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
