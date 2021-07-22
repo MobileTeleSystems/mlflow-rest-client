@@ -10,7 +10,7 @@ Changelog
         :tags: general
         :tickets: DSX-288
 
-        Change package author to dsx@mts.ru
+        Change package author to dsx-team@mts.ru
 
 .. changelog::
     :version: 1.1.7
