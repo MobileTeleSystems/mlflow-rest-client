@@ -29,8 +29,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client",
-    author="msmarty4",
-    author_email="msmarty4@mts.ru",
+    author="MTS DSX Team",
+    author_email="dsx@mts.ru",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

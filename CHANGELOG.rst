@@ -4,6 +4,15 @@ Changelog
 1.1
 --------------------
 .. changelog::
+    :version: 1.1.8
+
+    .. change::
+        :tags: general
+        :tickets: DSX-288
+
+        Change package author to dsx@mts.ru
+
+.. changelog::
     :version: 1.1.7
     :released: 26.05.2021 17:47
 
