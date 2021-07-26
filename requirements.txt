@@ -1,4 +1,6 @@
 datetime
 future; python_version == "2.7"
+requests
 six>=1.14
 typing; python_version == "2.7"
+urllib3
