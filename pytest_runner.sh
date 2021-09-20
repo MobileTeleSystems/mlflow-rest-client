@@ -7,7 +7,7 @@ _term() {
 
 trap _term SIGTERM SIGINT
 
-if [[ "x$CI" != "x" ]]; then
+if [[ "x$CI" == "xtrue" ]]; then
     root_path=$(dirname $(realpath $0))
     python_version=$(python -c 'import sys; print("{0}.{1}".format(*sys.version_info))')
     coverage run -m pytest --junitxml=$root_path/reports/junit/${COVERAGE:-unit}-${python_version}.xml "$@"
