@@ -3,7 +3,7 @@ services:
   mlflow-client-jenkins-unit:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test-unit}
     environment:
-      CI: unit
+      CI: 'true'
     build:
       context: .
       dockerfile: Dockerfile.unit
