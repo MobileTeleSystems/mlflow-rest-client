@@ -11,6 +11,7 @@ RUN yum -y install \
         gcc \
         g++ \
         make && \
+    yum -y remove pyparsing && \
     yum clean all
 
 RUN set -ex; \
