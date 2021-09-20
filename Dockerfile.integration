@@ -39,11 +39,11 @@ RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev
 ENV PYTHONPATH="/app:$PYTHONPATH" \
     PATH="/app:$PATH"
 
-USER mlflow-client
-
 COPY --chown=mlflow-client:mlflow-client mlflow_client/ /app/mlflow_client/
 COPY --chown=mlflow-client:mlflow-client integration-tests.sh coverage.sh .coveragerc wait-for-it.sh pytest_runner.sh /app/
 COPY --chown=mlflow-client:mlflow-client tests/*.py /app/tests/
 COPY --chown=mlflow-client:mlflow-client tests/integration /app/tests/integration
+
+USER mlflow-client
 
 ENTRYPOINT ["integration-tests.sh"]
