@@ -53,7 +53,7 @@ repos:
   - id: docker-compose-check
     files: ^docker-compose.*\.(yaml|yml)$
 - repo: https://github.com/pycqa/isort
-  rev: 5.9.2
+  rev: 5.9.3
   hooks:
   - id: isort
     files: mlflow_client/.*
@@ -69,16 +69,16 @@ repos:
   - id: rst-inline-touching-normal
   - id: text-unicode-replacement-char
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.21.0
+  rev: v2.26.0
   hooks:
   - id: pyupgrade
 - repo: https://github.com/ambv/black
-  rev: 21.6b0
+  rev: 21.9b0
   hooks:
   - id: black
     language_version: python3
 - repo: https://github.com/asottile/blacken-docs
-  rev: v1.10.0
+  rev: v1.11.0
   hooks:
   - id: blacken-docs
 - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
