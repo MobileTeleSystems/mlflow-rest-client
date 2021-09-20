@@ -76,7 +76,7 @@ pipeline {
                             gitlabCommitStatus('Build test images') {
                                 script {
                                     try {
-                                        docker.image("python:${env.PYTHON_VERSION}-slim").pull()
+                                        docker.image("python:${env.PYTHON_VERSION}-slim-buster").pull()
                                         docker.image("${docker_registry}/${mlflow_image}:latest").pull()
                                     } catch (Exception e) {}
 
