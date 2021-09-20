@@ -1,8 +1,6 @@
-bandit; python_version >= "3"
 changelog
 numpydoc
 pre-commit
-pylint
 setuptools-git-versioning
 sphinx
 sphinx_rtd_theme
