@@ -1,36 +1,48 @@
-ARG PYTHON_VERSION=3.9
-FROM python:${PYTHON_VERSION}-slim-buster as base
+ARG PYTHON_VERSION=3.8
+FROM docker.rep.msk.mts.ru/platform/python:${PYTHON_VERSION} as base
+ENV REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
-ADD http://bdreposdev01.msk.mts.ru/artifactory/files/repofiles/debian_sources.list /etc/apt/sources.list
-RUN apt-get update && \
-    apt-get install wget gcc make git python-dev -fy --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+RUN yum -y install \
+        wget \
+        gzip \
+        autoconf \
+        zlib-devel \
+        perl-devel \
+        gcc \
+        g++ \
+        make && \
+    yum clean all
 
-ADD http://bdreposdev01.msk.mts.ru/artifactory/files/pip/docker_pip.conf /etc/pip.conf
+RUN set -ex; \
+    cd /tmp; \
+    curl -s -q -L -k http://rep.msk.mts.ru/artifactory/files/git/git-2.28.0.tar.gz --output git.tar.gz; \
+    tar -zxf git.tar.gz; \
+    cd /tmp/git-2.28.0; \
+    make configure; \
+    ./configure --prefix=/usr/local --without-tcltk; \
+    make install NO_GETTEXT=1; \
+    git --version; \
+    rm -rf /tmp/git*
+
+RUN useradd mlflow-client -d /app
 
 WORKDIR /app
 
 # Ignore cached dependency layer, download new dependencies every time
 ARG BUILD_ID=1
-RUN set -ex; \
-    wget -q http://rep.msk.mts.ru/artifactory/list/files/pip/get-pip-19.1.1.py -O get-pip.py; \
-    python get-pip.py \
-        --disable-pip-version-check \
-        -U \
-        pip setuptools wheel \
-    ; \
-    pip --version; \
-    rm -f get-pip.py
+RUN pip install -U pip setuptools wheel
 
-COPY requirements.txt requirements-test.txt requirements-dev.txt /app/
+USER mlflow-client
+
+COPY --chown=mlflow-client:mlflow-client requirements.txt requirements-test.txt requirements-dev.txt /app/
 RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
 
-ENV PYTHONPATH "/app:$PYTHONPATH"
-ENV PATH /app:$PATH
+ENV PYTHONPATH="/app:$PYTHONPATH" \
+    PATH="/app:/app/.local/bin:$PATH"
 
-COPY mlflow_client/ /app/mlflow_client/
-COPY integration-tests.sh coverage.sh .coveragerc wait-for-it.sh pytest_runner.sh /app/
-COPY tests/*.py /app/tests/
-COPY tests/integration /app/tests/integration
+COPY --chown=mlflow-client:mlflow-client mlflow_client/ /app/mlflow_client/
+COPY --chown=mlflow-client:mlflow-client integration-tests.sh coverage.sh .coveragerc wait-for-it.sh pytest_runner.sh /app/
+COPY --chown=mlflow-client:mlflow-client tests/*.py /app/tests/
+COPY --chown=mlflow-client:mlflow-client tests/integration /app/tests/integration
 
 ENTRYPOINT ["integration-tests.sh"]

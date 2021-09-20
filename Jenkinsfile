@@ -12,7 +12,7 @@ Map git_info = [:]
 Map version_info = [:]
 
 List suffixes = ['unit', 'integration']
-List python_versions = ['2.7', '3.6', '3.7', '3.8', '3.9']
+List python_versions = ['2.7', '3.6', '3.7', '3.8']
 
 pipeline {
     agent {
@@ -63,7 +63,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                        values '2.7', '3.6', '3.7', '3.8'
                     }
                 }
                 stages {
@@ -76,7 +76,7 @@ pipeline {
                             gitlabCommitStatus('Build test images') {
                                 script {
                                     try {
-                                        docker.image("python:${env.PYTHON_VERSION}-slim-buster").pull()
+                                        docker.image("${docker_registry}/platform/python:${env.PYTHON_VERSION}").pull()
                                         docker.image("${docker_registry}/${mlflow_image}:latest").pull()
                                     } catch (Exception e) {}
 
@@ -129,7 +129,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                        values '2.7', '3.6', '3.7', '3.8'
                     }
                 }
                 stages {
@@ -155,7 +155,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8', '3.9'
+                        values '2.7', '3.6', '3.7', '3.8'
                     }
                 }
 
