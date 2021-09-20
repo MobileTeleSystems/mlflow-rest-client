@@ -3,6 +3,8 @@ services:
   mlflow-client-jenkins-integration:
     image: docker.rep.msk.mts.ru/bigdata/platform/dsx/mlflow-client:${TAG:-test}
     env_file: .env.jenkins.integration
+    environment:
+      CI: integration
     build:
       context: .
       dockerfile: Dockerfile.integration

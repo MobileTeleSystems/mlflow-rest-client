@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 
-coverage run -m pytest "$@"
+_term() {
+    echo "Caught SIGTERM signal!"
+    exit 255
+}
+
+trap _term SIGTERM SIGINT
+
+if [[ "x$CI" != "x" ]]; then
+    root_path=$(dirname $(realpath $0))
+    python_version=$(python -c 'import sys; print("{0}.{1}".format(*sys.version_info))')
+    coverage run -m pytest --junitxml=$root_path/reports/junit/${CI}-${python_version}.xml "$@"
+else
+    pytest "$@"
+fi
 
 ret=$?
-if [ "$ret" = 5 ]; then
-    echo "No tests collected.  Exiting with 0 (instead of 5)."
+if [[ "x$ret" == "x5" ]]; then
+    echo "No tests collected. Exiting with 0 (instead of 5)."
     exit 0
 fi
 exit "$ret"
