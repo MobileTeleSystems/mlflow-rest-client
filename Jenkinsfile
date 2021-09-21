@@ -291,13 +291,6 @@ pipeline {
         }
 
         stage ('Publish package & documentation') {
-            when {
-                anyOf {
-                    expression { git_info.is_dev }
-                    expression { git_info.is_tagged }
-                }
-            }
-
             steps {
                 gitlabCommitStatus('Publish package & documentation') {
                     rtUpload (
@@ -325,13 +318,6 @@ pipeline {
         }
 
         stage('Cleanup Artifactory') {
-            when {
-                anyOf {
-                    expression { git_info.is_dev }
-                    expression { git_info.is_tagged }
-                }
-            }
-
             steps {
                 gitlabCommitStatus('Cleanup Artifactory') {
                     build job: 'artifactory-cleanup', propagate: false, parameters: [
@@ -347,13 +333,6 @@ pipeline {
         }
 
         stage('Deploy documentation') {
-            when {
-                anyOf {
-                    expression { git_info.is_dev }
-                    expression { git_info.is_tagged }
-                }
-            }
-
             steps {
                 gitlabCommitStatus('Deploy documentation') {
                     build job: 'nginx-build', parameters: [

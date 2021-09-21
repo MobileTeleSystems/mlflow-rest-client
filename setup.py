@@ -20,7 +20,7 @@ setup(
     name="mlflow-client",
     version_config={
         "template": "{tag}",
-        "dev_template": "{tag}.dev{ccount}",
+        "dev_template": "{tag}.dev{env:BUILD_ID:{ccount}}",
         "dirty_template": "{tag}",
         "version_file": os.path.join(here, "mlflow_client", "VERSION"),
         "count_commits_from_version_file": True,
