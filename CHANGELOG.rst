@@ -28,6 +28,12 @@ Changelog
 
         Do not use `LIKE` operator while searching model by name in `get_or_create_model` function
 
+    .. change::
+        :tags: dev, feature
+        :tickets: DSX-358
+
+        Build and push dev versions for feature and bug branches too
+
 .. changelog::
     :version: 1.1.6
     :released: 03.04.2021 14:21

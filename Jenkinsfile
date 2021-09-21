@@ -251,7 +251,7 @@ pipeline {
                         python_versions.each { def python_version ->
                             docker.image("${docker_registry}/${docker_image}:unit-python${python_version}-${env.BUILD_ID}").inside("--entrypoint=''") {
                                 sh script: """
-                                    python setup.py bdist_wheel --build-number ${env.BUILD_ID}
+                                    python setup.py bdist_wheel
                                     python setup.py sdist
                                 """
                             }
