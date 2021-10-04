@@ -33,7 +33,7 @@ WORKDIR /app
 
 # Ignore cached dependency layer, download new dependencies every time
 ARG BUILD_ID=1
-RUN pip install -U pip setuptools wheel
+RUN pip install -U pip==20.3.4 setuptools wheel
 
 COPY --chown=mlflow-client:mlflow-client requirements.txt requirements-test.txt requirements-dev.txt /app/
 RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
