@@ -228,11 +228,7 @@ pipeline {
                 gitlabCommitStatus('Sonar Scan') {
                     withSonarQubeEnv('sonarqube') {
                         script {
-                            if (git_info.is_dev || git_info.is_tagged) {
-                                sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version_info.version}"
-                            } else {
-                                sh "/data/sonar-scanner/bin/sonar-scanner"
-                            }
+                            sh "/data/sonar-scanner/bin/sonar-scanner -Dsonar.projectVersion=${version_info.version}"
                         }
                     }
 
