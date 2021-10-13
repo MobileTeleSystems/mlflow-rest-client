@@ -1482,7 +1482,7 @@ class MLflowApiClient(object):
 
         Returns
         ----------
-        models : :obj:Iterator` of :obj:`mlflow_client.model.Model`
+        models : :obj:`Iterator` of :obj:`mlflow_client.model.Model`
             Models iterator
 
         Examples
