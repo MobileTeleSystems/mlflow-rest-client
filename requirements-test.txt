@@ -5,4 +5,5 @@ pytest
 pytest-logger
 pytest-rerunfailures<9.0; python_version == "2.7"
 pytest-rerunfailures; python_version >= "3"
-pytest-timeout
+pytest-timeout<2.0; python_version == "2.7"
+pytest-timeout; python_version >= "3"
