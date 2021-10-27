@@ -35,7 +35,7 @@ See https://mlflow-client.msk.bd-cloud.mts.ru/
 Contribution guide
 -------------------
 
-See https://wiki.bd.msk.mts.ru/display/DAT/Contribution+guide
+See `<CONTRIBUTING.rst>`__
 
 
 .. install

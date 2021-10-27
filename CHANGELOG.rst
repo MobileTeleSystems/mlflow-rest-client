@@ -12,6 +12,12 @@ Changelog
 
         Change package author to dsx-team@mts.ru
 
+    .. change::
+        :tags: general
+        :tickets: DSX-419
+
+        Add ``CONTRIBUTING.rst`` file
+
 .. changelog::
     :version: 1.1.7
     :released: 26.05.2021 17:47
