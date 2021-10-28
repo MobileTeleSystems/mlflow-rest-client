@@ -17,6 +17,7 @@
     install
     develop
     usage
+    contributing
 
 .. toctree::
     :maxdepth: 1
