@@ -124,7 +124,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "mlflow-client", u"mlflow-client Documentation", [author], 1)]
+man_pages = [(master_doc, "mlflow-client", "mlflow-client Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -136,7 +136,7 @@ texinfo_documents = [
     (
         master_doc,
         "mlflow-client",
-        u"mlflow-client documentation",
+        "mlflow-client documentation",
         author,
         "mlflow-client",
         "One line description of project.",

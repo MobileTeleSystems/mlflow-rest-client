@@ -1,12 +1,14 @@
 from enum import Enum
+from typing import List
 
-from .internal import ComparableByStr, Listable, MakeableFromTupleStr
+from pydantic import BaseModel, Field
+
+from .internal import ListableBase
 from .tag import Tag
 
 
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
-class ExperimentStage(Enum):
+class EXPERIMENTSTAGE(Enum):
     """Experiment stage"""
 
     active = "active"
@@ -44,7 +46,12 @@ class ExperimentTag(Tag):
     """
 
 
-class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
+class ListExperimentTags(ListableBase):
+
+    __root__: List[ExperimentTag]
+
+
+class Experiment(BaseModel):
     """Experiment representation
 
     Parameters
@@ -58,7 +65,7 @@ class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
     artifact_location : str, optional
         Experiment artifact location
 
-    stage : :obj:`str` or :obj:`ExperimentStage`, optional
+    stage : :obj:`str` or :obj:`EXPERIMENTSTAGE`, optional
         Experiment stage
 
     tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
@@ -75,7 +82,7 @@ class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
     artifact_location : str
         Experiment artifact location
 
-    stage : :obj:`ExperimentStage`
+    stage : :obj:`EXPERIMENTSTAGE`
         Experiment stage
 
     tags : :obj:`ExperimentTagList`
@@ -88,33 +95,14 @@ class Experiment(Listable, MakeableFromTupleStr, ComparableByStr):
         experiment = Experiment(id=123, name="some_name")
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, id, name, artifact_location=None, stage=None, tags=None):
-        self.id = int(id)
-        self.name = str(name)
-        self.artifact_location = str(artifact_location) if artifact_location else ""
+    id: int = Field(alias="experiment_id")
+    name: str
+    artifact_location: str = ""
+    stage: EXPERIMENTSTAGE = Field(EXPERIMENTSTAGE.active, alias="lifecycle_stage")
+    tags: ListExperimentTags = Field(default_factory=list)
 
-        if not stage:
-            stage = ExperimentStage.active
-        self.stage = ExperimentStage(stage)
-
-        self.tags = ExperimentTag.from_list(tags or [])
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(
-            id=inp.get("experiment_id") or inp.get("id"),
-            name=inp.get("name"),
-            artifact_location=inp.get("artifact_location"),
-            stage=inp.get("lifecycle_stage") or inp.get("stage"),
-            tags=inp.get("tags"),
-        )
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} id={self.id} name={self.name}>".format(self=self)
-
-    def __int__(self):
-        return self.id
+    class Config:
+        frozen = True
 
     def __str__(self):
         return self.name

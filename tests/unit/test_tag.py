@@ -14,7 +14,7 @@ def test_tag():
     key = rand_str()
     value = rand_str()
 
-    tag = Tag(key, value)
+    tag = Tag(key=key, value=value)
 
     assert tag.key == key
     assert tag.value == value
@@ -24,55 +24,9 @@ def test_tag():
 def test_tag_without_value():
     key = rand_str()
 
-    tag = Tag(key)
+    tag = Tag(key=key)
 
     assert tag.key == key
-    assert tag.value == ""
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_make_str():
-    key = rand_str()
-
-    tag = Tag.make(key)
-
-    assert tag.key == key
-    assert tag.value == ""
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_make_tuple():
-    key = rand_str()
-    value = rand_str()
-
-    tag = Tag.make((key, value))
-
-    assert tag.key == key
-    assert tag.value == value
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_make_dict():
-    dct = {
-        "key": rand_str(),
-        "value": rand_str(),
-    }
-
-    tag = Tag.make(dct)
-
-    assert tag.key == dct["key"]
-    assert tag.value == dct["value"]
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_make_dict_without_value():
-    dct = {
-        "key": rand_str(),
-    }
-
-    tag = Tag.make(dct)
-
-    assert tag.key == dct["key"]
     assert tag.value == ""
 
 
@@ -81,7 +35,7 @@ def test_tag_str():
     key = rand_str()
     value = rand_str()
 
-    tag = Tag(key, value)
+    tag = Tag(key=key, value=value)
 
     assert str(tag)
     assert str(tag) == key
@@ -95,11 +49,11 @@ def test_tag_eq():
     value1 = rand_str()
     value2 = rand_str()
 
-    assert Tag(key1, value1) == Tag(key1, value1)
-    assert Tag(key1, value1) != Tag(key1, value2)
+    assert Tag(key=key1, value=value1) == Tag(key=key1, value=value1)
+    assert Tag(key=key1, value=value1) != Tag(key=key1, value=value2)
 
-    assert Tag(key1, value1) != Tag(key2, value1)
-    assert Tag(key1, value1) != Tag(key2, value2)
+    assert Tag(key=key1, value=value1) != Tag(key=key2, value=value1)
+    assert Tag(key=key1, value=value1) != Tag(key=key2, value=value2)
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -109,37 +63,5 @@ def test_tag_eq_str():
 
     value1 = rand_str()
 
-    assert Tag(key1, value1) == key1
-    assert Tag(key1, value1) != key2
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_list_in_by_key():
-    key1 = rand_str()
-    key2 = rand_str()
-
-    value1 = rand_str()
-
-    tag1 = Tag(key1, value1)
-
-    lst = Tag.from_list([tag1])
-
-    assert key1 in lst
-    assert key2 not in lst
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_tag_list_get_item_by_key():
-    key1 = rand_str()
-    key2 = rand_str()
-
-    value1 = rand_str()
-
-    tag1 = Tag(key1, value1)
-
-    lst = Tag.from_list([tag1])
-
-    assert lst[key1] == tag1
-
-    with pytest.raises(KeyError):
-        lst[key2]
+    assert Tag(key=key1, value=value1).key == key1
+    assert Tag(key=key1, value=value1).key != key2

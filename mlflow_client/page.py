@@ -1,7 +1,9 @@
-from six import raise_from
+from typing import List
+
+from pydantic import BaseModel, parse_obj_as
 
 
-class Page(object):
+class Page:
     """Page representation
 
     Parameters
@@ -77,12 +79,7 @@ class Page(object):
             next_page_token = inp.get("next_page_token", None) or kwargs.pop("next_page_token", None)
 
         if item_class:
-            if hasattr(item_class, "from_list"):
-                items = item_class.from_list(items, **kwargs)
-            elif hasattr(item_class, "make"):
-                items = [item_class.make(item, **kwargs) for item in items]
-            else:
-                items = [item_class(item, **kwargs) for item in items]
+            items = [item_class.parse_obj(item, **kwargs) for item in items]
 
             return cls(items=items, next_page_token=next_page_token)
 
@@ -131,6 +128,7 @@ class Page(object):
         return self
 
     def __contains__(self, item):
+        res = [i for i in self.items]
         return item in self.items
 
     def __delitem__(self, i):
@@ -143,14 +141,10 @@ class Page(object):
         self._index = 0
         return self
 
-    def next(self):
-        # Python2 only
-        return self.__next__()
-
     def __next__(self):
         try:
             result = self.items[self._index]
         except IndexError as e:
-            raise_from(StopIteration, e)
+            raise StopIteration from e
         self._index += 1
         return result

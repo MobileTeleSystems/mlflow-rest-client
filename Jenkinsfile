@@ -12,7 +12,7 @@ Map git_info = [:]
 Map version_info = [:]
 
 List suffixes = ['unit', 'integration']
-List python_versions = ['2.7', '3.6', '3.7', '3.8']
+List python_versions = ['3.7', '3.8']
 
 pipeline {
     agent {
@@ -63,7 +63,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8'
+                        values '3.7', '3.8'
                     }
                 }
                 stages {
@@ -129,7 +129,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8'
+                        values '3.7', '3.8'
                     }
                 }
                 stages {
@@ -155,7 +155,7 @@ pipeline {
                     axis {
                         name 'PYTHON_VERSION'
                         // TODO: replace with python_versions variable after https://issues.jenkins.io/browse/JENKINS-62127
-                        values '2.7', '3.6', '3.7', '3.8'
+                        values '3.7', '3.8'
                     }
                 }
 

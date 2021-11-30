@@ -1,23 +1,24 @@
 import datetime
 import time
 from enum import Enum
+from typing import Optional
 
 
 class Unit(Enum):
-    NANOSEC = 1000
-    MSEC = 1
+    MSEC = 1000
+    SEC = 1
 
 
 def current_timestamp():
-    return int(time.time() - time.timezone)
+    return datetime.datetime.now().timestamp()
 
 
 def normalize_timestamp(timestamp):
     timestamp = int(timestamp)
     if timestamp >= 1000000000000:
-        unit = Unit.NANOSEC
-    else:
         unit = Unit.MSEC
+    else:
+        unit = Unit.SEC
     return timestamp / unit.value
 
 
@@ -33,24 +34,14 @@ def timestamp_2_time(timestamp):
     return None
 
 
-def _remove_tz(inp):
-    if inp.utcoffset() is not None:
-        inp -= inp.utcoffset()
-    if inp.tzinfo is not None:
-        if hasattr(datetime, "timezone"):
-            inp = inp.replace(tzinfo=datetime.timezone.utc)
-        else:
-            inp = inp.replace(tzinfo=None)
-    return inp
+def format_to_timestamp(data: Optional[int] = None) -> int:
+    """Any object (str, int, datetime formatting to timestamp."""
 
+    if not data:
+        data = datetime.datetime.now().timestamp()
+    elif isinstance(data, int):
+        data = normalize_timestamp(data)
+    elif isinstance(data, datetime.datetime):
+        data = data.timestamp()
 
-def time_2_timestamp(inp):
-    if inp:
-        if isinstance(inp, (float, int)):
-            timestamp = normalize_timestamp(inp)
-        if isinstance(inp, datetime.datetime):
-            inp = _remove_tz(inp)
-            utc = _remove_tz(datetime.datetime(1970, 1, 1))
-            timestamp = (inp - utc).total_seconds()
-        return mlflow_timestamp(timestamp)
-    return None
+    return normalize_timestamp(int(data))
