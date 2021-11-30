@@ -35,14 +35,14 @@ def create_model_name():
 
 
 def now():
-    return datetime.now().replace(microsecond=0)
+    return datetime.now()
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def client():
     host = os.environ.get("MLFLOW_HOST", "localhost")
     port = os.environ.get("MLFLOW_PORT", "5000")
-    api_url = "http://{host}:{port}".format(host=host, port=port)
+    api_url = f"http://{host}:{port}"
     with MLflowApiClient(api_url) as client:
         yield client
 

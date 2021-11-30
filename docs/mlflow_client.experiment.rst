@@ -7,7 +7,7 @@ Experiment
     :nosignatures:
 
     Experiment
-    ExperimentStage
+    EXPERIMENTSTAGE
     ExperimentList
     ExperimentTag
     ExperimentTagList
@@ -15,7 +15,7 @@ Experiment
 .. autoclass:: mlflow_client.experiment.Experiment
     :members:
 
-.. autoclass:: mlflow_client.experiment.ExperimentStage
+.. autoclass:: mlflow_client.experiment.EXPERIMENTSTAGE
     :members:
 
 .. autoclass:: mlflow_client.experiment.ExperimentList

@@ -1,23 +1,26 @@
 # pylint: disable=too-many-lines
 
 import json
+from datetime import datetime
+from typing import List
 
 import requests
 import urllib3
+from pydantic import parse_obj_as
 
 from .artifact import Artifact
 from .experiment import Experiment
 from .log import get_logger
-from .model import Model, ModelVersion, ModelVersionStage
+from .model import ListableModelVersion, Model, ModelVersion, ModelVersionStage
 from .page import Page
 from .run import Metric, Run, RunInfo, RunStatus, RunViewType
-from .timestamp import current_timestamp, time_2_timestamp
+from .timestamp import current_timestamp, format_to_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # pylint: disable=too-many-public-methods
-class MLflowApiClient(object):
+class MLflowApiClient:
     """HTTP Client for MLflow API
 
     Parameters
@@ -76,7 +79,7 @@ class MLflowApiClient(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self._session.close()
 
-    def list_experiments(self, view_type=RunViewType.active):
+    def list_experiments(self, view_type=RunViewType.ACTIVE):
         """
         List all existing experiments in MLflow database
 
@@ -97,9 +100,12 @@ class MLflowApiClient(object):
             experiments_list = client.list_experiments()
 
         """
-        return Experiment.from_list(self._get("experiments/list", view_type=view_type.value).get("experiments", []))
+        data = parse_obj_as(
+            List[Experiment], self._get("experiments/list", view_type=view_type.value).get("experiments", [])
+        )
+        return data
 
-    def list_experiments_iterator(self, view_type=RunViewType.active):
+    def list_experiments_iterator(self, view_type=RunViewType.ACTIVE):
         """
         Iterate by all existing experiments in MLflow database
 
@@ -144,7 +150,8 @@ class MLflowApiClient(object):
 
             experiment = client.get_experiment(123)
         """
-        return Experiment.from_dict(self._get("experiments/get", experiment_id=id)["experiment"])
+        data = self._get("experiments/get", experiment_id=id)["experiment"]
+        return Experiment.parse_obj(data)
 
     def get_experiment_by_name(self, name):
         """
@@ -356,7 +363,8 @@ class MLflowApiClient(object):
 
             runs = client.list_experiment_runs(123)
         """
-        return Run.from_list(run for run in self.list_experiment_runs_iterator(id))
+        data = [run for run in self.list_experiment_runs_iterator(id)]
+        return parse_obj_as(List[Run], data)
 
     def list_experiment_runs_iterator(self, id):
         """
@@ -402,7 +410,7 @@ class MLflowApiClient(object):
 
             run = client.get_run("some_run_id")
         """
-        return Run.from_dict(self._get("runs/get", run_id=id)["run"])
+        return Run.parse_obj(self._get("runs/get", run_id=id)["run"])
 
     def create_run(self, experiment_id, start_time=None, tags=None):
         """
@@ -445,11 +453,10 @@ class MLflowApiClient(object):
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
 
-        return Run.from_dict(
-            self._post("runs/create", experiment_id=experiment_id, start_time=time_2_timestamp(start_time), tags=tags)[
-                "run"
-            ]
-        )
+        data = self._post(
+            "runs/create", experiment_id=experiment_id, start_time=format_to_timestamp(start_time), tags=tags
+        )["run"]
+        return Run.parse_obj(data)
 
     def set_run_status(self, id, status, end_time=None):
         """
@@ -476,15 +483,16 @@ class MLflowApiClient(object):
         .. code:: python
 
             run_info = client.set_run_status("some_run_id", "FAILED")
-            run_info = client.set_run_status("some_run_id", RunStatus.failed)
+            run_info = client.set_run_status("some_run_id", RunStatus.FAILED)
             run_info = client.set_run_status(
-                "some_run_id", RunStatus.finished, end_time=datetime.datetime.now()
+                "some_run_id", RunStatus.FINISHED, end_time=datetime.datetime.now()
             )
         """
         params = {"status": status.value}
         if end_time:
-            params["end_time"] = time_2_timestamp(end_time)
-        return RunInfo.from_dict(self._post("runs/update", run_id=id, **params)["run_info"])
+            params["end_time"] = format_to_timestamp(end_time)
+
+        return RunInfo.parse_obj(self._post("runs/update", run_id=id, **params)["run_info"])
 
     def start_run(self, id):
         """
@@ -506,7 +514,7 @@ class MLflowApiClient(object):
 
             run_info = client.start_run("some_run_id")
         """
-        return self.set_run_status(id, RunStatus.started)
+        return self.set_run_status(id, RunStatus.STARTED)
 
     def schedule_run(self, id):
         """
@@ -528,7 +536,7 @@ class MLflowApiClient(object):
 
             run_info = client.schedule_run("some_run_id")
         """
-        return self.set_run_status(id, RunStatus.scheduled)
+        return self.set_run_status(id, RunStatus.SCHEDULED)
 
     def finish_run(self, id, end_time=None):
         """
@@ -556,7 +564,7 @@ class MLflowApiClient(object):
         """
         if not end_time:
             end_time = current_timestamp()
-        return self.set_run_status(id, RunStatus.finished, end_time=time_2_timestamp(end_time))
+        return self.set_run_status(id, RunStatus.FINISHED, end_time=format_to_timestamp(end_time))
 
     def fail_run(self, id, end_time=None):
         """
@@ -584,9 +592,9 @@ class MLflowApiClient(object):
         """
         if not end_time:
             end_time = current_timestamp()
-        return self.set_run_status(id, RunStatus.failed, end_time=time_2_timestamp(end_time))
+        return self.set_run_status(id, RunStatus.FAILED, end_time=end_time)
 
-    def kill_run(self, id, end_time=None):
+    def kill_run(self, id, end_time: datetime = None):
         """
         Change run status to KILLED
 
@@ -610,9 +618,9 @@ class MLflowApiClient(object):
             run_info = client.kill_run("some_run_id")
             run_info = client.kill_run("some_run_id", end_time=datetime.datetime.now())
         """
-        if not end_time:
-            end_time = current_timestamp()
-        return self.set_run_status(id, RunStatus.killed, end_time=time_2_timestamp(end_time))
+        data = self.set_run_status(id, RunStatus.KILLED, end_time=format_to_timestamp(end_time))
+
+        return data
 
     def delete_run(self, id):
         """
@@ -731,9 +739,7 @@ class MLflowApiClient(object):
         """
         if not timestamp:
             timestamp = current_timestamp()
-        dct = self._add_timestamp(
-            {"run_id": id, "key": key, "value": value, "step": int(step)}, time_2_timestamp(timestamp)
-        )
+        dct = self._add_timestamp({"run_id": id, "key": key, "value": value, "step": int(step)}, int(timestamp))
         self._post("runs/log-metric", **dct)
 
     def log_run_metrics(self, id, metrics):
@@ -759,7 +765,7 @@ class MLflowApiClient(object):
             ]
             client.log_run_metrics("some_run_id", metrics)
         """
-        timestamp = time_2_timestamp(current_timestamp())
+        timestamp = current_timestamp()
 
         if isinstance(metrics, dict):
             metrics = self._handle_tags(metrics)
@@ -829,7 +835,7 @@ class MLflowApiClient(object):
             metrics = []
         if isinstance(metrics, dict):
             metrics = self._handle_tags(metrics)
-        metrics = [self._add_timestamp(metric, time_2_timestamp(timestamp)) for metric in metrics]
+        metrics = [self._add_timestamp(metric, int(timestamp)) for metric in metrics]
 
         if not tags:
             tags = []
@@ -999,7 +1005,7 @@ class MLflowApiClient(object):
 
             metrics_list = client.list_run_metric_history("some_run_id", "some.metric")
         """
-        return Metric.from_list(self._get("metrics/get-history", run_id=id, metric_key=key)["metrics"])
+        return parse_obj_as(List[Metric], self._get("metrics/get-history", run_id=id, metric_key=key)["metrics"])
 
     def list_run_metric_history_iterator(self, id, key):
         """
@@ -1116,7 +1122,7 @@ class MLflowApiClient(object):
         self,
         experiment_ids,
         query="",
-        run_view_type=RunViewType.active,
+        run_view_type=RunViewType.ACTIVE,
         max_results=MAX_RESULTS,
         order_by=None,
         page_token=None,
@@ -1163,7 +1169,7 @@ class MLflowApiClient(object):
             order_by = ["name", "version ASC"]
             runs_page = client.search_runs(experiment_ids, order_by=order_by)
 
-            runs_page = client.search_runs(experiment_ids, run_view_type=RunViewType.all)
+            runs_page = client.search_runs(experiment_ids, run_view_type=RunViewType.ALL)
             runs_page = client.search_runs(experiment_ids, max_results=100)
             runs_page = client.search_runs(experiment_ids, page_token="next_page_id")
         """
@@ -1189,7 +1195,7 @@ class MLflowApiClient(object):
         self,
         experiment_ids,
         query="",
-        run_view_type=RunViewType.active,
+        run_view_type=RunViewType.ACTIVE,
         max_results=MAX_RESULTS,
         order_by=None,
         page_token=None,
@@ -1241,7 +1247,7 @@ class MLflowApiClient(object):
             for run in client.search_runs_iterator(experiment_ids, order_by=order_by):
                 print(run)
 
-            for run in client.search_runs_iterator(experiment_ids, run_view_type=RunViewType.all):
+            for run in client.search_runs_iterator(experiment_ids, run_view_type=RunViewType.ALL):
                 print(run)
 
             for run in client.search_runs_iterator(experiment_ids, max_results=100):
@@ -1307,7 +1313,9 @@ class MLflowApiClient(object):
             tags = []
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
-        return Model.from_dict(self._post("registered-models/create", name=name, tags=tags)["registered_model"])
+        data = self._post("registered-models/create", name=name, tags=tags)["registered_model"]
+
+        return Model.parse_obj(data)
 
     def get_model(self, name):
         """
@@ -1329,7 +1337,7 @@ class MLflowApiClient(object):
 
             model = client.get_model("some_model")
         """
-        return Model.from_dict(self._get("registered-models/get", name=name)["registered_model"])
+        return Model.parse_obj(self._get("registered-models/get", name=name)["registered_model"])
 
     def get_or_create_model(self, name, tags=None):
         """
@@ -1387,7 +1395,7 @@ class MLflowApiClient(object):
 
             model = client.rename_model("old_model", "new_model")
         """
-        return Model.from_dict(self._post("registered-models/rename", name=name, new_name=new_name)["registered_model"])
+        return Model.parse_obj(self._post("registered-models/rename", name=name, new_name=new_name)["registered_model"])
 
     def set_model_description(self, name, description):
         """
@@ -1412,7 +1420,7 @@ class MLflowApiClient(object):
 
             model = client.set_model_description("some_model", "new description")
         """
-        return Model.from_dict(
+        return Model.parse_obj(
             self._patch("registered-models/update", name=name, description=description)["registered_model"]
         )
 
@@ -1679,7 +1687,7 @@ class MLflowApiClient(object):
 
             model_versions_list = client.list_model_versions("some_model")
             model_versions_list = client.list_model_versions(
-                "some_model", stages=[ModelVersionStage.prod]
+                "some_model", stages=[ModelVersionStage.PROD]
             )
         """
         params = {}
@@ -1690,8 +1698,10 @@ class MLflowApiClient(object):
                 params["stages"] = [stages.value]
             else:
                 params["stages"] = [stages]
+
         response = self._get("registered-models/get-latest-versions", name=name, **params)
-        return ModelVersion.from_list(response.get("model_versions", []))
+
+        return ListableModelVersion.parse_obj(response.get("model_versions", []))
 
     def list_model_versions_iterator(self, name, stages=None):
         """
@@ -1718,7 +1728,7 @@ class MLflowApiClient(object):
                 print(model_version)
 
             for model_version in client.list_model_versions_iterator(
-                "some_model", stages=[ModelVersionStage.prod]
+                "some_model", stages=[ModelVersionStage.PROD]
             ):
                 print(model_version)
         """
@@ -1749,11 +1759,10 @@ class MLflowApiClient(object):
 
             model_versions_list = client.list_model_all_versions("some_model")
             model_versions_list = client.list_model_all_versions(
-                "some_model", stages=[ModelVersionStage.prod]
+                "some_model", stages=[ModelVersionStage.PROD]
             )
         """
-
-        return ModelVersion.from_list(self.list_model_all_versions_iterator(name=name, stages=stages))
+        return parse_obj_as(ListableModelVersion, self.list_model_all_versions_iterator(name=name, stages=stages))
 
     # pylint: disable=broad-except
     def list_model_all_versions_iterator(self, name, stages=None):
@@ -1781,7 +1790,7 @@ class MLflowApiClient(object):
                 print(model_version)
 
             for model_version in client.list_model_all_versions_iterator(
-                "some_model", stages=[ModelVersionStage.prod]
+                "some_model", stages=[ModelVersionStage.PROD]
             ):
                 print(model_version)
         """
@@ -1863,7 +1872,8 @@ class MLflowApiClient(object):
             tags = []
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
-        return ModelVersion.from_dict(
+
+        return ModelVersion.parse_obj(
             self._post("model-versions/create", name=name, tags=tags, **params)["model_version"]
         )
 
@@ -1890,7 +1900,7 @@ class MLflowApiClient(object):
 
             model_version = client.get_model_version("some_model", 1)
         """
-        return ModelVersion.from_dict(self._get("model-versions/get", name=name, version=str(version))["model_version"])
+        return ModelVersion.parse_obj(self._get("model-versions/get", name=name, version=str(version))["model_version"])
 
     def set_model_version_description(self, name, version, description):
         """
@@ -1918,7 +1928,7 @@ class MLflowApiClient(object):
 
             model_version = client.set_model_version_description("some_model", 1, "new description")
         """
-        return ModelVersion.from_dict(
+        return ModelVersion.parse_obj(
             self._patch("model-versions/update", name=name, version=str(version), description=description)[
                 "model_version"
             ]
@@ -2158,13 +2168,13 @@ class MLflowApiClient(object):
 
             model_version = client.transition_model_version_stage("some_run_id", 1, "Production")
             model_version = client.transition_model_version_stage(
-                "some_run_id", 1, ModelVersionStage.prod
+                "some_run_id", 1, ModelVersionStage.PROD
             )
             model_version = client.transition_model_version_stage(
-                "some_run_id", 1, ModelVersionStage.prod, archive_existing=True
+                "some_run_id", 1, ModelVersionStage.PROD, archive_existing=True
             )
         """
-        return ModelVersion.from_dict(
+        return ModelVersion.parse_obj(
             self._post(
                 "model-versions/transition-stage",
                 name=name,
@@ -2201,7 +2211,7 @@ class MLflowApiClient(object):
             model_version = client.test_model_version("some_run_id", 1)
             model_version = client.test_model_version("some_run_id", 1, archive_existing=True)
         """
-        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.test, **params)
+        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.TEST, **params)
 
     def promote_model_version(self, name, version, **params):
         """
@@ -2230,7 +2240,7 @@ class MLflowApiClient(object):
             model_version = client.promote_model_version("some_run_id", 1)
             model_version = client.promote_model_version("some_run_id", 1, archive_existing=True)
         """
-        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.prod, **params)
+        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.PROD, **params)
 
     def archive_model_version(self, name, version, **params):
         """
@@ -2255,7 +2265,7 @@ class MLflowApiClient(object):
 
             model_version = client.archive_model_version("some_run_id", 1)
         """
-        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.archived, **params)
+        return self.transition_model_version_stage(name, version, stage=ModelVersionStage.ARCHIVED, **params)
 
     @staticmethod
     def _handle_tags(tags):
@@ -2281,6 +2291,7 @@ class MLflowApiClient(object):
     def _post(self, url, **data):
         resp = self._request("post", url, json=data)
         rsp = str(resp.text)
+
         if rsp:
             return json.loads(rsp)
         return None

@@ -1,59 +1,49 @@
+from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
-from .internal import (
-    Comparable,
-    ComparableByStr,
-    HashableByStr,
-    Listable,
-    MakeableFromStr,
-    MakeableFromTupleStr,
-    SearchableList,
-)
+from pydantic import BaseModel, Field, parse_obj_as, root_validator, validator
+from requests.sessions import requote_uri
+
+from mlflow_client.internal import ListableBase
+
 from .tag import Tag
 from .timestamp import timestamp_2_time
 
 
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
 class ModelVersionStage(Enum):
     """Model version stage"""
 
-    unknown = "None"
+    UNKNOWN = "None"
 
     """ Model version has no stage """
 
-    test = "Staging"
+    TEST = "Staging"
     """ Is a testing model version"""
 
-    prod = "Production"
+    PROD = "Production"
     """ Is a production model version """
 
-    archived = "Archived"
+    ARCHIVED = "Archived"
     """ Model version was archived """
 
-    def __hash__(self):
-        return hash(self.value)
 
-
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
 class ModelVersionState(Enum):
     """Model version stage"""
 
-    pending = "PENDING_REGISTRATION"
+    PENDING = "PENDING_REGISTRATION"
     """ Model version registration is pending """
 
-    failed = "FAILED_REGISTRATION"
+    FAILED = "FAILED_REGISTRATION"
     """ Model version registration was failed """
 
-    ready = "READY"
+    READY = "READY"
     """ Model version registration was successful """
 
-    def __hash__(self):
-        return hash(self.value)
 
-
-class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
+class ModelVersionStatus(BaseModel):
     """Model version state with message
 
     Parameters
@@ -78,35 +68,23 @@ class ModelVersionStatus(Listable, MakeableFromTupleStr, ComparableByStr):
 
         status = ModelVersionStatus(state="READY")
 
-        status = ModelVersionStatus(state=ModelVersionState.ready)
+        status = ModelVersionStatus(state=ModelVersionState.READY)
 
-        status = ModelVersionStatus(state=ModelVersionState.failed, message="Reason")
+        status = ModelVersionStatus(state=ModelVersionState.FAILED, message="Reason")
     """
 
-    def __init__(self, state=None, message=None, *args, **kwargs):
-        super(ModelVersionStatus, self).__init__(*args, **kwargs)
+    state: ModelVersionState = ModelVersionState.PENDING
+    message: str = ""
 
-        self.state = ModelVersionState(state) if state else ModelVersionState.pending
-        """Model version state"""
+    class Config:
+        frozen = True
 
-        self.message = message or ""
-        """Model version state message"""
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(
-            state=inp.get("state"),
-            message=inp.get("message"),
-        )
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} state={self.state} message={self.message}>".format(self=self)
+    @validator("state")
+    def valid_state(cls, val):
+        return ModelVersionState(val) if isinstance(val, str) else ModelVersionState.PENDING
 
     def __str__(self):
         return str(self.state.name) + (" because of '{}'".format(self.message) if self.message else "")
-
-    def __hash__(self):
-        return hash(self.state.value)
 
 
 # pylint: disable=too-many-ancestors
@@ -137,70 +115,9 @@ class ModelVersionTag(Tag):
     """
 
 
-class ModelVersionList(SearchableList):
-    """
-    List of :obj:`ModelVersion` with extended functions
+class ListableModelVersionTag(ListableBase):
 
-    Parameters
-    ----------
-    iterable : Iterable
-        Any iterable
-
-    Examples
-    --------
-    .. code:: python
-
-        name = "some_metric"
-        item = ModelVersion(name)
-
-        simple_list = [item]
-        this_list = ModelVersion.from_list([item])  # or ModelVersionList([item])
-
-        assert item in simple_list
-        assert item in this_list
-
-        assert name not in simple_list
-        assert name in this_list
-        assert this_list[name] == item
-
-        assert ModelVersionStage.test not in simple_list
-        assert ModelVersionStage.prod in this_list
-        assert this_list[ModelVersionStage.prod] == item
-    """
-
-    # pylint: disable=broad-except
-    def __contains__(self, item):
-        for it in self:
-            try:
-                if isinstance(it, ModelVersion):
-                    if isinstance(item, ModelVersionStage) and it.stage == item:
-                        return True
-                    if it.stage == ModelVersionStage(item):
-                        return True
-            except Exception:  # nosec
-                pass
-
-        if isinstance(item, ModelVersionStage):
-            return False
-
-        return super(ModelVersionList, self).__contains__(item)
-
-    # pylint: disable=broad-except
-    def __getitem__(self, item):
-        for it in self:
-            try:
-                if isinstance(it, ModelVersion):
-                    if isinstance(item, ModelVersionStage) and it.stage == item:
-                        return it
-                    if it.stage == ModelVersionStage(item):
-                        return it
-            except Exception:  # nosec
-                pass
-
-        if isinstance(item, ModelVersionStage):
-            raise KeyError("ModelVersion with stage {stage} not found".format(stage=item))
-
-        return super(ModelVersionList, self).__getitem__(item)
+    __root__: List[ModelVersionTag] = list()
 
 
 # pylint: disable=too-many-ancestors
@@ -231,8 +148,13 @@ class ModelTag(Tag):
     """
 
 
+class ListableModelTag(ListableBase):
+
+    __root__: List[ModelTag]
+
+
 # pylint: disable=too-many-instance-attributes
-class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
+class ModelVersion(BaseModel):
     """Model version representation
 
     Parameters
@@ -309,154 +231,120 @@ class ModelVersion(Listable, MakeableFromTupleStr, Comparable):
         model_version = ModelVersion(name="some_model", version=1)
     """
 
-    list_class = ModelVersionList
+    name: str
+    version: int
+    created_time: datetime = Field(timestamp_2_time(None), alias="creation_timestamp")
+    updated_time: datetime = Field(timestamp_2_time(None), alias="last_updated_timestamp")
+    stage: ModelVersionStage = Field(ModelVersionStage.UNKNOWN, alias="current_stage")
+    description: str = ""
+    source: str = ""
+    run_id: Optional[str] = None
+    status: ModelVersionStatus = Field(ModelVersionStatus(), alias="state")
+    tags: ListableModelVersionTag = Field(default_factory=list)
 
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        name,
-        version,
-        creation_timestamp=None,
-        last_updated_timestamp=None,
-        stage=None,
-        description=None,
-        source=None,
-        run_id=None,
-        state=None,
-        state_message=None,
-        tags=None,
-    ):
-        self.name = str(name)
-        """Model name"""
+    class Config:
+        frozen = True
+        allow_population_by_field_name = True
 
-        self.version = int(version)
-        """Version number"""
+    @validator("run_id", pre=True)
+    def validation_run_id(cls, val):
+        if val == "":
+            return None
+        return val
 
-        self.created_time = timestamp_2_time(creation_timestamp)
-        """Version creation timestamp"""
+    @validator("tags", pre=True)
+    def validation_tags(cls, val):
+        if isinstance(val, dict):
+            return [val]
 
-        self.updated_time = timestamp_2_time(last_updated_timestamp)
-        """Version last update timestamp"""
+        return val
 
-        if stage is None:
-            stage = ModelVersionStage.unknown
-        self.stage = ModelVersionStage(stage)
-        """Version stage"""
+    @validator("status", pre=True)
+    def validator_status(cls, val):
+        if isinstance(val, ModelVersionState):
+            return {"status": val}
+        if isinstance(val, str):
+            return {"status": ModelVersionState(val)}
 
-        self.description = str(description) if description else ""
-        """Version description"""
-
-        self.source = str(source) if source else ""
-        """Version source path"""
-
-        self.run_id = str(run_id) if run_id else None
-        """Run ID used for generating version"""
-
-        self.status = ModelVersionStatus(state, state_message)
-        """Version status"""
-
-        self.tags = ModelVersionTag.from_list(tags or [])
-        """Version tags list"""
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(
-            name=inp.get("name"),
-            version=inp.get("version"),
-            creation_timestamp=inp.get("creation_timestamp"),
-            last_updated_timestamp=inp.get("last_updated_timestamp"),
-            stage=inp.get("current_stage") or inp.get("stage"),
-            description=inp.get("description"),
-            source=inp.get("source"),
-            run_id=inp.get("run_id"),
-            state=inp.get("status") or inp.get("state"),
-            state_message=inp.get("status_message") or inp.get("state_message"),
-            tags=inp.get("tags"),
-        )
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} name={self.name} version={self.version}>".format(self=self)
+        return val
 
     def __str__(self):
-        return str("{self.name} v{self.version}".format(self=self))
+        return f"{self.name} v{self.version}"
+
+    @root_validator(pre=True)
+    def main_validator(cls, values):
+
+        if "state_message" in values:
+            values["state"]["message"] = values["state_message"]
+
+        if "status_message" in values:
+            values["status"]["message"] = values["status_message"]
+
+        return values
 
 
-class Model(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
-    """Model representation
+class ListableModelVersion(ListableBase):
 
-    Parameters
-    ----------
-    name : str
-        Model name
+    __root__: List[ModelVersion]
 
-    creation_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
-        Model creation timestamp
+    def __getitem__(self, item):
 
-    last_updated_timestamp : :obj:`int` (UNIX timestamp) or :obj:`datetime.datetime`, optional
-        Model last update timestamp
+        if isinstance(item, ModelVersionStage):
+            res = {i.stage: i for i in self.__root__}
+            return res[item]
 
-    description : str, optional
-        Model description
+        if isinstance(item, str):
+            res = {i.name: i for i in self.__root__}
+            return res[item]
 
-    versions: :obj:`list` of :obj:`ModelVersion` or :obj:`list` of :obj:`dict`, optional
-        Model latest versions
+        return self.__root__[item]
 
-    tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
-        Model tags list
+    def __contains__(self, item):
+        for itm in self.__root__:
 
-    Attributes
-    ----------
-    name : str
-        Model name
+            if isinstance(item, ModelVersionStage):
+                if item == itm.stage:
+                    return True
 
-    created_time : :obj:`datetime.datetime`
-        Model creation timestamp
+            if (itm.name == item.name) and (itm.version == item.version):
+                return True
+        return False
 
-    updated_time : :obj:`datetime.datetime`
-        Model last update timestamp
 
-    description : str
-        Model description
+class Model(BaseModel):
+    name: str
 
-    versions: :obj:`ModelVersionList`
-        Model latest versions
-
-    tags : :obj:`ModelTagList`
-        Model tags list
-
-    Examples
-    --------
-    .. code:: python
-
-        model = Model(name="some_model")
-
-        model = Model(name="some_model", versions=[ModelVersion("some_model", 1)])
-    """
-
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self, name, creation_timestamp=None, last_updated_timestamp=None, description=None, versions=None, tags=None
-    ):
-        self.name = name
-        self.created_time = timestamp_2_time(creation_timestamp)
-        self.updated_time = timestamp_2_time(last_updated_timestamp)
-        self.description = str(description) if description else ""
-        self.versions = ModelVersion.from_list(versions or [], name=name)
-        self.tags = ModelTag.from_list(tags or [])
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(
-            name=inp.get("name"),
-            creation_timestamp=inp.get("creation_timestamp"),
-            last_updated_timestamp=inp.get("last_updated_timestamp"),
-            description=inp.get("description"),
-            versions=inp.get("latest_versions") or inp.get("versions"),
-            tags=inp.get("tags"),
-        )
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} name={self.name}>".format(self=self)
+    versions: ListableModelVersion = Field(default_factory=list, alias="latest_versions")
+    created_time: datetime = Field(timestamp_2_time(None), alias="creation_timestamp")
+    updated_time: datetime = Field(timestamp_2_time(None), alias="last_updated_timestamp")
+    description: str = str()
+    tags: ListableModelTag = Field(default_factory=list)
 
     def __str__(self):
         return str(self.name)
+
+    class Config:
+        frozen = True
+        allow_population_by_field_name = True
+
+
+class ListableModel(ListableBase):
+
+    __root__: List[Model]
+
+    def __getitem__(self, item):
+
+        if isinstance(item, str):
+            res = {i.name: i for i in self.__root__}
+            return res[item]
+
+        return self.__root__[item]
+
+    def __contains__(self, item):
+        if isinstance(item, str):
+            res = [i.name for i in self.__root__]
+
+        if isinstance(item, Model):
+            res = self.__root__
+
+        return item in res

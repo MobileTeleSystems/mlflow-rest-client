@@ -8,15 +8,15 @@ Run
 
     Run
     RunList
-    RunStage
-    RunStatus
+    RUNSTAGE
+    RUNSTATUS
 
 .. autosummary::
     :nosignatures:
 
     RunInfo
     RunInfoList
-    RunViewType
+    RUNVIEWTYPE
 
 .. autosummary::
     :nosignatures:
@@ -48,10 +48,10 @@ Run
 .. autoclass:: mlflow_client.run.RunList
     :members:
 
-.. autoclass:: mlflow_client.run.RunStage
+.. autoclass:: mlflow_client.run.RUNSTAGE
     :members:
 
-.. autoclass:: mlflow_client.run.RunStatus
+.. autoclass:: mlflow_client.run.RUNSTATUS
     :members:
 
 .. autoclass:: mlflow_client.run.RunInfo
@@ -60,7 +60,7 @@ Run
 .. autoclass:: mlflow_client.run.RunInfoList
     :members:
 
-.. autoclass:: mlflow_client.run.RunViewType
+.. autoclass:: mlflow_client.run.RUNVIEWTYPE
     :members:
 
 .. autoclass:: mlflow_client.run.RunData

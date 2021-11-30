@@ -1,69 +1,60 @@
+from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
-from six import string_types
+from pydantic import BaseModel, Field, root_validator
 
-from .internal import (
-    Comparable,
-    ComparableByStr,
-    HashableByStr,
-    Listable,
-    MakeableFromStr,
-    MakeableFromTupleStr,
-    SearchableList,
-)
+from .internal import ListableBase, ListableTag
 from .tag import Tag
 from .timestamp import timestamp_2_time
 
 
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
 class RunStage(Enum):
     """Run stage"""
 
-    active = "active"
+    ACTIVE = "active"
     """ Run is active """
 
-    deleted = "deleted"
+    DELETED = "deleted"
     """ Run was deleted """
 
 
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
 class RunStatus(Enum):
     """Run status"""
 
-    started = "RUNNING"
+    STARTED = "RUNNING"
     """ Run is running or created """
 
-    scheduled = "SCHEDULED"
+    SCHEDULED = "SCHEDULED"
     """ Run is scheduled for run """
 
-    finished = "FINISHED"
+    FINISHED = "FINISHED"
     """ Run was finished successfully """
 
-    failed = "FAILED"
+    FAILED = "FAILED"
     """ Run is failed """
 
-    killed = "KILLED"
+    KILLED = "KILLED"
     """ Run was killed """
 
 
-# TODO: change names to UPPERCASE in 2.0
 # pylint: disable=invalid-name
 class RunViewType(Enum):
     """Run view type"""
 
-    active = "ACTIVE_ONLY"
+    ACTIVE = "ACTIVE_ONLY"
     """ Show only active runs """
 
-    deleted = "DELETED_ONLY"
+    DELETED = "DELETED_ONLY"
     """ Show only deleted runs """
 
-    all = "ALL"
+    ALL = "ALL"
     """ Show all runs """
 
 
-class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
+class RunInfo(BaseModel):
     """Run information representation
 
     Parameters
@@ -119,45 +110,49 @@ class RunInfo(Listable, MakeableFromStr, ComparableByStr, HashableByStr):
         run_info = RunInfo("some_id")
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self, id, experiment_id=None, status=None, stage=None, start_time=None, end_time=None, artifact_uri=None
-    ):
-        self.id = str(id)
-        self.experiment_id = int(experiment_id) if experiment_id else None
+    id: str
+    experiment_id: int = None
+    status: RunStatus = RunStatus.STARTED
+    stage: RunStage = Field(RunStage.ACTIVE, alias="lifecycle_stage")
+    start_time: datetime = timestamp_2_time(None)
+    end_time: datetime = timestamp_2_time(None)
+    artifact_uri: str = str()
 
-        if status is None:
-            status = RunStatus.started
-        self.status = RunStatus(status)
+    class Config:
+        frozen = True
+        allow_population_by_field_name = True
 
-        if stage is None:
-            stage = RunStage.active
-        self.stage = RunStage(stage)
-
-        self.start_time = timestamp_2_time(start_time)
-        self.end_time = timestamp_2_time(end_time)
-        self.artifact_uri = str(artifact_uri) if artifact_uri else ""
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(
-            id=inp.get("run_id") or inp.get("run_uuid") or inp.get("id"),
-            experiment_id=inp.get("experiment_id"),
-            status=inp.get("status"),
-            stage=inp.get("lifecycle_stage") or inp.get("stage"),
-            start_time=inp.get("start_time"),
-            end_time=inp.get("end_time"),
-            artifact_uri=inp.get("artifact_uri"),
-        )
-
-    def __repr__(self):
-        return "<RunInfo id={self.id} experiment_id={self.experiment_id} status={self.status}>".format(self=self)
+    @root_validator(pre=True)
+    def validate_date(cls, values):
+        if not values.get("id"):
+            values["id"] = values.get("run_id") or values.get("run_uuid")
+        return values
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
-# pylint: disable=too-many-ancestors
+class ListableRunInfo(ListableBase):
+
+    __root__: List[RunInfo]
+
+    def __getitem__(self, item):
+        if isinstance(item, str):
+            res = {i.id: i for i in self.__root__}
+            return res[item]
+
+        return self.__root__[item]
+
+    def __contains__(self, item):
+        if isinstance(item, str):
+            res = [i.id for i in self.__root__]
+
+        if isinstance(item, RunInfo):
+            res = self.__root__
+
+        return item in res
+
+
 class Param(Tag):
     """Run parameter
 
@@ -179,61 +174,13 @@ class Param(Tag):
     """
 
 
-class MetricList(SearchableList):
-    """
-    List of :obj:`Metric` with extended functions
+class ListableParam(ListableBase):
 
-    Parameters
-    ----------
-    iterable : Iterable
-        Any iterable
-
-    Examples
-    --------
-    .. code:: python
-
-        name = "some_metric"
-        value = 1.23
-        item = Metric(name, value)
-
-        simple_list = [item]
-        this_list = Metric.from_list([item])  # or MetricList([item])
-
-        assert item in simple_list
-        assert item in this_list
-
-        assert name not in simple_list
-        assert name in this_list
-        assert this_list[name] == item
-
-        assert value not in simple_list
-        assert value in this_list
-        assert this_list[value] == item
-    """
-
-    def __contains__(self, item):
-        for it in self:
-            if isinstance(it, Metric):
-                if isinstance(item, string_types) and it.key == item:
-                    return True
-                if isinstance(item, float) and it.value == item:
-                    return True
-
-        return super(MetricList, self).__contains__(item)
-
-    def __getitem__(self, item):
-        for it in self:
-            if isinstance(it, Metric):
-                if isinstance(item, string_types) and it.key == item:
-                    return it
-                if isinstance(item, float) and it.value == item:
-                    return it
-
-        return super(MetricList, self).__getitem__(item)
+    __root__: List[Param]
 
 
 # pylint: disable=too-many-ancestors
-class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
+class Metric(BaseModel):
     """Run metric representation
 
     Parameters
@@ -276,25 +223,21 @@ class Metric(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
         )
     """
 
-    list_class = MetricList
-
-    def __init__(self, key, value=None, step=None, timestamp=None):
-        self.key = str(key)
-        self.value = float(value) if value is not None else None
-        self.step = int(step) if step else 0
-        self.timestamp = timestamp_2_time(timestamp)
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(key=inp.get("key"), value=inp.get("value"), step=inp.get("step"), timestamp=inp.get("timestamp"))
-
-    def __repr__(self):
-        return "<Metric key={self.key} value={self.value} step={self.step} timestamp={self.timestamp}>".format(
-            self=self
-        )
+    key: str
+    value: Optional[float] = None
+    step: int = 0
+    timestamp: datetime = timestamp_2_time(None)
 
     def __str__(self):
         return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
+
+    class Config:
+        frozen = True
+
+
+class ListableMetric(ListableBase):
+
+    __root__: List[Metric]
 
 
 # pylint: disable=too-many-ancestors
@@ -325,7 +268,7 @@ class RunTag(Tag):
     """
 
 
-class RunData(Listable, Comparable):
+class RunData(BaseModel):
     """Run data representation
 
     Parameters
@@ -361,33 +304,15 @@ class RunData(Listable, Comparable):
         run_data = RunData(params=[param], metrics=[metric], tags=[tag])
     """
 
-    def __init__(self, params=None, metrics=None, tags=None):
-        self.params = Param.from_list(params or [])
-        self.metrics = Metric.from_list(metrics or [])
-        self.tags = RunTag.from_list(tags or [])
+    params: ListableParam = Field(default_factory=list)
+    metrics: ListableMetric = Field(default_factory=list)
+    tags: ListableTag = Field(default_factory=list)
 
-    @classmethod
-    def make(cls, inp, **kwargs):
-        if isinstance(inp, cls):
-            return inp
-
-        if isinstance(inp, dict):
-            return cls.from_dict(inp, **kwargs)
-
-        try:
-            return cls.from_dict(vars(inp), **kwargs)
-        except TypeError:
-            return None
-
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(params=inp.get("params"), metrics=inp.get("metrics"), tags=inp.get("tags"))
-
-    def __repr__(self):
-        return "<RunData params={self.params} metrics={self.metrics} tags={self.tags}>".format(self=self)
+    class Config:
+        frozen = True
 
 
-class Run(Listable, ComparableByStr, HashableByStr):
+class Run(BaseModel):
     """Run representation
 
     Parameters
@@ -416,19 +341,23 @@ class Run(Listable, ComparableByStr, HashableByStr):
         run = Run(run_info, run_data)
     """
 
-    def __init__(self, info=None, data=None):
-        self.info = RunInfo.make(info or {})
-        self.data = RunData.make(data or {})
+    info: RunInfo
+    data: RunData = Field(default_factory=RunData)
 
-    def __repr__(self):
-        return "<Run info={info} data={data}>".format(info=repr(self.info), data=repr(self.data))
+    class Config:
+        frozen = True
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.info)
 
     def __getattr__(self, attr):
+
         if hasattr(self.info, attr):
             return getattr(self.info, attr)
         if hasattr(self.data, attr):
             return getattr(self.data, attr)
-        raise AttributeError("{} object has no attribute {}".format(self.__class__.__name__, attr))
+
+        raise AttributeError(f"{self.__class__.__name__} object has no attribute {attr}")
+
+    def __eq__(self, item):
+        return item == self.info.id

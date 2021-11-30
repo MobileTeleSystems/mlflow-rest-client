@@ -18,8 +18,8 @@ Model
     ModelVersionList
     ModelVersionTag
     ModelVersionTagList
-    ModelVersionStage
-    ModelVersionState
+    MODELVERSIONSTAGE
+    MODELVERSIONSTATE
     ModelVersionStatus
 
 .. autoclass:: mlflow_client.model.Model
@@ -48,10 +48,10 @@ Model
 .. autoclass:: mlflow_client.model.ModelVersionTagList
     :members:
 
-.. autoclass:: mlflow_client.model.ModelVersionStage
+.. autoclass:: mlflow_client.model.MODELVERSIONSTAGE
     :members:
 
-.. autoclass:: mlflow_client.model.ModelVersionState
+.. autoclass:: mlflow_client.model.MODELVERSIONSTATE
     :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionStatus

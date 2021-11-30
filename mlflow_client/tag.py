@@ -1,8 +1,9 @@
-from .internal import ComparableByStr, HashableByStr, Listable, MakeableFromTupleStr
+from pydantic import BaseModel, Field, root_validator
+from pydantic.dataclasses import dataclass
 
 
 # pylint: disable=too-many-ancestors
-class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
+class Tag(BaseModel):
     """Generic tag class
 
     Parameters
@@ -28,23 +29,24 @@ class Tag(Listable, MakeableFromTupleStr, ComparableByStr, HashableByStr):
         tag = Tag("some.tag", "some.val")
     """
 
-    def __init__(self, key, value=None):
-        self.key = str(key)
-        self.value = str(value) if value else ""
+    key: str
+    value: str = str()
 
-    @classmethod
-    def _from_dict(cls, inp):
-        return cls(key=inp.get("key"), value=inp.get("value"))
-
-    # pylint: disable=no-member
-    @classmethod
-    def from_list(cls, inp, **kwargs):
-        if isinstance(inp, dict):
-            return cls.list_class(cls.make(item, **kwargs) for item in inp.items())
-        return super(Tag, cls).from_list(inp, **kwargs)
-
-    def __repr__(self):
-        return "<{self.__class__.__name__} key={self.key} value={self.value}>".format(self=self)
+    class Config:
+        frozen = True
 
     def __str__(self):
         return self.key
+
+    @root_validator(pre=True)
+    def to_dict(cls, values: dict) -> dict:
+        """Bring to a single format."""
+        if isinstance(values, dict) and ("key" not in values and "value" not in values):
+            result = {}
+            for key, val in values.items():
+                result["key"] = key
+                result["value"] = val
+
+            return result
+
+        return values

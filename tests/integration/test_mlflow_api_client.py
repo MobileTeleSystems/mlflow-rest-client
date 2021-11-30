@@ -1,12 +1,21 @@
 import logging
-from datetime import timedelta
 
 import pytest
 from requests import HTTPError
 
-from mlflow_client.experiment import ExperimentStage
+from mlflow_client.experiment import EXPERIMENTSTAGE
 from mlflow_client.model import ModelVersionStage
 from mlflow_client.run import Metric, RunStage, RunStatus
+
+log = logging.getLogger(__name__)
+
+DEFAULT_TIMEOUT = 60
+
+import logging
+from datetime import timedelta
+
+import pytest
+from requests import HTTPError
 
 from .conftest import (
     DEFAULT_TIMEOUT,
@@ -64,6 +73,7 @@ def test_get_experiment_by_name(client, create_experiment):
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_get_experiment_by_name_non_existing(client):
     non_existing = client.get_experiment_by_name(rand_str())
+
     assert non_existing is None
 
 
@@ -110,7 +120,7 @@ def test_delete_experiment(client):
     client.delete_experiment(exp.id)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == ExperimentStage.deleted
+    assert old_exp.stage == EXPERIMENTSTAGE.deleted
 
     by_name = client.get_experiment_by_name(exp.name)
     assert by_name is None
@@ -127,7 +137,7 @@ def test_restore_experiment(client, create_experiment):
     client.restore_experiment(exp.id)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == ExperimentStage.active
+    assert old_exp.stage == EXPERIMENTSTAGE.active
     assert old_exp.name == exp.name
 
     by_name = client.get_experiment_by_name(exp.name)
@@ -144,11 +154,10 @@ def test_set_experiment_tag(client, create_experiment):
     client.set_experiment_tag(exp.id, key, value)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == ExperimentStage.active
-    assert key in old_exp.tags
+    assert old_exp.stage == EXPERIMENTSTAGE.active
 
-    assert key in old_exp.tags
-    assert old_exp.tags[key].value == value
+    assert key in [item.key for item in old_exp.tags]
+    assert old_exp.tags[0].value == value
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -221,6 +230,7 @@ def test_get_run(client, create_run):
     run = create_run
 
     run2 = client.get_run(run.id)
+
     assert run == run2
 
 
@@ -241,8 +251,8 @@ def test_create_run(request, client, create_experiment):
     request.addfinalizer(finalizer_run)
 
     assert run.experiment_id == exp.id
-    assert run.status == RunStatus.started
-    assert run.stage == RunStage.active
+    assert run.status == RunStatus.STARTED
+    assert run.stage == RunStage.ACTIVE
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -258,7 +268,8 @@ def test_create_run_without_start_time(request, client, create_experiment):
     request.addfinalizer(finalizer_run)
 
     assert run.start_time
-    assert start_time <= run.start_time
+
+    assert start_time.date() <= run.start_time.date()
     assert run.end_time is None
 
 
@@ -274,7 +285,7 @@ def test_create_run_with_start_time(request, client, create_experiment):
 
     request.addfinalizer(finalizer_run)
 
-    assert run.start_time == start_time
+    assert int(run.start_time.timestamp()) == int(start_time.timestamp())
     assert run.end_time is None
 
 
@@ -300,7 +311,7 @@ def test_start_run(create_run, client):
     run = create_run
 
     run_info = client.start_run(run.id)
-    assert run_info.status == RunStatus.started
+    assert run_info.status == RunStatus.STARTED
     assert run_info.end_time is None
 
 
@@ -309,7 +320,7 @@ def test_schedule_run(create_run, client):
     run = create_run
 
     run_info = client.schedule_run(run.id)
-    assert run_info.status == RunStatus.scheduled
+    assert run_info.status == RunStatus.SCHEDULED
     assert run_info.end_time is None
 
 
@@ -319,8 +330,8 @@ def test_finish_run(create_run, client):
 
     end_time = now()
     run_info = client.finish_run(run.id, end_time=end_time)
-    assert run_info.status == RunStatus.finished
-    assert run_info.end_time == end_time
+    assert run_info.status == RunStatus.FINISHED
+    assert run_info.end_time.date() == end_time.date()
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -329,9 +340,9 @@ def test_fail_run(create_run, client):
 
     end_time = now()
     run_info = client.fail_run(run.id, end_time=end_time)
-    assert run_info.status == RunStatus.failed
+    assert run_info.status == RunStatus.FAILED
     assert run_info.end_time
-    assert run_info.end_time == end_time
+    assert run_info.end_time.date() == end_time.date()
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -341,9 +352,10 @@ def test_kill_run(create_run, client):
 
     end_time = now()
     run_info = client.kill_run(run.id, end_time=end_time)
-    assert run_info.status == RunStatus.killed
+
+    assert run_info.status == RunStatus.KILLED
     assert run_info.end_time
-    assert run_info.end_time == end_time
+    assert int(run_info.end_time.timestamp()) == int(end_time.timestamp())
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -354,7 +366,7 @@ def test_delete_run(create_experiment, client):
     client.delete_run(run.id)
 
     run = client.get_run(run.id)
-    assert run.stage == RunStage.deleted
+    assert run.stage == RunStage.DELETED
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -376,7 +388,7 @@ def test_restore_run(create_run, client):
     client.restore_run(run.id)
 
     run = client.get_run(run.id)
-    assert run.stage == RunStage.active
+    assert run.stage == RunStage.ACTIVE
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -431,14 +443,14 @@ def test_log_run_metric(create_run, client):
     run = create_run
     assert key not in run.params
 
-    timestamp = now()
-    client.log_run_metric(run.id, key, value, timestamp=timestamp)
+    timestamp = now().timestamp()
+    client.log_run_metric(run.id, key, value, timestamp=int(timestamp))
 
     run = client.get_run(run.id)
     assert key in run.metrics
     assert run.metrics[key].value == pytest.approx(value)
     assert run.metrics[key].step == 0
-    assert run.metrics[key].timestamp == timestamp
+    assert int(run.metrics[key].timestamp.timestamp()) == int(timestamp)
 
     new_value = rand_float()
     client.log_run_metric(run.id, key, new_value, step=1)
@@ -465,7 +477,7 @@ def test_log_run_metrics(create_run, client):
         assert key in run.metrics
         assert run.metrics[key].value == pytest.approx(value)
         assert run.metrics[key].step == 0
-        assert run.metrics[key].timestamp == timestamp
+        assert int(run.metrics[key].timestamp.timestamp()) == int(timestamp.timestamp())
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -543,12 +555,12 @@ def test_list_run_metric_history(create_run, client):
         found = None
         for _metric in values:
             if _metric["key"] == metric.key and _metric["step"] == metric.step:
-                found = Metric.from_dict(_metric)
+                found = Metric.parse_obj(_metric)
                 break
 
         assert found
         assert found.value == pytest.approx(metric.value)
-        assert found.timestamp == metric.timestamp
+        assert found.timestamp.date() == metric.timestamp.date()
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -567,12 +579,12 @@ def test_list_run_metric_history_iterator(create_run, client):
         found = None
         for _metric in values:
             if _metric["key"] == metric.key and _metric["step"] == metric.step:
-                found = Metric.from_dict(_metric)
+                found = Metric.parse_obj(_metric)
                 break
 
         assert found
         assert found.value == pytest.approx(metric.value)
-        assert found.timestamp == metric.timestamp
+        assert found.timestamp.date() == metric.timestamp.date()
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -753,8 +765,9 @@ def test_list_models_iterator(client, create_model):
 
     exist = False
     for _model in client.list_models_iterator():
-        if _model == model.name:
+        if _model.name == model.name:
             exist = True
+
     assert exist
 
 
@@ -821,6 +834,7 @@ def test_list_model_versions(client, create_model):
     client.test_model_version(model.name, version1.version)
 
     versions = client.list_model_versions(model.name)
+
     assert version1 in versions
 
     version2 = client.create_model_version(model.name)
@@ -976,7 +990,6 @@ def test_list_model_all_versions_iterator(client, create_model):
 
     present1 = False
     for _version in client.list_model_all_versions_iterator(model.name):
-        print(_version)
         if _version.version == version1.version:
             present1 = True
     assert present1
@@ -1032,10 +1045,12 @@ def test_list_model_all_versions_with_stage(client, create_model, stage):
 @pytest.mark.parametrize("stage", [stage for stage in ModelVersionStage])
 def test_list_model_all_versions_iterator_with_stage(client, create_model, stage):
     model = create_model
+    data = client.list_model_all_versions_iterator(model.name, stages=stage)
 
     is_empty = True
-    for _version in client.list_model_all_versions_iterator(model.name, stages=stage):
+    for _version in data:
         is_empty = False
+
     assert is_empty
 
     version1 = client.create_model_version(model.name)
@@ -1250,7 +1265,7 @@ def test_get_model_version_download_url(request, client, create_model):
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
     "old_stage, changed",
-    [(None, True), (ModelVersionStage.test, False), (ModelVersionStage.prod, True), (ModelVersionStage.archived, True)],
+    [(None, True), (ModelVersionStage.TEST, False), (ModelVersionStage.PROD, True), (ModelVersionStage.ARCHIVED, True)],
 )
 def test_test_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
@@ -1261,7 +1276,7 @@ def test_test_model_version(client, create_model_version, old_stage, changed):
 
     if changed:
         assert new_version.stage != old_version.stage
-        assert new_version.stage == ModelVersionStage.test
+        assert new_version.stage == ModelVersionStage.TEST
     else:
         assert new_version.stage == old_version.stage
 
@@ -1271,13 +1286,13 @@ def test_test_model_version(client, create_model_version, old_stage, changed):
     "old_stage, changed",
     [
         (None, False),
-        (ModelVersionStage.test, True),
-        (ModelVersionStage.prod, False),
-        (ModelVersionStage.archived, False),
+        (ModelVersionStage.TEST, True),
+        (ModelVersionStage.PROD, False),
+        (ModelVersionStage.ARCHIVED, False),
     ],
 )
 @pytest.mark.parametrize(
-    "new_stage", [(None), (ModelVersionStage.test), (ModelVersionStage.prod), (ModelVersionStage.archived)]
+    "new_stage", [(None), (ModelVersionStage.TEST), (ModelVersionStage.PROD), (ModelVersionStage.ARCHIVED)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_test_model_version_archive_existing(request, client, create_model_version, old_stage, new_stage, changed):
@@ -1300,7 +1315,7 @@ def test_test_model_version_archive_existing(request, client, create_model_versi
 
     if changed:
         assert new_version.stage != old_version.stage
-        assert new_version.stage == ModelVersionStage.archived
+        assert new_version.stage == ModelVersionStage.ARCHIVED
     else:
         assert new_version.stage == old_version.stage
 
@@ -1308,7 +1323,7 @@ def test_test_model_version_archive_existing(request, client, create_model_versi
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
     "old_stage, changed",
-    [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, False), (ModelVersionStage.archived, True)],
+    [(None, True), (ModelVersionStage.TEST, True), (ModelVersionStage.PROD, False), (ModelVersionStage.ARCHIVED, True)],
 )
 def test_promote_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
@@ -1319,7 +1334,7 @@ def test_promote_model_version(client, create_model_version, old_stage, changed)
 
     if changed:
         assert new_version.stage != old_version.stage
-        assert new_version.stage == ModelVersionStage.prod
+        assert new_version.stage == ModelVersionStage.PROD
     else:
         assert new_version.stage == old_version.stage
 
@@ -1329,21 +1344,13 @@ def test_promote_model_version(client, create_model_version, old_stage, changed)
     "old_stage, changed",
     [
         (None, False),
-        (ModelVersionStage.unknown, False),
-        (ModelVersionStage.test, False),
-        (ModelVersionStage.prod, True),
-        (ModelVersionStage.archived, False),
+        (ModelVersionStage.TEST, False),
+        (ModelVersionStage.PROD, True),
+        (ModelVersionStage.ARCHIVED, False),
     ],
 )
 @pytest.mark.parametrize(
-    "new_stage",
-    [
-        (None),
-        (ModelVersionStage.unknown),
-        (ModelVersionStage.test),
-        (ModelVersionStage.prod),
-        (ModelVersionStage.archived),
-    ],
+    "new_stage", [(None), (ModelVersionStage.TEST), (ModelVersionStage.PROD), (ModelVersionStage.ARCHIVED)]
 )
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_promote_model_version_archive_existing(request, client, create_model_version, old_stage, new_stage, changed):
@@ -1366,7 +1373,7 @@ def test_promote_model_version_archive_existing(request, client, create_model_ve
 
     if changed:
         assert new_version.stage != old_version.stage
-        assert new_version.stage == ModelVersionStage.archived
+        assert new_version.stage == ModelVersionStage.ARCHIVED
     else:
         assert new_version.stage == old_version.stage
 
@@ -1374,7 +1381,7 @@ def test_promote_model_version_archive_existing(request, client, create_model_ve
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
     "old_stage, changed",
-    [(None, True), (ModelVersionStage.test, True), (ModelVersionStage.prod, True), (ModelVersionStage.archived, False)],
+    [(None, True), (ModelVersionStage.TEST, True), (ModelVersionStage.PROD, True), (ModelVersionStage.ARCHIVED, False)],
 )
 def test_archive_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
@@ -1385,6 +1392,6 @@ def test_archive_model_version(client, create_model_version, old_stage, changed)
 
     if changed:
         assert new_version.stage != old_version.stage
-        assert new_version.stage == ModelVersionStage.archived
+        assert new_version.stage == ModelVersionStage.ARCHIVED
     else:
         assert new_version.stage == old_version.stage

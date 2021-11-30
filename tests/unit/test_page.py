@@ -70,48 +70,6 @@ def test_page_make_dict_with_items_key():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_page_make_item_class():
-    dct = {
-        "items": [rand_str()],
-    }
-
-    page = Page.make(dct, item_class=Model)
-
-    assert page.items
-    assert isinstance(page.items[0], Model)
-    assert page.items[0].name == dct["items"][0]
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_page_make_item_class_with_next_page_token():
-    dct = {"items": [rand_str()], "next_page_token": rand_str()}
-
-    page = Page.make(dct, item_class=Model)
-
-    assert page.items
-    assert isinstance(page.items[0], Model)
-    assert page.items[0].name == dct["items"][0]
-    assert page.next_page_token == dct["next_page_token"]
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_page_make_item_class_with_kwargs():
-    dct = {
-        "items": [{"path": rand_str(), "is_dir": True, "root": rand_str(), "file_size": rand_int()}],
-    }
-    root = rand_str()
-
-    page = Page.make(dct, item_class=Artifact, root=root, is_dir=False)
-
-    assert page.items
-    assert isinstance(page.items[0], Artifact)
-    assert page.items[0].path == dct["items"][0]["path"]
-    assert not page.items[0].is_dir
-    assert page.items[0].root == root
-    assert page.items[0].file_size == dct["items"][0]["file_size"]
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_page_eq():
     items1 = [rand_str()]
     items2 = [rand_str(), rand_str()]
