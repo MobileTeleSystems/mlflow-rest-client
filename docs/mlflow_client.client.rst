@@ -3,14 +3,14 @@ MLflow API client
 
 Summary
 --------
-.. currentmodule:: mlflow_client.MLflowApiClient
+.. currentmodule:: mlflow_client.MLflowClient
 
 Main class
 ^^^^^^^^^^^
 .. autosummary::
     :nosignatures:
 
-    mlflow_client.MLflowApiClient
+    mlflow_client.MLflowClient
 
 Experiment
 ^^^^^^^^^^^
@@ -139,5 +139,5 @@ Model version
 
 Documentation
 --------------
-.. autoclass:: mlflow_client.MLflowApiClient
+.. autoclass:: mlflow_client.MLflowClient
     :members:

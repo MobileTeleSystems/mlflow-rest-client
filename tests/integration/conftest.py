@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from mlflow_client import MLflowApiClient
+from mlflow_client import MLflowClient
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def client():
     host = os.environ.get("MLFLOW_HOST", "localhost")
     port = os.environ.get("MLFLOW_PORT", "5000")
     api_url = f"http://{host}:{port}"
-    with MLflowApiClient(api_url) as client:
+    with MLflowClient(api_url) as client:
         yield client
 
 

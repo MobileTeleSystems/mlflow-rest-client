@@ -5,7 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 2.0.0
-        
+
         :tags: general, breaking
         :tickets: DSX-384
 
@@ -28,6 +28,12 @@ Changelog
         :tickets: DSX-409
 
         Add ``LICENSE.txt`` file
+
+    .. change::
+        :tags: client, breaking
+        :tickets: DSX-545
+
+        Rename ``MLflowApiClient`` to ``MLflowClient``
 
 1.1
 --------------------

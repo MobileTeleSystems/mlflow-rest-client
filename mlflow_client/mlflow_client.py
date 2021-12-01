@@ -34,7 +34,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # pylint: disable=too-many-public-methods
-class MLflowApiClient:
+class MLflowClient:
     """HTTP Client for MLflow API
 
     Parameters
@@ -75,7 +75,7 @@ class MLflowApiClient:
     --------
     .. code:: python
 
-        client = MLflowApiClient("http://some.domain:5000")
+        client = MLflowClient("http://some.domain:5000")
     """
 
     MAX_RESULTS = 100
