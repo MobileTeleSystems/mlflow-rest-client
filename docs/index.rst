@@ -3,7 +3,7 @@
 
 .. toctree::
     :maxdepth: 2
-    :caption: MLFlow Client
+    :caption: Python Client for MLflow
     :name: mlflow_client
     :hidden:
 

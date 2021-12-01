@@ -5,8 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 2.0.0
-
-    .. change::
+        
         :tags: general, breaking
         :tickets: DSX-384
 
@@ -23,6 +22,12 @@ Changelog
         :tickets: DSX-442
 
         Add ``Bearer`` token auth
+
+    .. change::
+        :tags: general
+        :tickets: DSX-409
+
+        Add ``LICENSE.txt`` file
 
 1.1
 --------------------
