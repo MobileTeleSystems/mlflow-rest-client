@@ -50,7 +50,7 @@ setup(
         "Tracker": "https://jira.bd.msk.mts.ru/projects/DSX/issues",
     },
     keywords="MLflow REST API",
-    packages=find_packages(exclude=["docs", "docs.*", "tests", "tests.*"]),
+    packages=find_packages(exclude=["docs", "docs.*", "tests", "tests.*", "samples", "samples.*"]),
     python_requires=">=3.7",
     install_requires=requirements,
     tests_require=test_requirements,
