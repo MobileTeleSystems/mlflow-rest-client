@@ -1,7 +1,7 @@
 .. title
 
-MLflow Python Client
-=======================
+Python Client for MLflow
+==========================
 
 |Build Status| |Quality Gate Status| |Maintainability Rating| |Coverage|
 |Documentation| |PyPI|
