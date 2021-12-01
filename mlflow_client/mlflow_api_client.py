@@ -37,6 +37,9 @@ class MLflowApiClient:
     password : str, optional
         MLflow user password (if exist)
 
+    token : str, optional
+        MLflow user token (if exist)
+
     logger : logging.Logger, optional
         Logger to use
 
@@ -64,7 +67,7 @@ class MLflowApiClient:
     MAX_RESULTS = 100
 
     # pylint: disable=too-many-arguments
-    def __init__(self, api_url, user=None, password=None, logger=None, ignore_ssl_check=False):
+    def __init__(self, api_url, user=None, password=None, token=None, logger=None, ignore_ssl_check=False):
         self.base_url = api_url
         self.logger = logger if logger else get_logger()
 
@@ -72,6 +75,8 @@ class MLflowApiClient:
         self._session.verify = not ignore_ssl_check
         if user and password:
             self._session.auth = (user, password)
+        elif token:
+            self._session.headers.update({"Authorization": f"Bearer {token}"})
 
     def __enter__(self):
         return self

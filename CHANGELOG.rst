@@ -1,6 +1,29 @@
 Changelog
 =================================================================
 
+2.0
+--------------------
+.. changelog::
+    :version: 2.0.0
+
+    .. change::
+        :tags: general, breaking
+        :tickets: DSX-384
+
+        Drop Python 2.7 and 3.6 support
+
+    .. change::
+        :tags: dependency, breaking
+        :tickets: DSX-384
+
+        Use ``pydantic`` to parse responses
+
+    .. change::
+        :tags: client, feature
+        :tickets: DSX-442
+
+        Add ``Bearer`` token auth
+
 1.1
 --------------------
 .. changelog::
