@@ -21,7 +21,7 @@ Python Client for MLflow
 
 A slightly opinionated Python client for `MLflow <https://mlflow.org>`_ REST API that implements all REST operations.
 
-See `mlflow_api_client.py <https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/blob/master/mlflow_client/mlflow_api_client.py>`_ for client implementation.
+See `mlflow_client.py <https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/blob/master/mlflow_client/mlflow_client.py>`_ for client implementation.
 
 .. documentation
 
@@ -105,9 +105,9 @@ Make sure you have an `MLflow Tracking Server <https://mlflow.org/docs/latest/tr
 
 .. code:: python
 
-    from mlflow_client import MLflowApiClient
+    from mlflow_client import MLflowClient
 
-    client = MLflowApiClient("https://mlflow.msk.bd-cloud.mts.ru", ignore_ssl_check=True)
+    client = MLflowClient("https://mlflow.msk.bd-cloud.mts.ru", ignore_ssl_check=True)
 
     experiment = client.get_or_create_experiment("experiment_name")
     run = client.create_run(experiment.id)
