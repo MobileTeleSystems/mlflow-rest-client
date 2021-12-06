@@ -76,12 +76,11 @@ pipeline {
                             gitlabCommitStatus('Build test images') {
                                 script {
                                     try {
-                                        docker.image("${docker_registry}/platform/python:${env.PYTHON_VERSION}").pull()
                                         docker.image("${docker_registry}/${mlflow_image}:latest").pull()
                                     } catch (Exception e) {}
 
-                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --build-arg PYTHON_VERSION=${env.PYTHON_VERSION} --force-rm -f Dockerfile.${env.SUFFIX} .")
-                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-${env.BUILD_ID}", "--build-arg BUILD_ID=${env.BUILD_ID} --force-rm -f Dockerfile.${env.SUFFIX} .")
+                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-python${env.PYTHON_VERSION}-${env.BUILD_ID}", "--pull --build-arg BUILD_ID=${env.BUILD_ID} --build-arg PYTHON_VERSION=${env.PYTHON_VERSION} --force-rm -f Dockerfile.${env.SUFFIX} .")
+                                    docker.build("${docker_registry}/${docker_image}:${env.SUFFIX}-${env.BUILD_ID}", "--pull --build-arg BUILD_ID=${env.BUILD_ID} --force-rm -f Dockerfile.${env.SUFFIX} .")
                                 }
                             }
                         }
@@ -104,7 +103,7 @@ pipeline {
                     String raw_version = ''
 
                     try {
-                        raw_version = sh(script: "python setup.py --version", returnStdout: true)
+                        raw_version = sh(script: "python3 setup.py --version", returnStdout: true)
                     } catch (Exception e) {}
 
                     version_info = getVersionInfo(raw_version)
@@ -204,10 +203,10 @@ pipeline {
                         sed -i 's#/app#${env.WORKSPACE}#g' /app/reports/coverage*.xml
 
                         # Get pylint report
-                        python -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > /app/reports/pylint.txt
+                        python3 -m pylint mlflow_client -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > /app/reports/pylint.txt
 
                         # Get bandit report
-                        python -m bandit -r mlflow_client -f json -o /app/reports/bandit.json || true
+                        python3 -m bandit -r mlflow_client -f json -o /app/reports/bandit.json || true
                     """
                 }
             }
@@ -247,8 +246,8 @@ pipeline {
                         python_versions.each { def python_version ->
                             docker.image("${docker_registry}/${docker_image}:unit-python${python_version}-${env.BUILD_ID}").inside("--entrypoint=''") {
                                 sh script: """
-                                    python setup.py bdist_wheel
-                                    python setup.py sdist
+                                    python3 setup.py bdist_wheel
+                                    python3 setup.py sdist
                                 """
                             }
                         }
@@ -286,6 +285,25 @@ pipeline {
             }
         }
 
+        stage('Export SBOM.xml') {
+            steps {
+                gitlabCommitStatus('Export SBOM.xml') {
+                    script {
+                        def python_version = python_versions[0]
+                        docker.image("${docker_registry}/platform/python:${python_version}").inside("--entrypoint='' -u root") {
+                            sh script: """
+                                python3 -m pip install -r ./requirements.txt
+                                python3 -m pip freeze > ./reports/requirements-frozen.txt
+                                python3 -m pip install cyclonedx-bom
+                                cyclonedx-py -r -i ./reports/requirements-frozen.txt -o ./reports/sbom-${version_info.version}.xml
+                                rm ./reports/requirements-frozen.txt
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
         stage ('Publish package & documentation') {
             steps {
                 gitlabCommitStatus('Publish package & documentation') {
@@ -296,6 +314,10 @@ pipeline {
                                 {
                                     "pattern": "docs/html-*.tar.gz",
                                     "target": "files/mlflow-client-docs/"
+                                },
+                                {
+                                    "pattern": "reports/sbom*.xml",
+                                    "target": "files/mlflow-client-sbom/"
                                 },
                                 {
                                     "pattern": "dist/.*(.tar.gz|.whl)",
