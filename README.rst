@@ -37,6 +37,11 @@ Contribution guide
 
 See `<CONTRIBUTING.rst>`__
 
+Security
+-------------------
+
+See `<SECURITY.rst>`__
+
 
 .. install
 

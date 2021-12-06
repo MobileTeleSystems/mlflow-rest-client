@@ -6,6 +6,19 @@ Changelog
 .. changelog::
     :version: 2.0.0
 
+    .. change::
+        :tags: general
+        :tickets: DSX-288
+
+        Change package author to `<dsx-team@mts.ru>`__
+
+    .. change::
+        :tags: general
+        :tickets: DSX-419
+
+        Add ``CONTRIBUTING.rst`` file
+
+    .. change::
         :tags: general, breaking
         :tickets: DSX-384
 
@@ -35,23 +48,14 @@ Changelog
 
         Rename ``MLflowApiClient`` to ``MLflowClient``
 
+    .. change::
+        :tags: general, feature
+        :tickets: DSX-449
+
+        Add ``SECURITY.rst`` file
+
 1.1
 --------------------
-.. changelog::
-    :version: 1.1.8
-
-    .. change::
-        :tags: general
-        :tickets: DSX-288
-
-        Change package author to dsx-team@mts.ru
-
-    .. change::
-        :tags: general
-        :tickets: DSX-419
-
-        Add ``CONTRIBUTING.rst`` file
-
 .. changelog::
     :version: 1.1.7
     :released: 26.05.2021 17:47

@@ -18,6 +18,7 @@
     develop
     usage
     contributing
+    security
 
 .. toctree::
     :maxdepth: 1
