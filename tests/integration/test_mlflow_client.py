@@ -1381,7 +1381,15 @@ def test_promote_model_version_archive_existing(request, client, create_model_ve
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize(
     "old_stage, changed",
-    [(None, True), (ModelVersionStage.TEST, True), (ModelVersionStage.PROD, True), (ModelVersionStage.ARCHIVED, False)],
+    [
+        (None, True),
+        (ModelVersionStage.TEST, True),
+        (ModelVersionStage.PROD, True),
+        (ModelVersionStage.ARCHIVED, False),
+        ("Staging", True),
+        ("Production", True),
+        ("Archived", False),
+    ],
 )
 def test_archive_model_version(client, create_model_version, old_stage, changed):
     old_version = create_model_version
