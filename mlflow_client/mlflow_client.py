@@ -2198,7 +2198,7 @@ class MLflowClient:
                 "model-versions/transition-stage",
                 name=name,
                 version=str(version),
-                stage=stage.value,
+                stage=ModelVersionStage(stage).value,
                 archive_existing_versions=archive_existing,
             )["model_version"]
         )
