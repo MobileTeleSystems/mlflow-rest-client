@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, root_validator
 
@@ -63,3 +64,7 @@ class Tag(BaseModel):
             return result
 
         return values
+
+
+# Custom type for type hints with Tag models
+TagsListOrDict = Union[Dict[str, str], List[Dict[str, str]], List[Tag]]
