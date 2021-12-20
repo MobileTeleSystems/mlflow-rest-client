@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from uuid import uuid4
 
 import pytest
 from pydantic import parse_obj_as
@@ -26,7 +27,7 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -35,7 +36,7 @@ def test_run_info():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_with_experiment_id():
-    id = rand_str()
+    id = uuid4()
     experiment_id = rand_int()
 
     run_info = RunInfo(id=id, experiment_id=experiment_id)
@@ -45,7 +46,7 @@ def test_run_info_with_experiment_id():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_experiment_id():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -64,7 +65,7 @@ def test_run_info_without_experiment_id():
     ],
 )
 def test_run_info_with_status(status):
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id, status=status)
 
@@ -73,7 +74,7 @@ def test_run_info_with_status(status):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_status():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -83,7 +84,7 @@ def test_run_info_without_status():
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [RunStage.ACTIVE, RunStage.DELETED])
 def test_run_info_with_stage(stage):
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id, stage=stage)
 
@@ -92,7 +93,7 @@ def test_run_info_with_stage(stage):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_stage():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -101,7 +102,7 @@ def test_run_info_without_stage():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_with_start_time():
-    id = rand_str()
+    id = uuid4()
     start_time = now()
 
     run_info = RunInfo(id=id, start_time=start_time)
@@ -111,7 +112,7 @@ def test_run_info_with_start_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_start_time():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -120,7 +121,7 @@ def test_run_info_without_start_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_with_end_time():
-    id = rand_str()
+    id = uuid4()
     end_time = now()
 
     run_info = RunInfo(id=id, end_time=end_time)
@@ -130,7 +131,7 @@ def test_run_info_with_end_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_end_time():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -139,7 +140,7 @@ def test_run_info_without_end_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_with_artifact_uri():
-    id = rand_str()
+    id = uuid4()
     artifact_uri = rand_str()
 
     run_info = RunInfo(id=id, artifact_uri=artifact_uri)
@@ -149,7 +150,7 @@ def test_run_info_with_artifact_uri():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_without_artifact_uri():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -158,7 +159,7 @@ def test_run_info_without_artifact_uri():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_str():
-    id = rand_str()
+    id = uuid4()
 
     run_info = RunInfo(id=id)
 
@@ -167,19 +168,19 @@ def test_run_info_make_str():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict():
-    dct = {"run_id": rand_str()}
+    dct = {"run_id": uuid4()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
     assert run_info.id == dct["run_id"]
 
-    dct = {"run_uuid": rand_str()}
+    dct = {"run_uuid": uuid4()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
     assert run_info.id == dct["run_uuid"]
 
-    dct = {"id": rand_str()}
+    dct = {"id": uuid4()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -188,7 +189,7 @@ def test_run_info_make_dict():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_experiment_id():
-    dct = {"id": rand_str(), "experiment_id": rand_int()}
+    dct = {"id": uuid4(), "experiment_id": rand_int()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -207,7 +208,7 @@ def test_run_info_make_dict_with_experiment_id():
     ],
 )
 def test_run_info_make_dict_with_status(status):
-    dct = {"id": rand_str(), "status": status.value}
+    dct = {"id": uuid4(), "status": status.value}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -217,13 +218,13 @@ def test_run_info_make_dict_with_status(status):
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 @pytest.mark.parametrize("stage", [RunStage.ACTIVE, RunStage.DELETED])
 def test_run_info_make_dict_with_stage(stage):
-    dct = {"id": rand_str(), "lifecycle_stage": stage.value}
+    dct = {"id": uuid4(), "lifecycle_stage": stage.value}
 
     run_info = parse_obj_as(RunInfo, dct)
 
     assert run_info.stage == stage
 
-    dct = {"id": rand_str(), "stage": stage.value}
+    dct = {"id": uuid4(), "stage": stage.value}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -232,7 +233,7 @@ def test_run_info_make_dict_with_stage(stage):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_start_time():
-    dct = {"id": rand_str(), "start_time": now()}
+    dct = {"id": uuid4(), "start_time": now()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -241,7 +242,7 @@ def test_run_info_make_dict_with_start_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_end_time():
-    dct = {"id": rand_str(), "end_time": now()}
+    dct = {"id": uuid4(), "end_time": now()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -250,7 +251,7 @@ def test_run_info_make_dict_with_end_time():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_make_dict_with_artifact_uri():
-    dct = {"id": rand_str(), "artifact_uri": rand_str()}
+    dct = {"id": uuid4(), "artifact_uri": rand_str()}
 
     run_info = parse_obj_as(RunInfo, dct)
 
@@ -258,19 +259,9 @@ def test_run_info_make_dict_with_artifact_uri():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_run_info_str():
-    id = rand_str()
-
-    run_info = RunInfo(id=id)
-
-    assert str(run_info)
-    assert str(run_info) == id
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_eq():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     assert RunInfo(id=id1) == RunInfo(id=id1)
     assert RunInfo(id=id1) != RunInfo(id=id2)
@@ -296,8 +287,8 @@ def test_run_info_eq():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_in():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     run1 = RunInfo(id=id1)
     run2 = RunInfo(id=id2)
@@ -310,30 +301,43 @@ def test_run_info_in():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_in_by_id():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     run1 = RunInfo(id=id1)
 
     lst = parse_obj_as(ListableRunInfo, [run1])
 
     assert id1 in lst
+    assert str(id1) in lst
+    assert id1.hex in lst
+
     assert id2 not in lst
+    assert str(id2) not in lst
+    assert id2.hex not in lst
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_info_get_item_by_id():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     run1 = RunInfo(id=id1)
 
     lst = parse_obj_as(ListableRunInfo, [run1])
 
     assert lst[id1] == run1
+    assert lst[str(id1)] == run1
+    assert lst[id1.hex] == run1
 
     with pytest.raises(KeyError):
         lst[id2]
+
+    with pytest.raises(KeyError):
+        lst[str(id2)]
+
+    with pytest.raises(KeyError):
+        lst[id2.hex]
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -703,7 +707,7 @@ def test_run_data_tag_by_name():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run():
-    id = rand_str()
+    id = uuid4()
     run_info = RunInfo(id=id)
     run_data = RunData()
 
@@ -715,7 +719,7 @@ def test_run():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_make_dict():
-    id = rand_str()
+    id = uuid4()
     run_info = RunInfo(id=id)
     run_data = RunData()
 
@@ -729,7 +733,7 @@ def test_run_make_dict():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_str():
-    id = rand_str()
+    id = uuid4()
     run_info = RunInfo(id=id)
     run = Run(info=run_info)
 
@@ -739,8 +743,8 @@ def test_run_str():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_eq():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     run_info1 = RunInfo(id=id1)
     run_info2 = RunInfo(id=id2)
@@ -764,17 +768,8 @@ def test_run_eq():
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_run_eq_id():
-    id = rand_str()
-    run_info = RunInfo(id=id)
-    run = Run(info=run_info)
-
-    assert run == id
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_get_attr():
-    id = rand_str()
+    id = uuid4()
     run_info = RunInfo(id=id)
 
     param = Param(key=rand_str())
@@ -798,8 +793,8 @@ def test_run_get_attr():
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_run_in():
-    id1 = rand_str()
-    id2 = rand_str()
+    id1 = uuid4()
+    id2 = uuid4()
 
     run_info1 = RunInfo(id=id1)
     run_info2 = RunInfo(id=id2)
@@ -811,18 +806,3 @@ def test_run_in():
 
     assert run1 in lst
     assert run2 not in lst
-
-
-@pytest.mark.timeout(DEFAULT_TIMEOUT)
-def test_run_in_by_id():
-    id1 = rand_str()
-    id2 = rand_str()
-
-    run_info1 = RunInfo(id=id1)
-
-    run1 = Run(info=run_info1)
-
-    lst = parse_obj_as(List[Run], [run1])
-
-    assert id1 in lst
-    assert id2 not in lst

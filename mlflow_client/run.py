@@ -14,7 +14,8 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, root_validator
 
@@ -124,7 +125,7 @@ class RunInfo(BaseModel):
         run_info = RunInfo("some_id")
     """
 
-    id: str
+    id: UUID
     experiment_id: int = None
     status: RunStatus = RunStatus.STARTED
     stage: RunStage = Field(RunStage.ACTIVE, alias="lifecycle_stage")
@@ -152,14 +153,19 @@ class ListableRunInfo(ListableBase):
 
     def __getitem__(self, item):
         if isinstance(item, str):
+            item = UUID(item)
+
+        if isinstance(item, UUID):
             res = {i.id: i for i in self.__root__}
             return res[item]
 
         return self.__root__[item]
 
     def __contains__(self, item):
+        res = [i.id for i in self.__root__]
+
         if isinstance(item, str):
-            res = [i.id for i in self.__root__]
+            item = UUID(str(item))
 
         if isinstance(item, RunInfo):
             res = self.__root__
@@ -365,7 +371,6 @@ class Run(BaseModel):
         return str(self.info)
 
     def __getattr__(self, attr):
-
         if hasattr(self.info, attr):
             return getattr(self.info, attr)
         if hasattr(self.data, attr):
@@ -373,5 +378,8 @@ class Run(BaseModel):
 
         raise AttributeError(f"{self.__class__.__name__} object has no attribute {attr}")
 
-    def __eq__(self, item):
-        return item == self.info.id
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Run):
+            return self.info.dict() == other.info.dict()
+
+        return super(BaseModel, self).__eq__(other)
