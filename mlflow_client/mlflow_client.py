@@ -19,6 +19,7 @@ from datetime import datetime
 from logging import Logger
 from re import M, U
 from typing import Iterator, List, Optional, Union
+from uuid import UUID
 
 import requests
 import urllib3
@@ -160,13 +161,13 @@ class MLflowClient:
         for experiment in experiments:
             yield experiment
 
-    def get_experiment(self, id: int) -> Experiment:
+    def get_experiment(self, experiment_id: int) -> Experiment:
         """
         Get experiment by its id
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         Returns
@@ -180,7 +181,7 @@ class MLflowClient:
 
             experiment = client.get_experiment(123)
         """
-        data = self._get("experiments/get", experiment_id=id)["experiment"]
+        data = self._get("experiments/get", experiment_id=experiment_id)["experiment"]
         return Experiment.parse_obj(data)
 
     def get_experiment_by_name(self, name: str) -> Optional[Experiment]:
@@ -240,13 +241,13 @@ class MLflowClient:
         experiment_id = self._post("experiments/create", name=name, **params)["experiment_id"]
         return self.get_experiment(experiment_id)
 
-    def rename_experiment(self, id: int, new_name: str) -> None:
+    def rename_experiment(self, experiment_id: int, new_name) -> None:
         """
         Rename experiment
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment id
 
         new_name : str
@@ -258,15 +259,15 @@ class MLflowClient:
 
             client.rename_experiment(123, "new_experiment")
         """
-        self._post("experiments/update", experiment_id=id, new_name=new_name)
+        self._post("experiments/update", experiment_id=experiment_id, new_name=new_name)
 
-    def delete_experiment(self, id: int) -> None:
+    def delete_experiment(self, experiment_id: int) -> None:
         """
         Delete experiment
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         Examples
@@ -275,15 +276,15 @@ class MLflowClient:
 
             client.delete_experiment(123)
         """
-        self._post("experiments/delete", experiment_id=id)
+        self._post("experiments/delete", experiment_id=experiment_id)
 
-    def restore_experiment(self, id: int) -> None:
+    def restore_experiment(self, experiment_id: int) -> None:
         """
         Restore experiment
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         Examples
@@ -292,15 +293,15 @@ class MLflowClient:
 
             client.restore_experiment(123)
         """
-        self._post("experiments/restore", experiment_id=id)
+        self._post("experiments/restore", experiment_id=experiment_id)
 
-    def set_experiment_tag(self, id: int, key: str, value: str) -> None:
+    def set_experiment_tag(self, experiment_id: int, key: str, value: str) -> None:
         """
         Set experiment tag
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         key : str
@@ -315,7 +316,7 @@ class MLflowClient:
 
             client.set_experiment_tag(123, "some.tag", "some.value")
         """
-        self._post("experiments/set-experiment-tag", experiment_id=id, key=key, value=value)
+        self._post("experiments/set-experiment-tag", experiment_id=experiment_id, key=key, value=value)
 
     def get_experiment_id(self, name: str) -> Optional[str]:
         """
@@ -373,13 +374,13 @@ class MLflowClient:
             experiment = self.get_experiment(experiment_id)
         return experiment
 
-    def list_experiment_runs(self, id: int) -> List[Run]:
+    def list_experiment_runs(self, experiment_id: int) -> List[Run]:
         """
         List experiments runs
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         Returns
@@ -393,16 +394,16 @@ class MLflowClient:
 
             runs = client.list_experiment_runs(123)
         """
-        data = [run for run in self.list_experiment_runs_iterator(id)]
+        data = [run for run in self.list_experiment_runs_iterator(experiment_id)]
         return parse_obj_as(List[Run], data)
 
-    def list_experiment_runs_iterator(self, id: int) -> Iterator:
+    def list_experiment_runs_iterator(self, experiment_id: int) -> Iterator:
         """
         Iterate by experiment runs
 
         Parameters
         ----------
-        id : int
+        experiment_id : int
             Experiment ID
 
         Returns
@@ -417,16 +418,16 @@ class MLflowClient:
             for run in client.list_experiment_runs_iterator(123):
                 print(run)
         """
-        for run in self.search_runs_iterator(experiment_ids=[id]):
+        for run in self.search_runs_iterator(experiment_ids=[experiment_id]):
             yield run
 
-    def get_run(self, id: str) -> Run:
+    def get_run(self, run_id: str) -> Run:
         """
         Get run by ID
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         Returns
@@ -440,7 +441,7 @@ class MLflowClient:
 
             run = client.get_run("some_run_id")
         """
-        return Run.parse_obj(self._get("runs/get", run_id=id)["run"])
+        return Run.parse_obj(self._get("runs/get", run_id=UUID(str(run_id)).hex)["run"])
 
     def create_run(
         self, experiment_id: int, start_time: Union[int, datetime, None] = None, tags: Optional[dict] = None
@@ -491,14 +492,14 @@ class MLflowClient:
         return Run.parse_obj(data)
 
     def set_run_status(
-        self, id: str, status: Union[str, RunStatus], end_time: Union[str, datetime, None] = None
+        self, run_id: str, status: Union[str, RunStatus], end_time: Union[str, datetime, None] = None
     ) -> RunInfo:
         """
         Set run status
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         status : :obj:`str` or :obj:`mlflow_client.run.RunStatus`
@@ -526,15 +527,15 @@ class MLflowClient:
         if end_time:
             params["end_time"] = format_to_timestamp(end_time)
 
-        return RunInfo.parse_obj(self._post("runs/update", run_id=id, **params)["run_info"])
+        return RunInfo.parse_obj(self._post("runs/update", run_id=UUID(str(run_id)).hex, **params)["run_info"])
 
-    def start_run(self, id: str) -> RunInfo:
+    def start_run(self, run_id: str) -> RunInfo:
         """
         Change run status to STARTED
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         Returns
@@ -548,15 +549,15 @@ class MLflowClient:
 
             run_info = client.start_run("some_run_id")
         """
-        return self.set_run_status(id, RunStatus.STARTED)
+        return self.set_run_status(run_id, RunStatus.STARTED)
 
-    def schedule_run(self, id: str) -> RunInfo:
+    def schedule_run(self, run_id: str) -> RunInfo:
         """
         Change run status to SCHEDULED
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         Returns
@@ -570,15 +571,15 @@ class MLflowClient:
 
             run_info = client.schedule_run("some_run_id")
         """
-        return self.set_run_status(id, RunStatus.SCHEDULED)
+        return self.set_run_status(run_id, RunStatus.SCHEDULED)
 
-    def finish_run(self, id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def finish_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
         """
         Change run status to FINISHED
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         end_time : :obj:`int` or :obj:`datetime.datetime`, optional
@@ -598,15 +599,15 @@ class MLflowClient:
         """
         if not end_time:
             end_time = current_timestamp()
-        return self.set_run_status(id, RunStatus.FINISHED, end_time=format_to_timestamp(end_time))
+        return self.set_run_status(run_id, RunStatus.FINISHED, end_time=format_to_timestamp(end_time))
 
-    def fail_run(self, id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def fail_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
         """
         Change run status to FAILED
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         end_time : :obj:`int` or :obj:`datetime.datetime`, optional
@@ -626,15 +627,15 @@ class MLflowClient:
         """
         if not end_time:
             end_time = current_timestamp()
-        return self.set_run_status(id, RunStatus.FAILED, end_time=end_time)
+        return self.set_run_status(run_id, RunStatus.FAILED, end_time=end_time)
 
-    def kill_run(self, id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def kill_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
         """
         Change run status to KILLED
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         end_time : :obj:`int` or :obj:`datetime.datetime`, optional
@@ -652,17 +653,17 @@ class MLflowClient:
             run_info = client.kill_run("some_run_id")
             run_info = client.kill_run("some_run_id", end_time=datetime.datetime.now())
         """
-        data = self.set_run_status(id, RunStatus.KILLED, end_time=format_to_timestamp(end_time))
+        data = self.set_run_status(run_id, RunStatus.KILLED, end_time=format_to_timestamp(end_time))
 
         return data
 
-    def delete_run(self, id: str) -> Optional[dict]:
+    def delete_run(self, run_id: str) -> Optional[dict]:
         """
         Delete run
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         Examples
@@ -671,15 +672,15 @@ class MLflowClient:
 
             client.delete_run("some_run_id")
         """
-        self._post("runs/delete", run_id=id)
+        self._post("runs/delete", run_id=UUID(str(run_id)).hex)
 
-    def restore_run(self, id: str) -> Optional[dict]:
+    def restore_run(self, run_id: str) -> Optional[dict]:
         """
         Restore run
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         Examples
@@ -688,15 +689,15 @@ class MLflowClient:
 
             client.restore_run("some_run_id")
         """
-        self._post("runs/restore", run_id=id)
+        self._post("runs/restore", run_id=UUID(str(run_id)).hex)
 
-    def log_run_parameter(self, id: str, key: str, value: str) -> Optional[dict]:
+    def log_run_parameter(self, run_id: str, key: str, value: str) -> Optional[dict]:
         """
         Add or update run parameter value
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         key : str
@@ -711,15 +712,15 @@ class MLflowClient:
 
             client.log_run_parameter("some_run_id", "some.param", "some_value")
         """
-        self._post("runs/log-parameter", run_id=id, key=key, value=value)
+        self._post("runs/log-parameter", run_id=UUID(str(run_id)).hex, key=key, value=value)
 
-    def log_run_parameters(self, id: str, params: Union[dict, List[dict]]):
+    def log_run_parameters(self, run_id: str, params: Union[dict, List[dict]]):
         """
         Add or update run parameters
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         params : :obj:`dict` or :obj:`list` of :obj:`dict`
@@ -738,17 +739,17 @@ class MLflowClient:
         if isinstance(params, dict):
             params = self._handle_tags(params)
 
-        self.log_run_batch(id=id, params=params)
+        self.log_run_batch(run_id=run_id, params=params)
 
     def log_run_metric(
-        self, id: str, key: str, value: float, step: int = 0, timestamp: Union[int, datetime, None] = None
+        self, run_id: str, key: str, value: float, step: int = 0, timestamp: Union[int, datetime, None] = None
     ):
         """
         Add or update run metric value
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         key : str
@@ -775,16 +776,18 @@ class MLflowClient:
         """
         if not timestamp:
             timestamp = current_timestamp()
-        dct = self._add_timestamp({"run_id": id, "key": key, "value": value, "step": int(step)}, int(timestamp))
+        dct = self._add_timestamp(
+            {"run_id": UUID(str(run_id)).hex, "key": key, "value": value, "step": int(step)}, int(timestamp)
+        )
         self._post("runs/log-metric", **dct)
 
-    def log_run_metrics(self, id: str, metrics: Union[dict, List[dict]]):
+    def log_run_metrics(self, run_id: str, metrics: Union[dict, List[dict]]):
         """
         Add or update run parameters
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         metrics : :obj:`dict` or :obj:`list` of :obj:`dict`
@@ -808,11 +811,11 @@ class MLflowClient:
 
         metrics = [self._add_timestamp(metric, timestamp) for metric in metrics]
 
-        self.log_run_batch(id=id, metrics=metrics)
+        self.log_run_batch(run_id=run_id, metrics=metrics)
 
     def log_run_batch(
         self,
-        id: str,
+        run_id: str,
         params: Optional[TagsListOrDict] = None,
         metrics: Optional[TagsListOrDict] = None,
         timestamp: Optional[TagsListOrDict] = None,
@@ -823,7 +826,7 @@ class MLflowClient:
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         params : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
@@ -885,15 +888,15 @@ class MLflowClient:
         if isinstance(metrics, dict):
             tags = self._handle_tags(tags)
 
-        self._post("runs/log-batch", run_id=id, params=params, metrics=metrics, tags=tags)
+        self._post("runs/log-batch", run_id=UUID(str(run_id)).hex, params=params, metrics=metrics, tags=tags)
 
-    def log_run_model(self, id: str, model: dict):
+    def log_run_model(self, run_id: str, model: dict):
         """
         Add or update run model description
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         model : dict
@@ -912,15 +915,15 @@ class MLflowClient:
 
             client.log_run_model("some_run_id", model)
         """
-        self._post("runs/log-model", run_id=id, model_json=model)
+        self._post("runs/log-model", run_id=UUID(str(run_id)).hex, model_json=model)
 
-    def set_run_tag(self, id: str, key: str, value: str):
+    def set_run_tag(self, run_id: str, key: str, value: str):
         """
         Set run tag
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         key : str
@@ -935,15 +938,15 @@ class MLflowClient:
 
             client.set_run_tag("some_run_id", "some.tag", "some.value")
         """
-        self._post("runs/set-tag", run_id=id, key=key, value=value)
+        self._post("runs/set-tag", run_id=UUID(str(run_id)).hex, key=key, value=value)
 
-    def set_run_tags(self, id: str, tags: Union[dict, List[dict]]):
+    def set_run_tags(self, run_id: str, tags: Union[dict, List[dict]]):
         """
         Set run tags
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         tags: :obj:`dict`, :obj:`list` of :obj:`dict`
@@ -963,15 +966,15 @@ class MLflowClient:
         if isinstance(tags, dict):
             tags = self._handle_tags(tags)
 
-        self.log_run_batch(id=id, tags=tags)
+        self.log_run_batch(run_id=run_id, tags=tags)
 
-    def delete_run_tag(self, id: str, key: str):
+    def delete_run_tag(self, run_id: str, key: str):
         """
         Delete run tag
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         key : str
@@ -983,15 +986,15 @@ class MLflowClient:
 
             client.delete_run_tag("some_run_id", "some.tag")
         """
-        self._post("runs/delete-tag", run_id=id, key=key)
+        self._post("runs/delete-tag", run_id=UUID(str(run_id)).hex, key=key)
 
-    def delete_run_tags(self, id: str, keys: Union[dict, List[dict]]):
+    def delete_run_tags(self, run_id: str, keys: Union[dict, List[dict]]):
         """
         Delete run tags
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         tags: :obj:`dict`, :obj:`list` of :obj:`dict`
@@ -1009,13 +1012,13 @@ class MLflowClient:
         """
         if isinstance(keys, dict):
             for tag in keys:
-                self.delete_run_tag(id, tag)
+                self.delete_run_tag(run_id, tag)
         elif isinstance(keys, list):
             for tag in keys:
                 if isinstance(tag, str):
-                    self.delete_run_tag(id, tag)
+                    self.delete_run_tag(run_id, tag)
                 elif isinstance(tag, dict) and "key" in tag:
-                    self.delete_run_tag(id, tag["key"])
+                    self.delete_run_tag(run_id, tag["key"])
 
     @staticmethod
     def _add_timestamp(item, timestamp):
@@ -1025,13 +1028,13 @@ class MLflowClient:
         item["timestamp"] = timestamp
         return item
 
-    def list_run_metric_history(self, id: str, key: str) -> List[Metric]:
+    def list_run_metric_history(self, run_id: str, key: str) -> List[Metric]:
         """
         List metric history
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         key : str
@@ -1048,15 +1051,18 @@ class MLflowClient:
 
             metrics_list = client.list_run_metric_history("some_run_id", "some.metric")
         """
-        return parse_obj_as(List[Metric], self._get("metrics/get-history", run_id=id, metric_key=key)["metrics"])
+        return parse_obj_as(
+            List[Metric],
+            self._get("metrics/get-history", run_id=UUID(str(run_id)).hex, metric_key=key)["metrics"],
+        )
 
-    def list_run_metric_history_iterator(self, id: str, key: str) -> Iterator:
+    def list_run_metric_history_iterator(self, run_id: str, key: str) -> Iterator:
         """
         Iterate by metric history
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         key : str
@@ -1074,16 +1080,16 @@ class MLflowClient:
             for metric in client.list_run_metric_history_iterator("some_run_id", "some.metric"):
                 print(metric)
         """
-        for metric in self.list_run_metric_history(id, key):
+        for metric in self.list_run_metric_history(run_id, key):
             yield metric
 
-    def list_run_artifacts(self, id: str, path: Optional[str] = None, page_token: Optional[str] = None) -> Page:
+    def list_run_artifacts(self, run_id: str, path: Optional[str] = None, page_token: Optional[str] = None) -> Page:
         """
         List run artifacts
 
         Parameters
         ----------
-        id : str
+        run_id : UUID
             Run ID
 
         path : str, optional
@@ -1110,11 +1116,13 @@ class MLflowClient:
             params["path"] = path
         if page_token:
             params["page_token"] = page_token
-        response = self._get("artifacts/list", run_id=id, **params)
+        response = self._get("artifacts/list", run_id=UUID(str(run_id)).hex, **params)
 
         return Page.make(response, items_key="files", item_class=Artifact, root=response["root_uri"])
 
-    def list_run_artifacts_iterator(self, id, path: Optional[str] = None, page_token: Optional[str] = None) -> Iterator:
+    def list_run_artifacts_iterator(
+        self, run_id, path: Optional[str] = None, page_token: Optional[str] = None
+    ) -> Iterator:
         """
         Iterate by run artifacts
 
@@ -1122,7 +1130,7 @@ class MLflowClient:
 
         Parameters
         ----------
-        id : str
+        run_id : str
             Run ID
 
         path : str, optional
@@ -1152,12 +1160,12 @@ class MLflowClient:
             ):
                 print(artifact)
         """
-        page = self.list_run_artifacts(id=id, path=path, page_token=page_token)
+        page = self.list_run_artifacts(run_id=run_id, path=path, page_token=page_token)
         while True:
             for item in page:
                 yield item
             if page.has_next_page:
-                page = self.list_run_artifacts(id=id, path=path, page_token=page.next_page_token)
+                page = self.list_run_artifacts(run_id=run_id, path=path, page_token=page.next_page_token)
             else:
                 break
 
@@ -1935,7 +1943,7 @@ class MLflowClient:
         if source:
             params["source"] = source
         if run_id:
-            params["run_id"] = run_id
+            params["run_id"] = UUID(str(run_id)).hex
 
         if not tags:
             tags = []
@@ -2395,6 +2403,7 @@ class MLflowClient:
 
         self.logger.debug("api_client.{}: req: {}".format(method.upper(), params))
         self.logger.debug("api_client.{}: url: {}".format(method.upper(), url))
+
         resp = getattr(self._session, method)(url, **params)
         resp.raise_for_status()
 

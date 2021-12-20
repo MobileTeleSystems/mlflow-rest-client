@@ -1,6 +1,5 @@
 import logging
-from datetime import timedelta
-from typing import List
+from uuid import uuid4
 
 import pytest
 from pydantic import parse_obj_as
@@ -149,7 +148,7 @@ def test_model_version_with_run_id():
     name = rand_str()
     version = rand_int()
 
-    run_id = rand_str()
+    run_id = uuid4()
 
     model_version = ModelVersion(name=name, version=version, run_id=run_id)
 
@@ -331,7 +330,7 @@ def test_model_version_make_dict_with_run_id():
     dct = {
         "name": rand_str(),
         "version": rand_int(),
-        "run_id": rand_str(),
+        "run_id": uuid4(),
     }
 
     model_version = parse_obj_as(ModelVersion, dct)

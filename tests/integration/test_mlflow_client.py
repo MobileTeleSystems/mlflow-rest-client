@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 
 import pytest
 from requests import HTTPError
@@ -237,7 +238,7 @@ def test_get_run(client, create_run):
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_get_run_fail(client):
     with pytest.raises(HTTPError):
-        client.get_run(rand_str())
+        client.get_run(uuid4())
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -609,7 +610,7 @@ def test_search_runs(create_run, client):
 
     query = 'metrics."{}" < 1'.format(key)
     runs = client.search_runs(experiment_ids=[run.experiment_id], query=query)
-    assert run.id in runs
+    assert run in runs
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)

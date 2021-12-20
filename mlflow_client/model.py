@@ -15,6 +15,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -251,7 +252,7 @@ class ModelVersion(BaseModel):
     stage: ModelVersionStage = Field(ModelVersionStage.UNKNOWN, alias="current_stage")
     description: str = ""
     source: str = ""
-    run_id: Optional[str] = None
+    run_id: Optional[UUID] = None
     status: ModelVersionStatus = Field(ModelVersionStatus(), alias="state")
     tags: ListableModelVersionTag = Field(default_factory=list)
 

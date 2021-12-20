@@ -139,7 +139,7 @@ class Page:
 
     def __contains__(self, item):
         res = [i for i in self.items]
-        return item in self.items
+        return item in res
 
     def __delitem__(self, i):
         del self.items[i]
