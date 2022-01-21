@@ -10,21 +10,21 @@ logger = get_logger()
 def process(client):
     logger.info("====== list_experiments")
     exps = client.list_experiments()
-    logger.info("list_experiments: #experiments: {}".format(len(exps)))
+    logger.info(f"list_experiments: #experiments: {len(exps)}")
     for exp in exps:
-        logger.info("  {}".format(exp))
+        logger.info(f"  {exp}")
 
     logger.info("====== get_or_create_experiment")
     experiment_name = "py_exp_" + str(time.time()).replace(".", "")
-    logger.info("create experiment with name {}".format(experiment_name))
+    logger.info(f"create experiment with name {experiment_name}")
     experiment = client.get_or_create_experiment(experiment_name)
-    logger.info("  id: {}".format(experiment.id))
+    logger.info(f"  id: {experiment.id}")
 
     logger.info("====== create_run")
     run_name = "run_for_exp_" + experiment_name
     start_time = current_timestamp()
     run = client.create_run(experiment_id=experiment.id, name=run_name, start_time=start_time)
-    logger.info("  run id {}".format(run.id))
+    logger.info(f"  run id {run.id}")
 
     logger.info("====== log_run_parameter and metrics")
     param_key = "max_depth"
@@ -49,19 +49,19 @@ def process(client):
 
     logger.info("====== get_run")
     run = client.get_run(run.id)
-    logger.info("  {}".format(run))
+    logger.info(f"  {run}")
 
     logger.info("====== get_experiment")
     experiment = client.get_experiment(experiment.id)
-    logger.info("  {}".format(experiment))
+    logger.info(f"  {experiment}")
 
     logger.info("====== get_metric_history")
     metric_history = client.get_run_metric_history(run.id, metric_key)
-    logger.info("  {}".format(metric_history))
+    logger.info(f"  {metric_history}")
 
     logger.info("====== list_run_artifacts")
     artifacts = client.list_run_artifacts(run.id)
-    logger.info("  {}".format(artifacts))
+    logger.info(f"  {artifacts}")
 
 
 if __name__ == "__main__":

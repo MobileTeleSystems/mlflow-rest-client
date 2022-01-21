@@ -22,7 +22,7 @@ from uuid import UUID
 
 import requests
 import urllib3
-from pydantic import parse_obj_as
+from pydantic import parse_obj_as  # pylint: disable=no-name-in-module
 
 from .artifact import Artifact
 from .experiment import Experiment
@@ -141,8 +141,7 @@ class MLflowClient:
                 print(experiment)
         """
         experiments = self.list_experiments(view_type=view_type)
-        for experiment in experiments:
-            yield experiment
+        yield from experiments
 
     def get_experiment(self, experiment_id: int) -> Experiment:
         """
@@ -377,7 +376,7 @@ class MLflowClient:
 
             runs = client.list_experiment_runs(123)
         """
-        data = [run for run in self.list_experiment_runs_iterator(experiment_id)]
+        data = list(self.list_experiment_runs_iterator(experiment_id))
         return parse_obj_as(List[Run], data)
 
     def list_experiment_runs_iterator(self, experiment_id: int) -> Iterator:
@@ -401,8 +400,7 @@ class MLflowClient:
             for run in client.list_experiment_runs_iterator(123):
                 print(run)
         """
-        for run in self.search_runs_iterator(experiment_ids=[experiment_id]):
-            yield run
+        yield from self.search_runs_iterator(experiment_ids=[experiment_id])
 
     def get_run(self, run_id: str) -> Run:
         """
@@ -1063,8 +1061,7 @@ class MLflowClient:
             for metric in client.list_run_metric_history_iterator("some_run_id", "some.metric"):
                 print(metric)
         """
-        for metric in self.list_run_metric_history(run_id, key):
-            yield metric
+        yield from self.list_run_metric_history(run_id, key)
 
     def list_run_artifacts(self, run_id: str, path: Optional[str] = None, page_token: Optional[str] = None) -> Page:
         """
@@ -1145,8 +1142,7 @@ class MLflowClient:
         """
         page = self.list_run_artifacts(run_id=run_id, path=path, page_token=page_token)
         while True:
-            for item in page:
-                yield item
+            yield from page
             if page.has_next_page:
                 page = self.list_run_artifacts(run_id=run_id, path=path, page_token=page.next_page_token)
             else:
@@ -1300,8 +1296,7 @@ class MLflowClient:
             page_token=page_token,
         )
         while True:
-            for item in page:
-                yield item
+            yield from page
             if page.has_next_page:
                 page = self.search_runs(
                     experiment_ids=experiment_ids,
@@ -1402,7 +1397,7 @@ class MLflowClient:
             model = client.get_or_create_model("some_model", tags=tags)
         """
 
-        for model in self.search_models_iterator("name = '{name}'".format(name=name), max_results=1):
+        for model in self.search_models_iterator(f"name = '{name}'", max_results=1):
             return model
         return self.create_model(name, tags=tags)
 
@@ -1542,8 +1537,7 @@ class MLflowClient:
         """
         page = self.list_models(max_results=max_results, page_token=page_token)
         while True:
-            for item in page:
-                yield item
+            yield from page
             if page.has_next_page:
                 page = self.list_models(max_results=max_results, page_token=page.next_page_token)
             else:
@@ -1658,8 +1652,7 @@ class MLflowClient:
 
         page = self.search_models(query=query, max_results=max_results, order_by=order_by, page_token=page_token)
         while True:
-            for item in page:
-                yield item
+            yield from page
             if page.has_next_page:
                 page = self.search_models(
                     query=query, max_results=max_results, order_by=order_by, page_token=page.next_page_token
@@ -1783,8 +1776,7 @@ class MLflowClient:
                 print(model_version)
         """
         versions = self.list_model_versions(name=name, stages=stages)
-        for version in versions:
-            yield version
+        yield from versions
 
     def list_model_all_versions(
         self, name: str, stages: Union[List[ModelVersionStage], List[str], None] = None
@@ -2174,8 +2166,7 @@ class MLflowClient:
             query=query, max_results=max_results, order_by=order_by, page_token=page_token
         )
         while True:
-            for item in page:
-                yield item
+            yield from page
             if page.has_next_page:
                 page = self.search_model_versions(
                     query=query, max_results=max_results, order_by=order_by, page_token=page.next_page_token
@@ -2384,13 +2375,13 @@ class MLflowClient:
     def _request(self, method: str, url: str, log_response: bool = True, **params) -> requests.Session:
         url = self._url(url)
 
-        log.debug("api_client.{}: req: {}".format(method.upper(), params))
-        log.debug("api_client.{}: url: {}".format(method.upper(), url))
+        log.debug(f"api_client.{method.upper()}: req: {params}")
+        log.debug(f"api_client.{method.upper()}: url: {url}")
 
         resp = getattr(self._session, method)(url, **params)
         resp.raise_for_status()
 
         if log_response:
-            log.debug("api_client.{}: rsp: {}".format(method.upper(), resp.text))
+            log.debug(f"api_client.{method.upper()}: rsp: {resp.text}")
 
         return resp

@@ -72,6 +72,7 @@ repos:
   rev: v2.31.0
   hooks:
   - id: pyupgrade
+    args: [--py37-plus, --keep-runtime-typing]
 - repo: https://github.com/ambv/black
   rev: 21.12b0
   hooks:

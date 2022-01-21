@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from pydantic import AnyUrl, BaseModel
+from pydantic import AnyUrl, BaseModel  # pylint: disable=no-name-in-module
 
 
 class Artifact(BaseModel):

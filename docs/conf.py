@@ -19,7 +19,7 @@ from packaging.version import Version
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 ver = Version(
     subprocess.check_output(  # nosec
-        "{python} ../setup.py --version".format(python=sys.executable),
+        f"{sys.executable} ../setup.py --version",
         shell=True,
     )
     .decode("utf-8")
@@ -65,7 +65,7 @@ exclude_patterns = ["_build", "Thumds.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = "mlflow-client {version}".format(version=version)
+html_title = f"mlflow-client {version}"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

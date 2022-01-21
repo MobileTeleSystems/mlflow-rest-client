@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import Dict, List, Union
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator  # pylint: disable=no-name-in-module
 
 
 # pylint: disable=too-many-ancestors
@@ -44,7 +44,7 @@ class Tag(BaseModel):
     """
 
     key: str
-    value: str = str()
+    value: str = ""
 
     class Config:
         frozen = True
@@ -53,7 +53,7 @@ class Tag(BaseModel):
         return self.key
 
     @root_validator(pre=True)
-    def to_dict(cls, values: dict) -> dict:
+    def to_dict(cls, values: dict) -> dict:  # pylint: disable=no-self-argument, no-self-use
         """Bring to a single format."""
         if isinstance(values, dict) and ("key" not in values and "value" not in values):
             result = {}

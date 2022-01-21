@@ -114,9 +114,7 @@ class Page:
         return bool(self.next_page_token)
 
     def __repr__(self):
-        return "<{self.__class__.__name__} items={count} has_next_page={self.has_next_page}>".format(
-            self=self, count=len(self.items)
-        )
+        return f"<{self.__class__.__name__} items={len(self.items)} has_next_page={self.has_next_page}>"
 
     def __eq__(self, other):
         if other is not None and not isinstance(other, self.__class__):
@@ -138,8 +136,7 @@ class Page:
         return self
 
     def __contains__(self, item):
-        res = [i for i in self.items]
-        return item in res
+        return item in self.items
 
     def __delitem__(self, i):
         del self.items[i]

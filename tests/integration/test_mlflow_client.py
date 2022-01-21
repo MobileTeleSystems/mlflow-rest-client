@@ -608,7 +608,7 @@ def test_search_runs(create_run, client):
     run = create_run
     client.log_run_metrics(run.id, values)
 
-    query = 'metrics."{}" < 1'.format(key)
+    query = f'metrics."{key}" < 1'
     runs = client.search_runs(experiment_ids=[run.experiment_id], query=query)
     assert run in runs
 
@@ -625,7 +625,7 @@ def test_search_runs_iterator(create_run, client):
     run = create_run
     client.log_run_metrics(run.id, values)
 
-    query = 'metrics."{}" < 1'.format(key)
+    query = f'metrics."{key}" < 1'
     exist = False
     for _run in client.search_runs_iterator(experiment_ids=[run.experiment_id], query=query):
         if _run.id == run.id:
@@ -777,7 +777,7 @@ def test_search_models(client, create_model):
     model = create_model
 
     for name in [model.name, model.name.replace("-", "_")]:
-        query = "name LIKE '{}%'".format(name)
+        query = f"name LIKE '{name}%'"
         models = client.search_models(query=query)
         assert model in models
 
@@ -787,7 +787,7 @@ def test_search_models_iterator(client, create_model):
     model = create_model
 
     for name in [model.name, model.name.replace("-", "_")]:
-        query = "name LIKE '{}%'".format(name)
+        query = f"name LIKE '{name}%'"
         exist = False
         for _model in client.search_models(query=query):
             if model.name == _model.name:
@@ -1231,7 +1231,7 @@ def test_delete_model_version(client, create_model):
 def test_search_model_versions(client, create_model_version):
     version = create_model_version
 
-    query = "name='{}'".format(version.name)
+    query = f"name='{version.name}'"
     versions = client.search_model_versions(query=query)
     assert version in versions
 
@@ -1240,7 +1240,7 @@ def test_search_model_versions(client, create_model_version):
 def test_search_model_versions_iterator(client, create_model_version):
     version = create_model_version
 
-    query = "name='{}'".format(version.name)
+    query = f"name='{version.name}'"
     exist = False
     for _version in client.search_model_versions_iterator(query=query):
         if _version == version:

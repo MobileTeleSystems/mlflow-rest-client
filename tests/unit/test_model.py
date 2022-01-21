@@ -382,7 +382,7 @@ def test_model_version_str():
     model_version = ModelVersion(name=name, version=version)
 
     assert str(model_version)
-    assert str(model_version) == "{name} v{version}".format(name=name, version=version)
+    assert str(model_version) == f"{name} v{version}"
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)

@@ -17,7 +17,11 @@ from enum import Enum
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import (  # pylint: disable=no-name-in-module
+    BaseModel,
+    Field,
+    root_validator,
+)
 
 from .internal import ListableBase, ListableTag
 from .tag import Tag
@@ -131,14 +135,14 @@ class RunInfo(BaseModel):
     stage: RunStage = Field(RunStage.ACTIVE, alias="lifecycle_stage")
     start_time: datetime = timestamp_2_time(None)
     end_time: datetime = timestamp_2_time(None)
-    artifact_uri: str = str()
+    artifact_uri: str = ""
 
     class Config:
         frozen = True
         allow_population_by_field_name = True
 
     @root_validator(pre=True)
-    def validate_date(cls, values):
+    def validate_date(cls, values):  # pylint: disable=no-self-argument, no-self-use
         if not values.get("id"):
             values["id"] = values.get("run_id") or values.get("run_uuid")
         return values
@@ -249,7 +253,7 @@ class Metric(BaseModel):
     timestamp: datetime = timestamp_2_time(None)
 
     def __str__(self):
-        return str("{self.key}: {self.value} for {self.step} at {self.timestamp}".format(self=self))
+        return str(f"{self.key}: {self.value} for {self.step} at {self.timestamp}")
 
     class Config:
         frozen = True
@@ -382,4 +386,4 @@ class Run(BaseModel):
         if isinstance(other, Run):
             return self.info.dict() == other.info.dict()
 
-        return super(BaseModel, self).__eq__(other)
+        return super().__eq__(other)

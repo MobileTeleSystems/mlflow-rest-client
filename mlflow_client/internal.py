@@ -14,7 +14,7 @@
 
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from .tag import Tag
 
@@ -55,4 +55,4 @@ class ListableTag(ListableBase):
             res = {i.key: i for i in self.__root__}
             return res[item]
 
-        return super(ListableTag, self).__getitem__(item)
+        return super().__getitem__(item)

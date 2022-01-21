@@ -66,6 +66,12 @@ Changelog
 
         Move documentation to readthedocs.org
 
+    .. change::
+        :tags: dev, feature
+        :tickets: internal:DSX-599
+
+        Upgrade source code to Python 3.7+
+
 1.1
 --------------------
 .. changelog::

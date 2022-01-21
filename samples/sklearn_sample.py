@@ -2,7 +2,6 @@
 Calls API operations on the hard-coded Python scikit-learn run in experiment 0 executed in the docker container.
 """
 
-from __future__ import print_function
 
 import sys
 from mlflow_client import MLflowClient
@@ -41,17 +40,17 @@ def process(client):
     print("====== get_artifact - txt")
     path = "confusion_matrix.txt"
     rsp = client.get_artifact(run.id, path)
-    print("get_artifacts: path={} rsp={}".format(path, rsp))
+    print(f"get_artifacts: path={path} rsp={rsp}")
 
     print("====== get_artifact - pkl")
     path = "model/model.pkl"
     rsp = client.get_artifact(run.id, path)
-    print("get_artifacts: path={} #rsp.bytes={}".format(path, len(rsp)))
+    print(f"get_artifacts: path={path} #rsp.bytes={len(rsp)}")
 
     print("====== Search")
     rsp = client.search_runs(
         experiment_id,
-        query="parameter.{param} = 3 and metric.{metric} >= 0.99".format(param=param_key, metric=metric_key),
+        query=f"parameter.{param_key} = 3 and metric.{metric_key} >= 0.99",
     )
     print("search_runs rsp:", rsp)
 

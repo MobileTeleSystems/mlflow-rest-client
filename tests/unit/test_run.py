@@ -481,9 +481,7 @@ def test_metric_str():
     metric = Metric(key=key, value=value, step=step, timestamp=timestamp)
 
     assert str(metric)
-    assert str(metric) == "{key}: {value} for {step} at {timestamp}".format(
-        key=key, value=value, step=step, timestamp=timestamp
-    )
+    assert str(metric) == f"{key}: {value} for {step} at {timestamp}"
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)

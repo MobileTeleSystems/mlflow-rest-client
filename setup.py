@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, "requirements.txt"), "r") as f:
+with open(os.path.join(here, "requirements.txt")) as f:
     requirements = f.readlines()
 
-with open(os.path.join(here, "README.rst"), "r") as f:
+with open(os.path.join(here, "README.rst")) as f:
     long_description = f.read()
 
 setup(

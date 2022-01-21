@@ -17,7 +17,12 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import (  # pylint: disable=no-name-in-module
+    BaseModel,
+    Field,
+    root_validator,
+    validator,
+)
 
 from mlflow_client.internal import ListableBase
 
@@ -94,11 +99,11 @@ class ModelVersionStatus(BaseModel):
         frozen = True
 
     @validator("state")
-    def valid_state(cls, val):
+    def valid_state(cls, val):  # pylint: disable=no-self-argument, no-self-use
         return ModelVersionState(val) if isinstance(val, str) else ModelVersionState.PENDING
 
     def __str__(self):
-        return str(self.state.name) + (" because of '{}'".format(self.message) if self.message else "")
+        return str(self.state.name) + (f" because of '{self.message}'" if self.message else "")
 
 
 # pylint: disable=too-many-ancestors
@@ -131,7 +136,7 @@ class ModelVersionTag(Tag):
 
 class ListableModelVersionTag(ListableBase):
 
-    __root__: List[ModelVersionTag] = list()
+    __root__: List[ModelVersionTag] = []
 
 
 # pylint: disable=too-many-ancestors
@@ -167,7 +172,7 @@ class ListableModelTag(ListableBase):
     __root__: List[ModelTag]
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes, no-self-argument, no-self-use
 class ModelVersion(BaseModel):
     """Model version representation
 
@@ -331,7 +336,7 @@ class Model(BaseModel):
     versions: ListableModelVersion = Field(default_factory=list, alias="latest_versions")
     created_time: datetime = Field(timestamp_2_time(None), alias="creation_timestamp")
     updated_time: datetime = Field(timestamp_2_time(None), alias="last_updated_timestamp")
-    description: str = str()
+    description: str = ""
     tags: ListableModelTag = Field(default_factory=list)
 
     def __str__(self):
