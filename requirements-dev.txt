@@ -1,6 +1,2 @@
-changelog
-numpydoc
 pre-commit
 setuptools-git-versioning
-sphinx
-sphinx_rtd_theme

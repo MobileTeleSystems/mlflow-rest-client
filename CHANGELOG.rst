@@ -8,57 +8,63 @@ Changelog
 
     .. change::
         :tags: general
-        :tickets: DSX-288
+        :tickets: internal:DSX-288
 
         Change package author to `<dsx-team@mts.ru>`__
 
     .. change::
         :tags: general
-        :tickets: DSX-419
+        :tickets: internal:DSX-419
 
         Add ``CONTRIBUTING.rst`` file
 
     .. change::
         :tags: general, breaking
-        :tickets: DSX-384
+        :tickets: internal:DSX-384
 
         Drop Python 2.7 and 3.6 support
 
     .. change::
         :tags: dependency, breaking
-        :tickets: DSX-384
+        :tickets: internal:DSX-384
 
         Use ``pydantic`` to parse responses
 
     .. change::
         :tags: client, feature
-        :tickets: DSX-442
+        :tickets: internal:DSX-442
 
         Add ``Bearer`` token auth
 
     .. change::
         :tags: general
-        :tickets: DSX-409
+        :tickets: internal:DSX-409
 
         Add ``LICENSE.txt`` file
 
     .. change::
         :tags: client, breaking
-        :tickets: DSX-545
+        :tickets: internal:DSX-545
 
         Rename ``MLflowApiClient`` to ``MLflowClient``
 
     .. change::
         :tags: general, feature
-        :tickets: DSX-449
+        :tickets: internal:DSX-449
 
         Add ``SECURITY.rst`` file
 
     .. change::
         :tags: general, feature
-        :tickets: DSX-411
+        :tickets: internal:DSX-411
 
         Move repo to github.com
+
+    .. change::
+        :tags: docs, feature
+        :tickets: internal:DSX-421
+
+        Move documentation to readthedocs.org
 
 1.1
 --------------------
@@ -68,19 +74,19 @@ Changelog
 
     .. change::
         :tags: tests, bug
-        :tickets: DSX-166
+        :tickets: internal:DSX-166
 
         Do not use relative paths to run tests
 
     .. change::
         :tags: client, bug
-        :tickets: DSX-262
+        :tickets: internal:DSX-262
 
         Do not use `LIKE` operator while searching model by name in `get_or_create_model` function
 
     .. change::
         :tags: dev, feature
-        :tickets: DSX-358
+        :tickets: internal:DSX-358
 
         Build and push dev versions for feature and bug branches too
 
@@ -90,19 +96,19 @@ Changelog
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-166
+        :tickets: internal:DSX-166
 
         Use Jenkins declarative pipeline
 
     .. change::
         :tags: client, feature
-        :tickets: DSX-166
+        :tickets: internal:DSX-166
 
         Disable SSL ignore warnings
 
     .. change::
         :tags: client, feature
-        :tickets: DSX-166
+        :tickets: internal:DSX-166
 
         Create one session for all requests
 
@@ -112,49 +118,49 @@ Changelog
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Pass project urls into setup.py
 
     .. change::
         :tags: general, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Test python 3.8 and 3.9 compatibility
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Improve Jenkinsfile
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-111
+        :tickets: internal:DSX-111
 
         Move CI/CD from bdbuilder04 to adm-ci
 
     .. change::
         :tags: dev, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Add requirements-dev.txt as ``dev`` extras into ``setup.py``
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-128
+        :tickets: internal:DSX-128
 
         Download base python images before build
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-130
+        :tickets: internal:DSX-130
 
         Fix requirements caching in Docker image
 
     .. change::
         :tags: docs, feature
-        :tickets: DSX-130
+        :tickets: internal:DSX-130
 
         Add summary to documentation pages
 
@@ -164,91 +170,91 @@ Changelog
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-66
+        :tickets: internal:DSX-66
 
         Allow to build and deploy versions from non-master branch
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-72
+        :tickets: internal:DSX-72
 
         Remove old dev versions from Artifactory
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-80
+        :tickets: internal:DSX-80
 
         Move documentation deployment step to separated Jenkins job
 
     .. change::
         :tags: general, bug
-        :tickets: DSX-80
+        :tickets: internal:DSX-80
 
         Include README.rst into PyPi package
 
     .. change::
         :tags: ci
-        :tickets: DSX-89
+        :tickets: internal:DSX-89
 
         Make test scripts a docker image entrypoints
 
     .. change::
         :tags: ci, bug
-        :tickets: DSX-89
+        :tickets: internal:DSX-89
 
         Publish package and documentation to Artifactory in one build info
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Pass real project version to SonarQube
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Pass project links to SonarQube
 
     .. change::
         :tags: ci, bug
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Remove redundant proxying from Jenkinsfile
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-111
+        :tickets: internal:DSX-111
 
         Move CI/CD from bdbuilder04 to adm-ci
 
     .. change::
         :tags: ci, bug
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Remove volumes after stopping test container
 
     .. change::
         :tags: ci, bug
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Fix PyLint report upload to SonarQube
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Format source code with Black
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Check source code vulnerabilities with Bandit
 
     .. change::
         :tags: dev, feature
-        :tickets: DSX-34
+        :tickets: internal:DSX-34
 
         Add pre-commit hooks
 
@@ -258,13 +264,13 @@ Changelog
 
     .. change::
         :tags: ci
-        :tickets: DSX-53
+        :tickets: internal:DSX-53
 
         Improve Jenkinsfile
 
     .. change::
         :tags: client, feature
-        :tickets: DSX-25
+        :tickets: internal:DSX-25
 
         Add ``list_model_all_versions`` and ``list_model_all_versions_iterator`` methods
 
@@ -274,13 +280,13 @@ Changelog
 
     .. change::
         :tags: dependency
-        :tickets: DSX-45
+        :tickets: internal:DSX-45
 
         Don't hard code dependency versions
 
     .. change::
         :tags: model
-        :tickets: DSX-45
+        :tickets: internal:DSX-45
 
         Fix error with accessing model list by stage
 
@@ -290,7 +296,7 @@ Changelog
 
     .. change::
         :tags: docs
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Improve documentation
 
@@ -300,43 +306,43 @@ Changelog
 
     .. change::
         :tags: refactor
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Refactor code
 
     .. change::
         :tags: tests
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Increase tests coverage
 
     .. change::
         :tags: model, feature
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Allow to get version by stage from ``Model`` object
 
     .. change::
         :tags: tag, feature
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Allow to get tag by name from any object
 
     .. change::
         :tags: run, feature
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Allow to get param by key from ``RunData`` object
 
     .. change::
         :tags: run, feature
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Allow to get metric by key from ``RunData`` object
 
     .. change::
         :tags: docs
-        :tickets: DSX-46
+        :tickets: internal:DSX-46
 
         Improve documentation
 
@@ -349,21 +355,21 @@ Changelog
 
     .. change::
         :tags: general
-        :tickets: DSX-16
+        :tickets: internal:DSX-16
         :changeset: d5e57951
 
         Added ``mlflow_client.__version__`` attribute
 
     .. change::
         :tags: docs
-        :tickets: DSX-16
+        :tickets: internal:DSX-16
         :changeset: 33121a8e
 
         Added CHANGELOG.rst file
 
     .. change::
         :tags: general, bug
-        :tickets: DSX-16
+        :tickets: internal:DSX-16
         :changeset: 67b641f6
 
         Fixed VERSION file include into package
@@ -374,21 +380,21 @@ Changelog
 
     .. change::
         :tags: general
-        :tickets: DSX-24
+        :tickets: internal:DSX-24
         :changeset: e3d715da
 
         Add VERSION file
 
     .. change::
         :tags: docs
-        :tickets: SCRR-133
+        :tickets: internal:SCRR-133
         :changeset: 0b32c40d
 
         Deploy dev version documentation
 
     .. change::
         :tags: general, bug
-        :tickets: SCRR-142
+        :tickets: internal:SCRR-142
         :changeset: 0b32c40d
 
         Removed ``tests`` dir from release package
@@ -399,7 +405,7 @@ Changelog
 
     .. change::
         :tags: ci
-        :tickets: SCRR-133
+        :tickets: internal:SCRR-133
         :changeset: f7824f2a
 
         Update ansible from v2.2 to v2.9
@@ -410,14 +416,14 @@ Changelog
 
     .. change::
         :tags: ci
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 0aa457f9
 
         Development version is released on every push to ``dev`` branch
 
     .. change::
         :tags: general, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 0aa457f9
 
         Removed ``tests`` dir from release package
@@ -428,7 +434,7 @@ Changelog
 
     .. change::
         :tags: client, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: ca138fa5
 
         Logs are now passed to STDOUT instead of STDERR
@@ -439,7 +445,7 @@ Changelog
 
     .. change::
         :tags: client, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: e9d7759d
 
         Fixed ``MLflowApiClient.get_or_create_model`` method
@@ -450,14 +456,14 @@ Changelog
 
     .. change::
         :tags: tests, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 5d345837
 
         Add timeout to integration tests
 
     .. change::
         :tags: client, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 3b7c1930
 
         Fixed ``ignore_ssl_check`` flag handling in ``MLflowApiClient`` methods
@@ -468,7 +474,7 @@ Changelog
 
     .. change::
         :tags: client, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 22d95875
 
         Add ``MLflowApiClient.get_or_create_model`` method
@@ -479,14 +485,14 @@ Changelog
 
     .. change::
         :tags: general
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 77e7f798
 
         ``mlflow-client`` package was created based on ``mlflow-python-client <https://github.com/amesar/mlflow-python-client>``__
 
     .. change::
         :tags: artifact, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``artifact`` module was added with certain classes:
@@ -494,7 +500,7 @@ Changelog
 
     .. change::
         :tags: experiment, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``experiment`` module was added with certain classes:
@@ -504,7 +510,7 @@ Changelog
 
     .. change::
         :tags: model, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``model`` module was added with certain classes:
@@ -518,7 +524,7 @@ Changelog
 
     .. change::
         :tags: page, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``page`` module was added with certain classes:
@@ -526,7 +532,7 @@ Changelog
 
     .. change::
         :tags: run, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``run`` module was added with certain classes:
@@ -542,7 +548,7 @@ Changelog
 
     .. change::
         :tags: tag, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``tag`` module was added with certain classes:
@@ -550,7 +556,7 @@ Changelog
 
     .. change::
         :tags: client, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 81484376
 
         ``client.MLflowApiClient`` class methods were created:
@@ -643,7 +649,7 @@ Changelog
 
     .. change::
         :tags: page, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 432be0ef
 
         * ``page.Page``:
@@ -657,7 +663,7 @@ Changelog
 
     .. change::
         :tags: run, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 432be0ef
 
         * ``run.RunInfo``
@@ -687,7 +693,7 @@ Changelog
 
     .. change::
         :tags: tag, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 432be0ef
 
         * ``tag.Tag``
@@ -696,14 +702,14 @@ Changelog
 
     .. change::
         :tags: sample, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: 432be0ef
 
         Fixed sample scripts
 
     .. change::
         :tags: client, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         Fixed ``MLflowApiClient`` methods:
@@ -727,7 +733,7 @@ Changelog
 
     .. change::
         :tags: tag, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         Fixed ``MLflowApiClient`` methods tag handling:
@@ -737,7 +743,7 @@ Changelog
 
     .. change::
         :tags: client, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         Added new ``MLflowApiClient`` methods:
@@ -750,14 +756,14 @@ Changelog
 
     .. change::
         :tags: client, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         Now it's possible to pass stages to ``MLflowApiClient.list_model_versions`` as list of strings
 
     .. change::
         :tags: model, feature
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         * ``model.ModelVersionState``
@@ -774,7 +780,7 @@ Changelog
 
     .. change::
         :tags: model, bug
-        :tickets: SCRR-111
+        :tickets: internal:SCRR-111
         :changeset: a01fe488
 
         Fixed parsing stage in ``model.ModelVersion`` constructor

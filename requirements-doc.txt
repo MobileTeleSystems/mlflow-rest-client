@@ -1,0 +1,5 @@
+changelog
+furo
+numpydoc
+sphinx
+sphinx-autodoc-typehints

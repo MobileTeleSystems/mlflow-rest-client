@@ -1,13 +1,7 @@
+:hide-toc:
+
 .. include:: ../README.rst
     :end-before: documentation
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Python Client for MLflow
-    :name: mlflow_client
-    :hidden:
-
-    self
 
 .. toctree::
     :maxdepth: 2
@@ -15,10 +9,7 @@
     :name: howto
 
     install
-    develop
     usage
-    contributing
-    security
 
 .. toctree::
     :maxdepth: 1
@@ -34,6 +25,17 @@
     mlflow_client.tag
 
 .. toctree::
+    :maxdepth: 2
+    :caption: Develop
+    :name: develop
+    :hidden:
+
+    changelog
+    develop
+    contributing
+    security
+
+.. toctree::
     :maxdepth: 3
     :caption: Changelog
     :name: changelog
@@ -41,10 +43,11 @@
     changelog
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Links
-    :name: links
+    :maxdepth: 1
+    :caption: Project Links
+    :hidden:
 
-    references
-    Index <genindex.html#https://>
-    Search page <search.html#https://>
+    Source Code <https://github.com/MobileTeleSystems/mlflow-client>
+    CI/CD <https://github.com/MobileTeleSystems/mlflow-client/actions>
+    Code Coverage <https://app.codecov.io/gh/MobileTeleSystems/mlflow-client>
+    Issue Tracker <https://github.com/MobileTeleSystems/mlflow-client/issues>
