@@ -3,8 +3,8 @@
 Python Client for MLflow
 ==========================
 
-|Build Status| |Quality Gate Status| |Maintainability Rating| |Coverage|
-|Documentation| |PyPI|
+|status| |PyPI| |PyPI License| |PyPI Python Version|
+|ReadTheDocs| |Build| |Coverage| |pre-commit.ci|
 
 .. |status| image:: https://www.repostatus.org/badges/latest/active.svg
     :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
