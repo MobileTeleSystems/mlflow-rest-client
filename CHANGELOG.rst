@@ -54,6 +54,12 @@ Changelog
 
         Add ``SECURITY.rst`` file
 
+    .. change::
+        :tags: general, feature
+        :tickets: DSX-411
+
+        Move repo to github.com
+
 1.1
 --------------------
 .. changelog::

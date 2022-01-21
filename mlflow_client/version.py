@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# pylint: disable= wrong-import-position
+import os
 
-from .mlflow_client import MLflowClient
-from .version import get_version
+VERSION_FILE = os.path.join(os.path.dirname(__file__), "VERSION")
 
-__version__ = get_version()
+
+def get_version():
+    with open(VERSION_FILE) as f:
+        return f.read().strip()

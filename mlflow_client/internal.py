@@ -1,4 +1,4 @@
-#  Copyright 2021 MTS (Mobile Telesystems)
+#  Copyright 2022 MTS (Mobile Telesystems)
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 from typing import List
 
 from pydantic import BaseModel
-from pydantic.generics import GenericModel
 
 from .tag import Tag
 

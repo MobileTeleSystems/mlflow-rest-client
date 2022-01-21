@@ -168,9 +168,9 @@ changelog_hide_sections_from_tags = True
 # how to render changelog links - these are plain
 # python string templates, ticket/pullreq/changeset number goes
 # in "%s"
-changelog_render_ticket = "https://jira.bd.msk.mts.ru/browse/%s"
-changelog_render_pullreq = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/merge_requests/%s"
-changelog_render_changeset = "https://git.bd.msk.mts.ru/bigdata/platform/dsx/mlflow-client/-/commit/%s"
+changelog_render_ticket = "https://github.com/MobileTeleSystems/mlflow-client/issues/%s"
+changelog_render_pullreq = "https://github.com/MobileTeleSystems/mlflow-client/-/merge_requests/%s"
+changelog_render_changeset = "https://github.com/MobileTeleSystems/mlflow-client/-/commit/%s"
 
 tags = {ver}
 tags.update(Version.parse(tag) for tag in get_all_tags())

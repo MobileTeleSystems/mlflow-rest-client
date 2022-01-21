@@ -1,4 +1,4 @@
-#  Copyright 2021 MTS (Mobile Telesystems)
+#  Copyright 2022 MTS (Mobile Telesystems)
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
 # pylint: disable=too-many-lines
 
 import json
+import logging
 from datetime import datetime
-from logging import Logger
-from re import M, U
 from typing import Iterator, List, Optional, Union
 from uuid import UUID
 
@@ -27,7 +26,6 @@ from pydantic import parse_obj_as
 
 from .artifact import Artifact
 from .experiment import Experiment
-from .log import get_logger
 from .model import ListableModelVersion, Model, ModelVersion, ModelVersionStage
 from .page import Page
 from .run import Metric, Run, RunInfo, RunStatus, RunViewType
@@ -35,6 +33,8 @@ from .tag import TagsListOrDict
 from .timestamp import current_timestamp, format_to_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+log = logging.getlog(__name__)
 
 
 # pylint: disable=too-many-public-methods
@@ -58,22 +58,8 @@ class MLflowClient:
     token : str, optional
         MLflow user token (if exist)
 
-    logger : logging.Logger, optional
-        Logger to use
-
     ignore_ssl_check : bool
         If `True`, skip SSL verify step
-
-    Attributes
-    ----------
-    base_url : str
-        MLflow URL
-
-    user : str
-        MLflow user name
-
-    logger : logging.Logger
-        Logger to use
 
     Examples
     --------
@@ -91,12 +77,9 @@ class MLflowClient:
         user: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        logger: Optional[Logger] = None,
         ignore_ssl_check: bool = False,
     ):
-        self.base_url = api_url
-        self.logger = logger if logger else get_logger()
-
+        self._base_url = api_url
         self._session = requests.Session()
         self._session.verify = not ignore_ssl_check
         if user and password:
@@ -2370,7 +2353,7 @@ class MLflowClient:
         return result
 
     def _url(self, path: str) -> str:
-        return f"{self.base_url}/api/2.0/preview/mlflow/{path}"
+        return f"{self._base_url}/api/2.0/preview/mlflow/{path}"
 
     def _get(self, url: str, **query) -> Optional[dict]:
         resp = self._request("get", url, params=query)
@@ -2401,13 +2384,13 @@ class MLflowClient:
     def _request(self, method: str, url: str, log_response: bool = True, **params) -> requests.Session:
         url = self._url(url)
 
-        self.logger.debug("api_client.{}: req: {}".format(method.upper(), params))
-        self.logger.debug("api_client.{}: url: {}".format(method.upper(), url))
+        log.debug("api_client.{}: req: {}".format(method.upper(), params))
+        log.debug("api_client.{}: url: {}".format(method.upper(), url))
 
         resp = getattr(self._session, method)(url, **params)
         resp.raise_for_status()
 
         if log_response:
-            self.logger.debug("api_client.{}: rsp: {}".format(method.upper(), resp.text))
+            log.debug("api_client.{}: rsp: {}".format(method.upper(), resp.text))
 
         return resp
