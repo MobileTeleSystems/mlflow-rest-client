@@ -45,7 +45,7 @@ class ModelVersionStage(Enum):
 
 # pylint: disable=invalid-name
 class ModelVersionState(Enum):
-    """Model version stage"""
+    """Model version state"""
 
     PENDING = "PENDING_REGISTRATION"
     """ Model version registration is pending """
