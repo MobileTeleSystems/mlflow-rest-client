@@ -36,13 +36,6 @@
     security
 
 .. toctree::
-    :maxdepth: 3
-    :caption: Changelog
-    :name: changelog
-
-    changelog
-
-.. toctree::
     :maxdepth: 1
     :caption: Project Links
     :hidden:

@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from requests import HTTPError
 
-from mlflow_client.experiment import EXPERIMENTSTAGE
+from mlflow_client.experiment import ExperimentStage
 from mlflow_client.model import ModelVersionStage
 from mlflow_client.run import Metric, RunStage, RunStatus
 
@@ -121,7 +121,7 @@ def test_delete_experiment(client):
     client.delete_experiment(exp.id)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == EXPERIMENTSTAGE.deleted
+    assert old_exp.stage == ExperimentStage.DELETED
 
     by_name = client.get_experiment_by_name(exp.name)
     assert by_name is None
@@ -138,7 +138,7 @@ def test_restore_experiment(client, create_experiment):
     client.restore_experiment(exp.id)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == EXPERIMENTSTAGE.active
+    assert old_exp.stage == ExperimentStage.ACTIVE
     assert old_exp.name == exp.name
 
     by_name = client.get_experiment_by_name(exp.name)
@@ -155,7 +155,7 @@ def test_set_experiment_tag(client, create_experiment):
     client.set_experiment_tag(exp.id, key, value)
 
     old_exp = client.get_experiment(exp.id)
-    assert old_exp.stage == EXPERIMENTSTAGE.active
+    assert old_exp.stage == ExperimentStage.ACTIVE
 
     assert key in [item.key for item in old_exp.tags]
     assert old_exp.tags[0].value == value

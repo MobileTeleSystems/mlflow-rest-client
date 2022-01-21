@@ -7,7 +7,6 @@ Python Client for MLflow
 |ReadTheDocs| |Build| |Coverage| |pre-commit.ci|
 
 .. |status| image:: https://www.repostatus.org/badges/latest/active.svg
-    :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
     :target: https://www.repostatus.org/#active
 .. |PyPI| image:: https://badge.fury.io/py/mlflow-client.svg
     :target: https://badge.fury.io/py/mlflow-client

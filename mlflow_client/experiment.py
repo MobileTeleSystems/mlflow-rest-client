@@ -22,13 +22,13 @@ from .tag import Tag
 
 
 # pylint: disable=invalid-name
-class EXPERIMENTSTAGE(Enum):
+class ExperimentStage(Enum):
     """Experiment stage"""
 
-    active = "active"
+    ACTIVE = "active"
     """ Experiment is active """
 
-    deleted = "deleted"
+    DELETED = "deleted"
     """ Experiment was deleted"""
 
 
@@ -79,7 +79,7 @@ class Experiment(BaseModel):
     artifact_location : str, optional
         Experiment artifact location
 
-    stage : :obj:`str` or :obj:`EXPERIMENTSTAGE`, optional
+    stage : :obj:`str` or :obj:`ExperimentStage`, optional
         Experiment stage
 
     tags : :obj:`dict` or :obj:`list` of :obj:`dict`, optional
@@ -112,7 +112,7 @@ class Experiment(BaseModel):
     id: int = Field(alias="experiment_id")
     name: str
     artifact_location: str = ""
-    stage: EXPERIMENTSTAGE = Field(EXPERIMENTSTAGE.active, alias="lifecycle_stage")
+    stage: ExperimentStage = Field(ExperimentStage.ACTIVE, alias="lifecycle_stage")
     tags: ListExperimentTags = Field(default_factory=list)
 
     class Config:

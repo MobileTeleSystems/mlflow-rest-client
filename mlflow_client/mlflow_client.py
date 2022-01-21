@@ -34,7 +34,7 @@ from .timestamp import current_timestamp, format_to_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-log = logging.getlog(__name__)
+log = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-public-methods

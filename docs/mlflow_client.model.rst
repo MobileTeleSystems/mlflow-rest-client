@@ -1,57 +1,41 @@
 Model
 =================================================================
 
-.. currentmodule:: mlflow_client.experiment
+.. currentmodule:: mlflow_client.model
 
 .. autosummary::
     :nosignatures:
 
     Model
-    ModelList
     ModelTag
-    ModelTagList
 
 .. autosummary::
     :nosignatures:
 
     ModelVersion
-    ModelVersionList
     ModelVersionTag
-    ModelVersionTagList
-    MODELVERSIONSTAGE
-    MODELVERSIONSTATE
+    ModelVersionStage
+    ModelVersionState
     ModelVersionStatus
 
 .. autoclass:: mlflow_client.model.Model
-    :members:
-
-.. autoclass:: mlflow_client.model.ModelList
     :members:
 
 .. autoclass:: mlflow_client.model.ModelTag
     :members:
     :show-inheritance:
 
-.. autoclass:: mlflow_client.model.ModelTagList
-    :members:
-
 .. autoclass:: mlflow_client.model.ModelVersion
-    :members:
-
-.. autoclass:: mlflow_client.model.ModelVersionList
     :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionTag
     :members:
     :show-inheritance:
 
-.. autoclass:: mlflow_client.model.ModelVersionTagList
+.. autoclass:: mlflow_client.model.ModelVersionStage
     :members:
 
-.. autoclass:: mlflow_client.model.MODELVERSIONSTAGE
-    :members:
-
-.. autoclass:: mlflow_client.model.MODELVERSIONSTATE
+.. autoclass:: mlflow_client.model.ModelVersionState
     :members:
 
 .. autoclass:: mlflow_client.model.ModelVersionStatus
