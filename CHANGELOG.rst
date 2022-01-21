@@ -72,6 +72,12 @@ Changelog
 
         Upgrade source code to Python 3.7+
 
+    .. change::
+        :tags: ci, feature
+        :tickets: internal:DSX-412
+
+        Move from Gitlab CI to Github Actions
+
 1.1
 --------------------
 .. changelog::

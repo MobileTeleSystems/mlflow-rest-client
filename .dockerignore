@@ -6,7 +6,7 @@
 .pytest_cache
 .scannerwork
 .tox
-docker-compose*
+**/docker-compose*
 reports
 sonar*
 test_venv

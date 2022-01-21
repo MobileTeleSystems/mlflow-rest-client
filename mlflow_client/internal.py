@@ -20,6 +20,8 @@ from .tag import Tag
 
 
 class ListableBase(BaseModel):
+    __root__: list
+
     class Config:
         frozen = True
 

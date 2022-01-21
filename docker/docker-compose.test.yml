@@ -1,0 +1,27 @@
+version: '3.5'
+services:
+  mlflow:
+    image: mlflow-test:${MLFLOW_VERSION:-1.22.0}
+    build:
+      context: .
+      args:
+        MLFLOW_VERSION: ${MLFLOW_VERSION:-1.22.0}
+    env_file: .env.test
+    restart: unless-stopped
+    ports:
+    - 127.0.0.1:5000:5000
+    depends_on:
+    - mlflow-db
+    networks:
+    - default
+    - db
+
+  mlflow-db:
+    image: postgres:11.8
+    env_file: .env.test
+    restart: unless-stopped
+    networks:
+    - db
+networks:
+  db:
+    internal: true
