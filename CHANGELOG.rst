@@ -74,7 +74,7 @@ Changelog
 
     .. change::
         :tags: ci, feature
-        :tickets: DSX:412
+        :tickets: DSX:412, 1
 
         Move from Gitlab CI to Github Actions
 
