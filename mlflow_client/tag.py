@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, root_validator  # pylint: disable=no-name-in-module
 
@@ -62,4 +62,4 @@ class Tag(BaseModel):
 
 
 # Custom type for type hints with Tag models
-TagsListOrDict = Union[dict[str, str], list[dict[str, str]], list[Tag]]
+TagsListOrDict = Union[Dict[str, str], list[Dict[str, str]], List[Tag]]

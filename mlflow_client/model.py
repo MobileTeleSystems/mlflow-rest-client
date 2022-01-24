@@ -49,7 +49,7 @@ class ModelVersionStage(Enum):
     """ Model version was archived """
 
 
-ModelVersionStageOrList = Union[str, ModelVersionStage, list[ModelVersionStage], list[str]]
+ModelVersionStageOrList = Union[str, ModelVersionStage, List[ModelVersionStage], List[str]]
 
 
 # pylint: disable=invalid-name
