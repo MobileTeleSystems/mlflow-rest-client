@@ -62,4 +62,4 @@ class Tag(BaseModel):
 
 
 # Custom type for type hints with Tag models
-TagsListOrDict = Union[Dict[str, str], list[Dict[str, str]], List[Tag]]
+TagsListOrDict = Union[Dict[str, str], List[Dict[str, str]], List[Tag]]
