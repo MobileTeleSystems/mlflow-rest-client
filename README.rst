@@ -51,7 +51,7 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 Documentation
 -------------
 
-See https://mlflow-client.readthedocs.io/en/latest/
+See https://mlflow-client.readthedocs.io/
 
 .. contribution
 
