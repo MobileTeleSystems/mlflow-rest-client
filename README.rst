@@ -41,7 +41,7 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 - There is no integration with ML frameworks and libraries.
   You should use official `MLflow client <https://mlflow.org/docs/latest/python_api/mlflow.html>`__ instead.
 
-- There are no integration with S3 or other artifact storage type.
+- There is no integration with S3 or other artifact storage type.
   You should access it directly with `boto3 <https://boto3.amazonaws.com>`_ or other client.
 
 - Only Python 3.7+ is supported. Python 3.6 and lower already reached end of life.
