@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from uuid import uuid4
 
@@ -6,9 +8,7 @@ from pydantic import parse_obj_as
 
 from mlflow_client.model import (
     ListableModel,
-    ListableModelTag,
     ListableModelVersion,
-    ListableModelVersionTag,
     Model,
     ModelTag,
     ModelVersion,

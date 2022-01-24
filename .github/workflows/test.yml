@@ -88,9 +88,6 @@ jobs:
     - name: Run pylint
       run: pylint mlflow_client
 
-    - name: Run bandit
-      run: bandit -r mlflow_client
-
     - name: Build package
       run: |
         python setup.py --version

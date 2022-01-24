@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from pydantic import (  # pylint: disable=no-name-in-module
@@ -25,7 +27,8 @@ from pydantic import (  # pylint: disable=no-name-in-module
 
 from .internal import ListableBase, ListableTag
 from .tag import Tag
-from .timestamp import timestamp_2_time
+
+RunId = Union[str, UUID]
 
 
 # pylint: disable=invalid-name
@@ -130,11 +133,11 @@ class RunInfo(BaseModel):
     """
 
     id: UUID
-    experiment_id: int = None
+    experiment_id: Optional[int] = None
     status: RunStatus = RunStatus.STARTED
     stage: RunStage = Field(RunStage.ACTIVE, alias="lifecycle_stage")
-    start_time: datetime = timestamp_2_time(None)
-    end_time: datetime = timestamp_2_time(None)
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
     artifact_uri: str = ""
 
     class Config:
@@ -250,7 +253,7 @@ class Metric(BaseModel):
     key: str
     value: Optional[float] = None
     step: int = 0
-    timestamp: datetime = timestamp_2_time(None)
+    timestamp: Optional[datetime] = None
 
     def __str__(self):
         return str(f"{self.key}: {self.value} for {self.step} at {self.timestamp}")
@@ -288,7 +291,7 @@ class RunTag(Tag):
     --------
     .. code:: python
 
-        tag = RunTag("some.tag", "some.val")
+        tag = RunTag(key="some.tag", value="some.val")
     """
 
 
@@ -321,9 +324,9 @@ class RunData(BaseModel):
     --------
     .. code:: python
 
-        param = Param("some.param", "some_value")
-        metric = Metric("some.metric", value=1.23)
-        tag = RunTag("some.tag", "some.val")
+        param = Param(key="some.param", value="some_value")
+        metric = Metric(name="some.metric", value=1.23)
+        tag = RunTag(key="some.tag", value="some.val")
 
         run_data = RunData(params=[param], metrics=[metric], tags=[tag])
     """
@@ -359,7 +362,7 @@ class Run(BaseModel):
     --------
     .. code:: python
 
-        run_info = RunInfo("some_id")
+        run_info = RunInfo(id="some_id")
         run_data = RunData(params=..., metrics=..., tags=...)
 
         run = Run(run_info, run_data)

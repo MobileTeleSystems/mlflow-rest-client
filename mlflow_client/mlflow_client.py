@@ -14,10 +14,11 @@
 
 # pylint: disable=too-many-lines
 
-import json
+from __future__ import annotations
+
 import logging
 from datetime import datetime
-from typing import Iterator, List, Optional, Union
+from typing import Any, Iterator, List
 from uuid import UUID
 
 import requests
@@ -26,10 +27,16 @@ from pydantic import parse_obj_as  # pylint: disable=no-name-in-module
 
 from .artifact import Artifact
 from .experiment import Experiment
-from .model import ListableModelVersion, Model, ModelVersion, ModelVersionStage
+from .model import (
+    ListableModelVersion,
+    Model,
+    ModelVersion,
+    ModelVersionStage,
+    ModelVersionStageOrList,
+)
 from .page import Page
-from .run import Metric, Run, RunInfo, RunStatus, RunViewType
-from .tag import TagsListOrDict
+from .run import Metric, Run, RunId, RunInfo, RunStatus, RunViewType
+from .tag import Tag, TagsListOrDict
 from .timestamp import current_timestamp, format_to_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -65,7 +72,16 @@ class MLflowClient:
     --------
     .. code:: python
 
-        client = MLflowClient("http://some.domain:5000")
+        client = MLflowClient(url="http://some.domain:5000")
+        client_with_basic_auth = MLflowClient(
+            url="http://some.domain:5000", user="abc", password="cde"
+        )
+        client_with_token_auth = MLflowClient(
+            url="http://some.domain:5000", token="68036ad49a92d53d02cc10ddf5ec2802"
+        )
+        client_without_ssl_check = MLflowClient(
+            url="http://some.domain:5000", ignore_ssl_check=True
+        )
     """
 
     MAX_RESULTS = 100
@@ -74,9 +90,9 @@ class MLflowClient:
     def __init__(
         self,
         api_url: str,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None,
+        user: str | None = None,
+        password: str | None = None,
+        token: str | None = None,
         ignore_ssl_check: bool = False,
     ):
         self._base_url = api_url
@@ -93,7 +109,7 @@ class MLflowClient:
     def __exit__(self, exc_type, exc_value, traceback):
         self._session.close()
 
-    def list_experiments(self, view_type: RunViewType = RunViewType.ACTIVE) -> List[Experiment]:
+    def list_experiments(self, view_type: RunViewType = RunViewType.ACTIVE) -> list[Experiment]:
         """
         List all existing experiments in MLflow database
 
@@ -114,8 +130,10 @@ class MLflowClient:
             experiments_list = client.list_experiments()
 
         """
+
         data = parse_obj_as(
-            List[Experiment], self._get("experiments/list", view_type=view_type.value).get("experiments", [])
+            List[Experiment],
+            self._get("experiments/list", view_type=view_type.value).get("experiments", []),
         )
         return data
 
@@ -140,6 +158,7 @@ class MLflowClient:
             for experiment in client.list_experiments_iterator():
                 print(experiment)
         """
+
         experiments = self.list_experiments(view_type=view_type)
         yield from experiments
 
@@ -163,10 +182,11 @@ class MLflowClient:
 
             experiment = client.get_experiment(123)
         """
-        data = self._get("experiments/get", experiment_id=experiment_id)["experiment"]
+
+        data = self._get("experiments/get", experiment_id=experiment_id).get("experiment")
         return Experiment.parse_obj(data)
 
-    def get_experiment_by_name(self, name: str) -> Optional[Experiment]:
+    def get_experiment_by_name(self, name: str) -> Experiment | None:
         """
         Get experiment by its name
 
@@ -186,12 +206,13 @@ class MLflowClient:
 
             experiment = client.get_experiment_by_name("some_experiment")
         """
+
         experiment_id = self.get_experiment_id(name)
         if experiment_id:
             return self.get_experiment(experiment_id)
         return None
 
-    def create_experiment(self, name: str, artifact_location: Optional[str] = None) -> Experiment:
+    def create_experiment(self, name: str, artifact_location: str | None = None) -> Experiment:
         """
         Create experiment
 
@@ -216,14 +237,15 @@ class MLflowClient:
 
             experiment = client.create_experiment("some_experiment", artifact_location="some/path")
         """
-        params = {}
+
+        params: dict[str, str] = {}
         if artifact_location:
             params["artifact_location"] = artifact_location
 
-        experiment_id = self._post("experiments/create", name=name, **params)["experiment_id"]
-        return self.get_experiment(experiment_id)
+        experiment_id = self._post("experiments/create", name=name, **params).get("experiment_id")
+        return self.get_experiment(experiment_id)  # type: ignore[arg-type]
 
-    def rename_experiment(self, experiment_id: int, new_name) -> None:
+    def rename_experiment(self, experiment_id: int, new_name: str) -> None:
         """
         Rename experiment
 
@@ -241,6 +263,7 @@ class MLflowClient:
 
             client.rename_experiment(123, "new_experiment")
         """
+
         self._post("experiments/update", experiment_id=experiment_id, new_name=new_name)
 
     def delete_experiment(self, experiment_id: int) -> None:
@@ -258,6 +281,7 @@ class MLflowClient:
 
             client.delete_experiment(123)
         """
+
         self._post("experiments/delete", experiment_id=experiment_id)
 
     def restore_experiment(self, experiment_id: int) -> None:
@@ -275,6 +299,7 @@ class MLflowClient:
 
             client.restore_experiment(123)
         """
+
         self._post("experiments/restore", experiment_id=experiment_id)
 
     def set_experiment_tag(self, experiment_id: int, key: str, value: str) -> None:
@@ -298,9 +323,10 @@ class MLflowClient:
 
             client.set_experiment_tag(123, "some.tag", "some.value")
         """
+
         self._post("experiments/set-experiment-tag", experiment_id=experiment_id, key=key, value=value)
 
-    def get_experiment_id(self, name: str) -> Optional[str]:
+    def get_experiment_id(self, name: str) -> int | None:
         """
         Get experiment id by name
 
@@ -320,13 +346,14 @@ class MLflowClient:
 
             experiment_id = client.get_experiment_id("some_experiment")
         """
+
         exps = self.list_experiments()
         for exp in exps:
             if exp.name == name:
                 return exp.id
         return None
 
-    def get_or_create_experiment(self, name: str, artifact_location: Optional[str] = None) -> Experiment:
+    def get_or_create_experiment(self, name: str, artifact_location: str | None = None) -> Experiment:
         """
         Get existing experiment by name or create new one
 
@@ -349,14 +376,14 @@ class MLflowClient:
 
             experiment = client.get_or_create_experiment("some_experiment")
         """
-        experiment_id = self.get_experiment_id(name)
-        if experiment_id is None:
-            experiment = self.create_experiment(name, artifact_location)
-        else:
-            experiment = self.get_experiment(experiment_id)
-        return experiment
 
-    def list_experiment_runs(self, experiment_id: int) -> List[Run]:
+        experiment_id = self.get_experiment_id(name)
+        if experiment_id is not None:
+            return self.get_experiment(experiment_id)
+
+        return self.create_experiment(name, artifact_location)
+
+    def list_experiment_runs(self, experiment_id: int) -> list[Run]:
         """
         List experiments runs
 
@@ -376,6 +403,7 @@ class MLflowClient:
 
             runs = client.list_experiment_runs(123)
         """
+
         data = list(self.list_experiment_runs_iterator(experiment_id))
         return parse_obj_as(List[Run], data)
 
@@ -400,9 +428,10 @@ class MLflowClient:
             for run in client.list_experiment_runs_iterator(123):
                 print(run)
         """
+
         yield from self.search_runs_iterator(experiment_ids=[experiment_id])
 
-    def get_run(self, run_id: str) -> Run:
+    def get_run(self, run_id: RunId) -> Run:
         """
         Get run by ID
 
@@ -422,10 +451,14 @@ class MLflowClient:
 
             run = client.get_run("some_run_id")
         """
-        return Run.parse_obj(self._get("runs/get", run_id=UUID(str(run_id)).hex)["run"])
+
+        return Run.parse_obj(self._get("runs/get", run_id=UUID(str(run_id)).hex).get("run"))
 
     def create_run(
-        self, experiment_id: int, start_time: Union[int, datetime, None] = None, tags: Optional[dict] = None
+        self,
+        experiment_id: int,
+        start_time: int | datetime | None = None,
+        tags: TagsListOrDict | None = None,
     ) -> Run:
         """
         Create run
@@ -459,21 +492,25 @@ class MLflowClient:
             tags = [{"key": "some", "value": "tag"}]
             run = client.create_run(experiment_id, tags=tags)
         """
+
         if not start_time:
             start_time = current_timestamp()
 
-        if not tags:
-            tags = []
-        if isinstance(tags, dict):
-            tags = self._handle_tags(tags)
+        tags_list = self._handle_tags(tags)
 
         data = self._post(
-            "runs/create", experiment_id=experiment_id, start_time=format_to_timestamp(start_time), tags=tags
-        )["run"]
+            "runs/create",
+            experiment_id=experiment_id,
+            start_time=format_to_timestamp(start_time),
+            tags=tags_list,
+        ).get("run")
         return Run.parse_obj(data)
 
     def set_run_status(
-        self, run_id: str, status: Union[str, RunStatus], end_time: Union[str, datetime, None] = None
+        self,
+        run_id: RunId,
+        status: str | RunStatus,
+        end_time: int | datetime | None = None,
     ) -> RunInfo:
         """
         Set run status
@@ -504,13 +541,14 @@ class MLflowClient:
                 "some_run_id", RunStatus.FINISHED, end_time=datetime.datetime.now()
             )
         """
-        params = {"status": status.value}
+
+        params: dict[str, Any] = {"status": RunStatus(status).value}
         if end_time:
             params["end_time"] = format_to_timestamp(end_time)
 
-        return RunInfo.parse_obj(self._post("runs/update", run_id=UUID(str(run_id)).hex, **params)["run_info"])
+        return RunInfo.parse_obj(self._post("runs/update", run_id=UUID(str(run_id)).hex, **params).get("run_info"))
 
-    def start_run(self, run_id: str) -> RunInfo:
+    def start_run(self, run_id: RunId) -> RunInfo:
         """
         Change run status to STARTED
 
@@ -532,7 +570,7 @@ class MLflowClient:
         """
         return self.set_run_status(run_id, RunStatus.STARTED)
 
-    def schedule_run(self, run_id: str) -> RunInfo:
+    def schedule_run(self, run_id: RunId) -> RunInfo:
         """
         Change run status to SCHEDULED
 
@@ -552,9 +590,10 @@ class MLflowClient:
 
             run_info = client.schedule_run("some_run_id")
         """
+
         return self.set_run_status(run_id, RunStatus.SCHEDULED)
 
-    def finish_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def finish_run(self, run_id: RunId, end_time: int | datetime | None = None) -> RunInfo:
         """
         Change run status to FINISHED
 
@@ -578,11 +617,12 @@ class MLflowClient:
             run_info = client.finish_run("some_run_id")
             run_info = client.finish_run("some_run_id", end_time=datetime.datetime.now())
         """
+
         if not end_time:
             end_time = current_timestamp()
         return self.set_run_status(run_id, RunStatus.FINISHED, end_time=format_to_timestamp(end_time))
 
-    def fail_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def fail_run(self, run_id: RunId, end_time: int | datetime | None = None) -> RunInfo:
         """
         Change run status to FAILED
 
@@ -606,11 +646,12 @@ class MLflowClient:
             run_info = client.fail_run("some_run_id")
             run_info = client.fail_run("some_run_id", end_time=datetime.datetime.now())
         """
+
         if not end_time:
             end_time = current_timestamp()
         return self.set_run_status(run_id, RunStatus.FAILED, end_time=end_time)
 
-    def kill_run(self, run_id: str, end_time: Union[int, datetime, None] = None) -> RunInfo:
+    def kill_run(self, run_id: RunId, end_time: int | datetime | None = None) -> RunInfo:
         """
         Change run status to KILLED
 
@@ -634,11 +675,12 @@ class MLflowClient:
             run_info = client.kill_run("some_run_id")
             run_info = client.kill_run("some_run_id", end_time=datetime.datetime.now())
         """
+
         data = self.set_run_status(run_id, RunStatus.KILLED, end_time=format_to_timestamp(end_time))
 
         return data
 
-    def delete_run(self, run_id: str) -> Optional[dict]:
+    def delete_run(self, run_id: RunId) -> None:
         """
         Delete run
 
@@ -655,7 +697,7 @@ class MLflowClient:
         """
         self._post("runs/delete", run_id=UUID(str(run_id)).hex)
 
-    def restore_run(self, run_id: str) -> Optional[dict]:
+    def restore_run(self, run_id: RunId) -> None:
         """
         Restore run
 
@@ -670,9 +712,10 @@ class MLflowClient:
 
             client.restore_run("some_run_id")
         """
+
         self._post("runs/restore", run_id=UUID(str(run_id)).hex)
 
-    def log_run_parameter(self, run_id: str, key: str, value: str) -> Optional[dict]:
+    def log_run_parameter(self, run_id: RunId, key: str, value: str) -> None:
         """
         Add or update run parameter value
 
@@ -693,9 +736,10 @@ class MLflowClient:
 
             client.log_run_parameter("some_run_id", "some.param", "some_value")
         """
+
         self._post("runs/log-parameter", run_id=UUID(str(run_id)).hex, key=key, value=value)
 
-    def log_run_parameters(self, run_id: str, params: Union[dict, List[dict]]):
+    def log_run_parameters(self, run_id: RunId, params: TagsListOrDict) -> None:
         """
         Add or update run parameters
 
@@ -717,14 +761,17 @@ class MLflowClient:
             client.log_run_parameters("some_run_id", params)
         """
 
-        if isinstance(params, dict):
-            params = self._handle_tags(params)
-
-        self.log_run_batch(run_id=run_id, params=params)
+        params_list = self._handle_tags(params)
+        self.log_run_batch(run_id=run_id, params=params_list)
 
     def log_run_metric(
-        self, run_id: str, key: str, value: float, step: int = 0, timestamp: Union[int, datetime, None] = None
-    ):
+        self,
+        run_id: RunId,
+        key: str,
+        value: float,
+        step: int = 0,
+        timestamp: int | datetime | None = None,
+    ) -> None:
         """
         Add or update run metric value
 
@@ -755,14 +802,22 @@ class MLflowClient:
                 "some_run_id", "some.metric", 123, timestamp=datetime.datetime.now()
             )
         """
+
         if not timestamp:
             timestamp = current_timestamp()
+
         dct = self._add_timestamp(
-            {"run_id": UUID(str(run_id)).hex, "key": key, "value": value, "step": int(step)}, int(timestamp)
+            {"run_id": UUID(str(run_id)).hex, "key": key, "value": value, "step": int(step)},
+            format_to_timestamp(timestamp),
         )
         self._post("runs/log-metric", **dct)
 
-    def log_run_metrics(self, run_id: str, metrics: Union[dict, List[dict]]):
+    def log_run_metrics(
+        self,
+        run_id: RunId,
+        metrics: TagsListOrDict,
+        timestamp: int | datetime | None = None,
+    ) -> None:
         """
         Add or update run parameters
 
@@ -773,6 +828,9 @@ class MLflowClient:
 
         metrics : :obj:`dict` or :obj:`list` of :obj:`dict`
             Metrics
+
+        timestamp : :obj:`int` or :obj:`datetime.datetime`, optional
+            Metric timestamp
 
         Examples
         --------
@@ -785,23 +843,23 @@ class MLflowClient:
             ]
             client.log_run_metrics("some_run_id", metrics)
         """
-        timestamp = current_timestamp()
 
-        if isinstance(metrics, dict):
-            metrics = self._handle_tags(metrics)
+        if not timestamp:
+            timestamp = current_timestamp()
 
-        metrics = [self._add_timestamp(metric, timestamp) for metric in metrics]
-
-        self.log_run_batch(run_id=run_id, metrics=metrics)
+        metrics_list = [
+            self._add_timestamp(metric, format_to_timestamp(timestamp)) for metric in self._handle_tags(metrics)
+        ]
+        self.log_run_batch(run_id=run_id, metrics=metrics_list)
 
     def log_run_batch(
         self,
-        run_id: str,
-        params: Optional[TagsListOrDict] = None,
-        metrics: Optional[TagsListOrDict] = None,
-        timestamp: Optional[TagsListOrDict] = None,
-        tags: Optional[TagsListOrDict] = None,
-    ):
+        run_id: RunId,
+        params: TagsListOrDict | None = None,
+        metrics: TagsListOrDict | None = None,
+        timestamp: int | datetime | None = None,
+        tags: TagsListOrDict | None = None,
+    ) -> None:
         """
         Add or update run parameters, mertics or tags withit one request
 
@@ -853,25 +911,17 @@ class MLflowClient:
         if not timestamp:
             timestamp = current_timestamp()
 
-        if not params:
-            params = []
-        if isinstance(params, dict):
-            params = self._handle_tags(params)
+        metrics_list = [
+            self._add_timestamp(metric, format_to_timestamp(timestamp)) for metric in self._handle_tags(metrics)
+        ]
+        params_list = self._handle_tags(params)
+        tags_list = self._handle_tags(tags)
 
-        if not metrics:
-            metrics = []
-        if isinstance(metrics, dict):
-            metrics = self._handle_tags(metrics)
-        metrics = [self._add_timestamp(metric, int(timestamp)) for metric in metrics]
+        self._post(
+            "runs/log-batch", run_id=UUID(str(run_id)).hex, params=params_list, metrics=metrics_list, tags=tags_list
+        )
 
-        if not tags:
-            tags = []
-        if isinstance(metrics, dict):
-            tags = self._handle_tags(tags)
-
-        self._post("runs/log-batch", run_id=UUID(str(run_id)).hex, params=params, metrics=metrics, tags=tags)
-
-    def log_run_model(self, run_id: str, model: dict):
+    def log_run_model(self, run_id: RunId, model: dict) -> None:
         """
         Add or update run model description
 
@@ -896,9 +946,10 @@ class MLflowClient:
 
             client.log_run_model("some_run_id", model)
         """
+
         self._post("runs/log-model", run_id=UUID(str(run_id)).hex, model_json=model)
 
-    def set_run_tag(self, run_id: str, key: str, value: str):
+    def set_run_tag(self, run_id: RunId, key: str, value: str) -> None:
         """
         Set run tag
 
@@ -919,9 +970,10 @@ class MLflowClient:
 
             client.set_run_tag("some_run_id", "some.tag", "some.value")
         """
+
         self._post("runs/set-tag", run_id=UUID(str(run_id)).hex, key=key, value=value)
 
-    def set_run_tags(self, run_id: str, tags: Union[dict, List[dict]]):
+    def set_run_tags(self, run_id: RunId, tags: TagsListOrDict) -> None:
         """
         Set run tags
 
@@ -944,12 +996,10 @@ class MLflowClient:
             client.set_run_tags("some_run_id", run_tags)
         """
 
-        if isinstance(tags, dict):
-            tags = self._handle_tags(tags)
+        tags_list = self._handle_tags(tags)
+        self.log_run_batch(run_id=run_id, tags=tags_list)
 
-        self.log_run_batch(run_id=run_id, tags=tags)
-
-    def delete_run_tag(self, run_id: str, key: str):
+    def delete_run_tag(self, run_id: RunId, key: str) -> None:
         """
         Delete run tag
 
@@ -967,9 +1017,10 @@ class MLflowClient:
 
             client.delete_run_tag("some_run_id", "some.tag")
         """
+
         self._post("runs/delete-tag", run_id=UUID(str(run_id)).hex, key=key)
 
-    def delete_run_tags(self, run_id: str, keys: Union[dict, List[dict]]):
+    def delete_run_tags(self, run_id: RunId, keys: TagsListOrDict | list[str]) -> None:
         """
         Delete run tags
 
@@ -991,25 +1042,28 @@ class MLflowClient:
 
             client.delete_run_tags("some_run_id", run_tags)
         """
+
         if isinstance(keys, dict):
-            for tag in keys:
-                self.delete_run_tag(run_id, tag)
+            for key in keys:
+                self.delete_run_tag(run_id, key)
         elif isinstance(keys, list):
             for tag in keys:
                 if isinstance(tag, str):
                     self.delete_run_tag(run_id, tag)
+                elif isinstance(tag, Tag):
+                    self.delete_run_tag(run_id, tag.key)
                 elif isinstance(tag, dict) and "key" in tag:
                     self.delete_run_tag(run_id, tag["key"])
 
     @staticmethod
-    def _add_timestamp(item, timestamp):
+    def _add_timestamp(item: dict, timestamp: int) -> dict:
         if "timestamp" in item and isinstance(item["timestamp"], int):
             return item
 
         item["timestamp"] = timestamp
         return item
 
-    def list_run_metric_history(self, run_id: str, key: str) -> List[Metric]:
+    def list_run_metric_history(self, run_id: RunId, key: str) -> list[Metric]:
         """
         List metric history
 
@@ -1032,12 +1086,13 @@ class MLflowClient:
 
             metrics_list = client.list_run_metric_history("some_run_id", "some.metric")
         """
+
         return parse_obj_as(
             List[Metric],
-            self._get("metrics/get-history", run_id=UUID(str(run_id)).hex, metric_key=key)["metrics"],
+            self._get("metrics/get-history", run_id=UUID(str(run_id)).hex, metric_key=key).get("metrics"),
         )
 
-    def list_run_metric_history_iterator(self, run_id: str, key: str) -> Iterator:
+    def list_run_metric_history_iterator(self, run_id: RunId, key: str) -> Iterator[Metric]:
         """
         Iterate by metric history
 
@@ -1061,9 +1116,10 @@ class MLflowClient:
             for metric in client.list_run_metric_history_iterator("some_run_id", "some.metric"):
                 print(metric)
         """
+
         yield from self.list_run_metric_history(run_id, key)
 
-    def list_run_artifacts(self, run_id: str, path: Optional[str] = None, page_token: Optional[str] = None) -> Page:
+    def list_run_artifacts(self, run_id: RunId, path: str | None = None, page_token: str | None = None) -> Page:
         """
         List run artifacts
 
@@ -1091,6 +1147,7 @@ class MLflowClient:
             artifacts_page = client.list_run_artifacts("some_run_id", path="some/path/*")
             artifacts_page = client.list_run_artifacts("some_run_id", page_token="next_page_id")
         """
+
         params = {}
         if path:
             params["path"] = path
@@ -1101,8 +1158,11 @@ class MLflowClient:
         return Page.make(response, items_key="files", item_class=Artifact, root=response["root_uri"])
 
     def list_run_artifacts_iterator(
-        self, run_id, path: Optional[str] = None, page_token: Optional[str] = None
-    ) -> Iterator:
+        self,
+        run_id: RunId,
+        path: str | None = None,
+        page_token: str | None = None,
+    ) -> Iterator[Artifact]:
         """
         Iterate by run artifacts
 
@@ -1140,6 +1200,7 @@ class MLflowClient:
             ):
                 print(artifact)
         """
+
         page = self.list_run_artifacts(run_id=run_id, path=path, page_token=page_token)
         while True:
             yield from page
@@ -1150,12 +1211,12 @@ class MLflowClient:
 
     def search_runs(
         self,
-        experiment_ids: List[int],
+        experiment_ids: list[int],
         query: str = "",
         run_view_type: RunViewType = RunViewType.ACTIVE,
         max_results: int = MAX_RESULTS,
-        order_by: Optional[List[str]] = None,
-        page_token: Optional[str] = None,
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
     ) -> Page:
         """
         Search for runs
@@ -1223,13 +1284,13 @@ class MLflowClient:
 
     def search_runs_iterator(
         self,
-        experiment_ids: List[int],
-        query: Optional[str] = "",
+        experiment_ids: list[int],
+        query: str = "",
         run_view_type: RunViewType = RunViewType.ACTIVE,
         max_results: int = MAX_RESULTS,
-        order_by: Optional[List[str]] = None,
-        page_token: Optional[str] = None,
-    ) -> Iterator:
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
+    ) -> Iterator[Run]:
         """
         Iterate by runs
 
@@ -1309,7 +1370,7 @@ class MLflowClient:
             else:
                 break
 
-    def create_model(self, name: str, tags: Optional[TagsListOrDict] = None) -> Model:
+    def create_model(self, name: str, tags: TagsListOrDict | None = None) -> Model:
         """
         Create model
 
@@ -1338,11 +1399,8 @@ class MLflowClient:
             model = client.create_model("some_model", tags=tags)
         """
 
-        if not tags:
-            tags = []
-        if isinstance(tags, dict):
-            tags = self._handle_tags(tags)
-        data = self._post("registered-models/create", name=name, tags=tags)["registered_model"]
+        tags_list = self._handle_tags(tags)
+        data = self._post("registered-models/create", name=name, tags=tags_list).get("registered_model")
 
         return Model.parse_obj(data)
 
@@ -1366,9 +1424,10 @@ class MLflowClient:
 
             model = client.get_model("some_model")
         """
-        return Model.parse_obj(self._get("registered-models/get", name=name)["registered_model"])
 
-    def get_or_create_model(self, name: str, tags: Optional[TagsListOrDict] = None) -> Model:
+        return Model.parse_obj(self._get("registered-models/get", name=name).get("registered_model"))
+
+    def get_or_create_model(self, name: str, tags: TagsListOrDict | None = None) -> Model:
         """
         Get existing model by name or create new one
 
@@ -1424,7 +1483,10 @@ class MLflowClient:
 
             model = client.rename_model("old_model", "new_model")
         """
-        return Model.parse_obj(self._post("registered-models/rename", name=name, new_name=new_name)["registered_model"])
+
+        return Model.parse_obj(
+            self._post("registered-models/rename", name=name, new_name=new_name).get("registered_model")
+        )
 
     def set_model_description(self, name: str, description: str) -> Model:
         """
@@ -1449,8 +1511,9 @@ class MLflowClient:
 
             model = client.set_model_description("some_model", "new description")
         """
+
         return Model.parse_obj(
-            self._patch("registered-models/update", name=name, description=description)["registered_model"]
+            self._patch("registered-models/update", name=name, description=description).get("registered_model"),
         )
 
     def delete_model(self, name: str) -> None:
@@ -1468,9 +1531,10 @@ class MLflowClient:
 
             client.delete_model("some_model")
         """
+
         self._delete("registered-models/delete", name=name)
 
-    def list_models(self, max_results: int = MAX_RESULTS, page_token: Optional[str] = None) -> Page:
+    def list_models(self, max_results: int = MAX_RESULTS, page_token: str | None = None) -> Page:
         """
         List models
 
@@ -1495,15 +1559,17 @@ class MLflowClient:
             models_page = client.list_models(max_results=1000)
             models_page = client.list_models(page_token="next_page_id")
         """
-        params = {}
+
+        params: dict[str, Any] = {}
         if page_token:
             params["max_results"] = max_results
         if page_token:
             params["page_token"] = page_token
+
         response = self._get("registered-models/list", **params)
         return Page.make(response, items_key="registered_models", item_class=Model)
 
-    def list_models_iterator(self, max_results: int = MAX_RESULTS, page_token: Optional[str] = None) -> Iterator:
+    def list_models_iterator(self, max_results: int = MAX_RESULTS, page_token: str | None = None) -> Iterator:
         """
         Iterate by models
 
@@ -1535,6 +1601,7 @@ class MLflowClient:
             for model in client.list_models(page_token="next_page_id"):
                 print(model)
         """
+
         page = self.list_models(max_results=max_results, page_token=page_token)
         while True:
             yield from page
@@ -1546,9 +1613,9 @@ class MLflowClient:
     def search_models(
         self,
         query: str,
-        max_results: Optional[int] = None,
-        order_by: Union[List[str], None] = None,
-        page_token: Optional[str] = None,
+        max_results: int | None = None,
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
     ) -> Page:
         """
         Search for models
@@ -1587,7 +1654,8 @@ class MLflowClient:
             models_page = client.search_models(query, max_results=100)
             models_page = client.search_models(query, page_token="next_page_id")
         """
-        params = {"filter": query}
+
+        params: dict[str, Any] = {"filter": query}
         if max_results:
             params["max_results"] = max_results
         if order_by:
@@ -1600,10 +1668,10 @@ class MLflowClient:
 
     def search_models_iterator(
         self,
-        query: str = "",
+        query: str,
         max_results: int = MAX_RESULTS,
-        order_by: Optional[List[str]] = None,
-        page_token: Optional[str] = None,
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
     ) -> Iterator:
         """
         Iterate models found by search query
@@ -1660,7 +1728,7 @@ class MLflowClient:
             else:
                 break
 
-    def set_model_tag(self, name: str, key: str, value: str):
+    def set_model_tag(self, name: str, key: str, value: str) -> None:
         """
         Set model tag
 
@@ -1681,6 +1749,7 @@ class MLflowClient:
 
             client.set_model_tag("some_model", "some.tag", "some.value")
         """
+
         self._post("registered-models/set-tag", name=name, key=key, value=value)
 
     def delete_model_tag(self, name: str, key: str):
@@ -1701,10 +1770,13 @@ class MLflowClient:
 
             client.delete_model_tag("some_model", "some.tag")
         """
+
         self._delete("registered-models/delete-tag", name=name, key=key)
 
     def list_model_versions(
-        self, name: str, stages: Union[List[ModelVersionStage], List[str], None] = None
+        self,
+        name: str,
+        stages: ModelVersionStageOrList | None = None,
     ) -> ListableModelVersion:
         """
         List model versions (only latest version of each stage)
@@ -1731,21 +1803,26 @@ class MLflowClient:
                 "some_model", stages=[ModelVersionStage.PROD]
             )
         """
-        params = {}
+
+        params: dict[str, Any] = {}
         if stages:
+            stages_list: list[str]
+
             if isinstance(stages, list):
-                params["stages"] = [stage.value if isinstance(stage, ModelVersionStage) else stage for stage in stages]
-            elif isinstance(stages, ModelVersionStage):
-                params["stages"] = [stages.value]
+                stages_list = [ModelVersionStage(stage).value for stage in stages]
             else:
-                params["stages"] = [stages]
+                stages_list = [ModelVersionStage(stages).value]
+
+            params["stages"] = stages_list
 
         response = self._get("registered-models/get-latest-versions", name=name, **params)
 
         return ListableModelVersion.parse_obj(response.get("model_versions", []))
 
     def list_model_versions_iterator(
-        self, name: str, stages: Union[List[ModelVersionStage], List[str]] = None
+        self,
+        name: str,
+        stages: ModelVersionStageOrList | None = None,
     ) -> Iterator:
         """
         Iterate by models versions (only latest version of each stage)
@@ -1775,11 +1852,14 @@ class MLflowClient:
             ):
                 print(model_version)
         """
+
         versions = self.list_model_versions(name=name, stages=stages)
         yield from versions
 
     def list_model_all_versions(
-        self, name: str, stages: Union[List[ModelVersionStage], List[str], None] = None
+        self,
+        name: str,
+        stages: ModelVersionStageOrList | None = None,
     ) -> ListableModelVersion:
         """
         List model versions (all versions of each stage)
@@ -1806,11 +1886,14 @@ class MLflowClient:
                 "some_model", stages=[ModelVersionStage.PROD]
             )
         """
+
         return parse_obj_as(ListableModelVersion, self.list_model_all_versions_iterator(name=name, stages=stages))
 
     # pylint: disable=broad-except
     def list_model_all_versions_iterator(
-        self, name: str, stages: Union[List[ModelVersionStage], List[str], None] = None
+        self,
+        name: str,
+        stages: ModelVersionStageOrList | None = None,
     ) -> Iterator:
         """
         Iterate by models versions (all versions of each stage)
@@ -1841,14 +1924,12 @@ class MLflowClient:
                 print(model_version)
         """
 
-        _stages = None
+        _stages: list[ModelVersionStage] = []
         if stages:
             if isinstance(stages, list):
-                _stages = [
-                    ModelVersionStage(stage) if not isinstance(stage, ModelVersionStage) else stage for stage in stages
-                ]
+                _stages = [ModelVersionStage(stage) for stage in stages]
             else:
-                _stages = [stages]
+                _stages = [ModelVersionStage(stages)]
 
         max_version = -1
         for version in self.list_model_versions_iterator(name, stages):
@@ -1870,9 +1951,9 @@ class MLflowClient:
     def create_model_version(
         self,
         name: str,
-        source: Optional[str] = None,
-        run_id: Optional[str] = None,
-        tags: Optional[TagsListOrDict] = None,
+        source: str | None = None,
+        run_id: str | None = None,
+        tags: TagsListOrDict | None = None,
     ) -> ModelVersion:
         """
         Create model version
@@ -1914,19 +1995,17 @@ class MLflowClient:
             tags = [{"key": "some", "value": "tag"}]
             model_version = client.create_model_version(name, tags=tags)
         """
+
         params = {}
         if source:
             params["source"] = source
         if run_id:
             params["run_id"] = UUID(str(run_id)).hex
 
-        if not tags:
-            tags = []
-        if isinstance(tags, dict):
-            tags = self._handle_tags(tags)
+        tags_list = self._handle_tags(tags)
 
         return ModelVersion.parse_obj(
-            self._post("model-versions/create", name=name, tags=tags, **params)["model_version"]
+            self._post("model-versions/create", name=name, tags=tags_list, **params).get("model_version"),
         )
 
     def get_model_version(self, name: str, version: int) -> ModelVersion:
@@ -1952,7 +2031,10 @@ class MLflowClient:
 
             model_version = client.get_model_version("some_model", 1)
         """
-        return ModelVersion.parse_obj(self._get("model-versions/get", name=name, version=str(version))["model_version"])
+
+        return ModelVersion.parse_obj(
+            self._get("model-versions/get", name=name, version=str(version)).get("model_version")
+        )
 
     def set_model_version_description(self, name: str, version: int, description: str) -> ModelVersion:
         """
@@ -1980,13 +2062,14 @@ class MLflowClient:
 
             model_version = client.set_model_version_description("some_model", 1, "new description")
         """
+
         return ModelVersion.parse_obj(
-            self._patch("model-versions/update", name=name, version=str(version), description=description)[
+            self._patch("model-versions/update", name=name, version=str(version), description=description).get(
                 "model_version"
-            ]
+            )
         )
 
-    def set_model_version_tag(self, name: str, version: int, key: str, value: str):
+    def set_model_version_tag(self, name: str, version: int, key: str, value: str) -> None:
         """
         Set model version tag
 
@@ -2010,9 +2093,10 @@ class MLflowClient:
 
             client.set_model_version_tag("some_model", 1, "some.tag", "some.value")
         """
+
         self._post("model-versions/set-tag", name=name, version=str(version), key=key, value=value)
 
-    def delete_model_version_tag(self, name: str, version: int, key: str):
+    def delete_model_version_tag(self, name: str, version: int, key: str) -> None:
         """
         Delete model version tag
 
@@ -2033,9 +2117,10 @@ class MLflowClient:
 
             client.delete_model_version_tag("some_model", 1, "some.tag")
         """
+
         self._delete("model-versions/delete-tag", name=name, version=str(version), key=key)
 
-    def delete_model_version(self, name: str, version: int):
+    def delete_model_version(self, name: str, version: int) -> None:
         """
         Delete model version
 
@@ -2053,14 +2138,15 @@ class MLflowClient:
 
             client.delete_model_version("some_model", 1)
         """
+
         self._delete("model-versions/delete", name=name, version=str(version))
 
     def search_model_versions(
         self,
         query: str,
-        max_results: Optional[int] = None,
-        order_by: Optional[List[str]] = None,
-        page_token: Optional[str] = None,
+        max_results: int | None = None,
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
     ) -> Page:
         """
         Search for model versions
@@ -2099,7 +2185,8 @@ class MLflowClient:
             model_versions_page = client.search_model_versions(query, max_results=100)
             model_versions_page = client.search_model_versions(query, page_token="next_page_id")
         """
-        params = {"filter": query}
+
+        params: dict[str, Any] = {"filter": query}
         if max_results:
             params["max_results"] = max_results
         if order_by:
@@ -2112,10 +2199,10 @@ class MLflowClient:
 
     def search_model_versions_iterator(
         self,
-        query: str = "",
+        query: str,
         max_results: int = MAX_RESULTS,
-        order_by: Optional[List[str]] = None,
-        page_token: Optional[str] = None,
+        order_by: list[str] | None = None,
+        page_token: str | None = None,
     ) -> Iterator:
         """
         Iterate by model versions
@@ -2162,6 +2249,7 @@ class MLflowClient:
             ):
                 print(page)
         """
+
         page = self.search_model_versions(
             query=query, max_results=max_results, order_by=order_by, page_token=page_token
         )
@@ -2174,7 +2262,7 @@ class MLflowClient:
             else:
                 break
 
-    def get_model_version_download_url(self, name: str, version: int) -> Optional[str]:
+    def get_model_version_download_url(self, name: str, version: int) -> str | None:
         """
         Get download URL for model artifact by version
 
@@ -2185,9 +2273,6 @@ class MLflowClient:
 
         version: int
             Version number
-
-        tags : :obj:`dict`, :obj:`list` of :obj:`dict`, optional
-            List of run tags
 
         Returns
         ----------
@@ -2200,10 +2285,15 @@ class MLflowClient:
 
             download_url = client.get_model_version_download_url("some_model", 1)
         """
+
         return self._get("model-versions/get-download-uri", name=name, version=str(version)).get("artifact_uri")
 
     def transition_model_version_stage(
-        self, name: str, version: int, stage: Union[str, ModelVersionStage], archive_existing: bool = False
+        self,
+        name: str,
+        version: int,
+        stage: str | ModelVersionStage,
+        archive_existing: bool = False,
     ) -> ModelVersion:
         """
         Transition model version between stages
@@ -2239,6 +2329,7 @@ class MLflowClient:
                 "some_run_id", 1, ModelVersionStage.PROD, archive_existing=True
             )
         """
+
         return ModelVersion.parse_obj(
             self._post(
                 "model-versions/transition-stage",
@@ -2276,6 +2367,7 @@ class MLflowClient:
             model_version = client.test_model_version("some_run_id", 1)
             model_version = client.test_model_version("some_run_id", 1, archive_existing=True)
         """
+
         return self.transition_model_version_stage(name, version, stage=ModelVersionStage.TEST, **params)
 
     def promote_model_version(self, name: str, version: int, **params) -> ModelVersion:
@@ -2305,6 +2397,7 @@ class MLflowClient:
             model_version = client.promote_model_version("some_run_id", 1)
             model_version = client.promote_model_version("some_run_id", 1, archive_existing=True)
         """
+
         return self.transition_model_version_stage(name, version, stage=ModelVersionStage.PROD, **params)
 
     def archive_model_version(self, name: str, version: int, **params) -> ModelVersion:
@@ -2330,49 +2423,59 @@ class MLflowClient:
 
             model_version = client.archive_model_version("some_run_id", 1)
         """
+
         return self.transition_model_version_stage(name, version, stage=ModelVersionStage.ARCHIVED, **params)
 
     @staticmethod
-    def _handle_tags(tags: dict) -> list:
-        result = []
-        for key, value in tags.items():
-            dct = {"key": key, "value": value}
-            if hasattr(value, "step"):
-                dct["step"] = value.step
-            result.append(dct)
+    def _handle_tags(tags: TagsListOrDict | None) -> list[dict[str, str]]:
+        result: list[dict[str, str]] = []
+
+        if not tags:
+            return result
+
+        if isinstance(tags, dict):
+            for key, value in tags.items():
+                dct = {"key": key, "value": value}
+
+                step = getattr(value, "step", None)
+                if step is not None:
+                    dct["step"] = step
+
+                result.append(dct)
+        else:
+            result = tags  # type: ignore[assignment]
 
         return result
 
     def _url(self, path: str) -> str:
         return f"{self._base_url}/api/2.0/preview/mlflow/{path}"
 
-    def _get(self, url: str, **query) -> Optional[dict]:
+    def _get(self, url: str, **query) -> dict:
         resp = self._request("get", url, params=query)
-        rsp = str(resp.text)
-        if rsp:
-            return json.loads(rsp)
-        return None
+        if not resp.text:
+            return {}
 
-    def _post(self, url: str, **data) -> Optional[dict]:
+        return resp.json()
+
+    def _post(self, url: str, **data) -> dict:
         resp = self._request("post", url, json=data)
-        rsp = str(resp.text)
+        if not resp.text:
+            return {}
 
-        if rsp:
-            return json.loads(rsp)
-        return None
+        return resp.json()
 
-    def _patch(self, url: str, **data) -> Optional[dict]:
+    def _patch(self, url: str, **data) -> dict:
         resp = self._request("patch", url, json=data)
-        rsp = str(resp.text)
-        if rsp:
-            return json.loads(rsp)
-        return None
+        if not resp.text:
+            return {}
 
-    def _delete(self, url: str, **data):
+        return resp.json()
+
+    def _delete(self, url: str, **data) -> None:
         self._request("delete", url, json=data)
 
     # pylint: disable=logging-format-interpolation
-    def _request(self, method: str, url: str, log_response: bool = True, **params) -> requests.Session:
+    def _request(self, method: str, url: str, log_response: bool = True, **params) -> requests.Response:
         url = self._url(url)
 
         log.debug(f"api_client.{method.upper()}: req: {params}")

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from datetime import timedelta
 from uuid import uuid4
 
 import pytest
@@ -7,16 +10,6 @@ from requests import HTTPError
 from mlflow_client.experiment import ExperimentStage
 from mlflow_client.model import ModelVersionStage
 from mlflow_client.run import Metric, RunStage, RunStatus
-
-log = logging.getLogger(__name__)
-
-DEFAULT_TIMEOUT = 60
-
-import logging
-from datetime import timedelta
-
-import pytest
-from requests import HTTPError
 
 from .conftest import (
     DEFAULT_TIMEOUT,
@@ -28,6 +21,8 @@ from .conftest import (
 )
 
 log = logging.getLogger(__name__)
+
+DEFAULT_TIMEOUT = 60
 
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
@@ -676,7 +671,7 @@ def test_create_model_already_exist(request, client):
 
     request.addfinalizer(finalizer)
 
-    with pytest.raises(HTTPError) as ex:
+    with pytest.raises(HTTPError):
         client.create_model(model_name)
 
 

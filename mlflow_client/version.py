@@ -12,11 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 import os
 
 VERSION_FILE = os.path.join(os.path.dirname(__file__), "VERSION")
 
 
-def get_version():
+def get_version() -> str:
     with open(VERSION_FILE) as f:
         return f.read().strip()

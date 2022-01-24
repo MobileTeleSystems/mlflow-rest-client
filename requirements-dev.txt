@@ -1,4 +1,3 @@
-bandit
 pre-commit
 pylint
 setuptools-git-versioning

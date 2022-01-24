@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from pydantic import (  # pylint: disable=no-name-in-module
@@ -27,7 +29,6 @@ from pydantic import (  # pylint: disable=no-name-in-module
 from mlflow_client.internal import ListableBase
 
 from .tag import Tag
-from .timestamp import timestamp_2_time
 
 
 # pylint: disable=invalid-name
@@ -46,6 +47,9 @@ class ModelVersionStage(Enum):
 
     ARCHIVED = "Archived"
     """ Model version was archived """
+
+
+ModelVersionStageOrList = Union[str, ModelVersionStage, list[ModelVersionStage], list[str]]
 
 
 # pylint: disable=invalid-name
@@ -130,7 +134,7 @@ class ModelVersionTag(Tag):
     --------
     .. code:: python
 
-        tag = ModelVersionTag("some.tag", "some.val")
+        tag = ModelVersionTag(key="some.tag", value="some.val")
     """
 
 
@@ -163,7 +167,7 @@ class ModelTag(Tag):
     --------
     .. code:: python
 
-        tag = ModelTag("some.tag", "some.val")
+        tag = ModelTag(key="some.tag", value="some.val")
     """
 
 
@@ -252,8 +256,8 @@ class ModelVersion(BaseModel):
 
     name: str
     version: int
-    created_time: datetime = Field(timestamp_2_time(None), alias="creation_timestamp")
-    updated_time: datetime = Field(timestamp_2_time(None), alias="last_updated_timestamp")
+    created_time: datetime = Field(None, alias="creation_timestamp")
+    updated_time: datetime = Field(None, alias="last_updated_timestamp")
     stage: ModelVersionStage = Field(ModelVersionStage.UNKNOWN, alias="current_stage")
     description: str = ""
     source: str = ""
@@ -321,9 +325,8 @@ class ListableModelVersion(ListableBase):
     def __contains__(self, item):
         for itm in self.__root__:
 
-            if isinstance(item, ModelVersionStage):
-                if item == itm.stage:
-                    return True
+            if isinstance(item, ModelVersionStage) and item == itm.stage:
+                return True
 
             if (itm.name == item.name) and (itm.version == item.version):
                 return True
@@ -334,8 +337,8 @@ class Model(BaseModel):
     name: str
 
     versions: ListableModelVersion = Field(default_factory=list, alias="latest_versions")
-    created_time: datetime = Field(timestamp_2_time(None), alias="creation_timestamp")
-    updated_time: datetime = Field(timestamp_2_time(None), alias="last_updated_timestamp")
+    created_time: datetime = Field(None, alias="creation_timestamp")
+    updated_time: datetime = Field(None, alias="last_updated_timestamp")
     description: str = ""
     tags: ListableModelTag = Field(default_factory=list)
 

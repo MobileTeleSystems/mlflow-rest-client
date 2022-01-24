@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 from enum import Enum
 from typing import List
 
@@ -56,7 +58,7 @@ class ExperimentTag(Tag):
     --------
     .. code:: python
 
-        tag = ExperimentTag("some.tag", "some.val")
+        tag = ExperimentTag(key="some.tag", value="some.val")
     """
 
 

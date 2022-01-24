@@ -30,7 +30,7 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 - Unlike `MLflow Tracking client <https://mlflow.org/docs/latest/python_api/mlflow.tracking.html>`__
   all REST API methods are exposed to user.
 
-- All class fields are validated with `pydantic <https://pydantic-docs.helpmanual.io>`_
+- All class fields are validated with `pydantic <https://pydantic-docs.helpmanual.io>`_.
 
 - Basic and Bearer auth is supported.
 

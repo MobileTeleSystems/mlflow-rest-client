@@ -11,7 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Dict, List, Union
+
+from __future__ import annotations
+
+from typing import Union
 
 from pydantic import BaseModel, root_validator  # pylint: disable=no-name-in-module
 
@@ -28,19 +31,11 @@ class Tag(BaseModel):
     value : str
         Tag value
 
-    Attributes
-    ----------
-    key : str
-        Tag name
-
-    value : str
-        Tag value
-
     Examples
     --------
     .. code:: python
 
-        tag = Tag("some.tag", "some.val")
+        tag = Tag(key="some.tag", value="some.val")
     """
 
     key: str
@@ -67,4 +62,4 @@ class Tag(BaseModel):
 
 
 # Custom type for type hints with Tag models
-TagsListOrDict = Union[Dict[str, str], List[Dict[str, str]], List[Tag]]
+TagsListOrDict = Union[dict[str, str], list[dict[str, str]], list[Tag]]

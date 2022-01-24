@@ -12,9 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from __future__ import annotations
+
 import datetime
 from enum import Enum
-from typing import Optional
+from typing import Union
+
+AnyTimestamp = Union[int, datetime.datetime, None]
 
 
 class Unit(Enum):
@@ -22,24 +26,24 @@ class Unit(Enum):
     SEC = 1
 
 
-def current_timestamp():
-    return datetime.datetime.now().timestamp()
+def current_timestamp() -> int:
+    return int(datetime.datetime.now().timestamp())
 
 
-def normalize_timestamp(timestamp):
+def normalize_timestamp(timestamp: int | float) -> int:
     timestamp = int(timestamp)
     if timestamp >= 1000000000000:
         unit = Unit.MSEC
     else:
         unit = Unit.SEC
-    return timestamp / unit.value
+    return timestamp // unit.value
 
 
-def mlflow_timestamp(timestamp):
+def mlflow_timestamp(timestamp: int) -> int:
     return timestamp * 1000
 
 
-def timestamp_2_time(timestamp):
+def timestamp_2_time(timestamp: AnyTimestamp) -> datetime.datetime | None:
     if timestamp:
         if isinstance(timestamp, datetime.datetime):
             return timestamp
@@ -47,14 +51,16 @@ def timestamp_2_time(timestamp):
     return None
 
 
-def format_to_timestamp(data: Optional[int] = None) -> int:
+def format_to_timestamp(data: AnyTimestamp = None) -> int:
     """Any object (str, int, datetime formatting to timestamp."""
 
     if not data:
-        data = datetime.datetime.now().timestamp()
+        result = datetime.datetime.now().timestamp()
     elif isinstance(data, int):
-        data = normalize_timestamp(data)
+        result = normalize_timestamp(data)
     elif isinstance(data, datetime.datetime):
-        data = data.timestamp()
+        result = data.timestamp()
+    else:
+        result = data
 
-    return normalize_timestamp(int(data))
+    return normalize_timestamp(int(result))

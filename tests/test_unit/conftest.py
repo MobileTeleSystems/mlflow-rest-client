@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import random
 import string
@@ -8,18 +10,18 @@ log = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 60
 
 
-def rand_str(length=8):
+def rand_str(length: int = 8) -> str:
     letters = string.ascii_lowercase
     return "".join(random.sample(letters, length))
 
 
-def rand_int(a=0, b=100):
+def rand_int(a: int = 0, b: int = 100) -> int:
     return random.randint(a, b)
 
 
-def rand_float(a=0, b=100):
+def rand_float(a: float = 0, b: int = 100) -> float:
     return random.uniform(a, b)
 
 
-def now():
+def now() -> datetime:
     return datetime.now().replace(microsecond=0)

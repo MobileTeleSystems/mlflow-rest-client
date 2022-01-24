@@ -78,6 +78,12 @@ Changelog
 
         Move from Gitlab CI to Github Actions
 
+    .. change::
+        :tags: dev, feature
+        :tickets: DSX:549
+
+        Check type hints with ``mypy``
+
 1.1
 --------------------
 .. changelog::
