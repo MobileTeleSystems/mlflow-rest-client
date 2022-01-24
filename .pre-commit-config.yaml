@@ -11,7 +11,7 @@ repos:
   - id: check-vcs-permalinks
   - id: check-yaml
   - id: file-contents-sorter
-    files: ^(\.env.*)$
+    files: ^(docker\/\.env.*)$
   - id: requirements-txt-fixer
     files: ^(requirements.*\.txt)$
   - id: end-of-file-fixer
@@ -20,7 +20,7 @@ repos:
   - id: fix-encoding-pragma
     args: [--remove]
   - id: name-tests-test
-    files: ^tests/(integration|unit)/.*\.py$
+    files: ^tests/(test_integration|test_unit)/.*\.py$
     args: [--django]
   - id: trailing-whitespace
   - id: detect-private-key
@@ -51,7 +51,7 @@ repos:
   rev: v2.0.1
   hooks:
   - id: docker-compose-check
-    files: ^docker-compose.*\.(yaml|yml)$
+    files: ^docker\/docker-compose.*\.(yaml|yml)$
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:

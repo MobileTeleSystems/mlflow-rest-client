@@ -1,6 +1,4 @@
-bandit
 coverage
-pylint
 pytest
 pytest-logger
 pytest-rerunfailures

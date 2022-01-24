@@ -7,6 +7,7 @@
     :maxdepth: 2
     :caption: How to
     :name: howto
+    :hidden:
 
     install
     usage
@@ -15,6 +16,7 @@
     :maxdepth: 1
     :caption: Contents
     :name: mastertoc
+    :hidden:
 
     mlflow_client.client
     mlflow_client.artifact
