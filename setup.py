@@ -19,7 +19,7 @@ setup(
         "version_file": os.path.join(here, "mlflow_rest_client", "VERSION"),
         "count_commits_from_version_file": True,
     },
-    description="Python client for MLflow API",
+    description="Python client for MLflow REST API",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     license="Apache License 2.0",

@@ -1,4 +1,4 @@
-MLflow API client
+MLflow REST API client
 =================================================================
 
 Summary
