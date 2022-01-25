@@ -49,8 +49,8 @@ Changelog
 
         Rename library:
 
-            * ``mlflow-client`` -> ``mlflow-rest-client``
-            * ``MLflowApiClient`` -> ``MLflowRESTClient``
+        * ``mlflow-client`` -> ``mlflow-rest-client``
+        * ``MLflowApiClient`` -> ``MLflowRESTClient``
 
     .. change::
         :tags: general, feature
