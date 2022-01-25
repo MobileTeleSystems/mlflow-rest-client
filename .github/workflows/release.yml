@@ -110,12 +110,12 @@ jobs:
     - name: Install dev dependencies
       run: pip install -r requirements-dev.txt
 
-    - name: Download all coverage reports
+    - name: Download all built packages
       uses: actions/download-artifact@v2
       with:
         path: dist_raw
 
-    - name: Move coverage reports to the root folder
+    - name: Move packages to dist folder
       run: |
         mkdir dist
         find dist_raw -type f -exec mv '{}' dist \;

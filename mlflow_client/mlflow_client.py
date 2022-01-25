@@ -119,7 +119,7 @@ class MLflowClient:
             View type
 
         Returns
-        ----------
+        -------
         experiments_list: :obj:`mlflow_client.experiment.ExperimentList`
             Experiments list
 
@@ -147,7 +147,7 @@ class MLflowClient:
             View type
 
         Returns
-        ----------
+        -------
         experiments_iterator: :obj:`Iterator` of :obj:`mlflow_client.experiment.Experiment`
             Experiments iterator
 
@@ -172,7 +172,7 @@ class MLflowClient:
             Experiment ID
 
         Returns
-        ----------
+        -------
         experiment: :obj:`mlflow_client.experiment.Experiment`
             Experiment
 
@@ -196,7 +196,7 @@ class MLflowClient:
             Experiment name
 
         Returns
-        ----------
+        -------
         experiment: :obj:`mlflow_client.experiment.Experiment` or None
             Experiment, if exists
 
@@ -225,7 +225,7 @@ class MLflowClient:
             Path for artifacts
 
         Returns
-        ----------
+        -------
         experiment: :obj:`mlflow_client.experiment.Experiment`
             New experiment
 
@@ -336,7 +336,7 @@ class MLflowClient:
             Experiment name
 
         Returns
-        ----------
+        -------
         id : str or None
             Experiment ID, if exists
 
@@ -366,7 +366,7 @@ class MLflowClient:
             Path for artifacts
 
         Returns
-        ----------
+        -------
         experiment : :obj:`mlflow_client.experiment.Experiment`
             New or existing experiment
 
@@ -393,7 +393,7 @@ class MLflowClient:
             Experiment ID
 
         Returns
-        ----------
+        -------
         runs : :obj:`list` of :obj:`mlflow_client.run.Run`
             Runs list
 
@@ -417,7 +417,7 @@ class MLflowClient:
             Experiment ID
 
         Returns
-        ----------
+        -------
         runs : :obj:`Iterator` of :obj:`mlflow_client.run.Run`
             Runs iterator
 
@@ -441,7 +441,7 @@ class MLflowClient:
             Run ID
 
         Returns
-        ----------
+        -------
         run : :obj:`mlflow_client.run.Run`
             Run
 
@@ -475,7 +475,7 @@ class MLflowClient:
             List of run tags
 
         Returns
-        ----------
+        -------
         run : :obj:`mlflow_client.run.Run`
             Run
 
@@ -527,7 +527,7 @@ class MLflowClient:
             End time
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -558,7 +558,7 @@ class MLflowClient:
             Run ID
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -580,7 +580,7 @@ class MLflowClient:
             Run ID
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -606,7 +606,7 @@ class MLflowClient:
             End time
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -635,7 +635,7 @@ class MLflowClient:
             End time
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -664,7 +664,7 @@ class MLflowClient:
             End time
 
         Returns
-        ----------
+        -------
         run_info : :obj:`mlflow_client.run.Runinfo`
             Run info
 
@@ -1076,7 +1076,7 @@ class MLflowClient:
             Metric name
 
         Returns
-        ----------
+        -------
         metrics: :obj:`mlflow_client.run.Metric`
             Metrics list
 
@@ -1105,7 +1105,7 @@ class MLflowClient:
             Metric name
 
         Returns
-        ----------
+        -------
         metrics: :obj:`Iterator` of :obj:`mlflow_client.run.Metric`
             Metrics iterator
 
@@ -1135,7 +1135,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         artifacts_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.artifact.Artifact`
             Artifacts page
 
@@ -1180,7 +1180,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         artifacts: :obj:`Iterator` of :obj:`mlflow_client.artifact.Artifact`
             Artifacts iterator
 
@@ -1242,7 +1242,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         runs_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.run.Run`
             Runs page
 
@@ -1317,7 +1317,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         runs: :obj:`Iterator` of :obj:`mlflow_client.run.Run`
             Runs iterator
 
@@ -1383,7 +1383,7 @@ class MLflowClient:
             List of run tags
 
         Returns
-        ----------
+        -------
         model: :obj:`mlflow_client.modelModel`
             New model
 
@@ -1414,7 +1414,7 @@ class MLflowClient:
             Model name
 
         Returns
-        ----------
+        -------
         model : :obj:`mlflow_client.run.Model`
             Model
 
@@ -1440,7 +1440,7 @@ class MLflowClient:
             List of run tags
 
         Returns
-        ----------
+        -------
         model: :obj:`mlflow_client.modelModel`
             New or existing model
 
@@ -1473,7 +1473,7 @@ class MLflowClient:
             New model name
 
         Returns
-        ----------
+        -------
         model: :obj:`mlflow_client.model.Model`
             Updated model
 
@@ -1501,7 +1501,7 @@ class MLflowClient:
             New model description
 
         Returns
-        ----------
+        -------
         model: :obj:`mlflow_client.model.Model`
             Updated model
 
@@ -1547,7 +1547,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         models_page : :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
             Models page
 
@@ -1584,7 +1584,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         models : :obj:`Iterator` of :obj:`mlflow_client.model.Model`
             Models iterator
 
@@ -1636,7 +1636,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         models_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
             Models page
 
@@ -1694,7 +1694,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         models: :obj:`Iterator` of :obj:`mlflow_client.model.Model`
             Models iterator
 
@@ -1790,7 +1790,7 @@ class MLflowClient:
             Model stages to fetch
 
         Returns
-        ----------
+        -------
         model_versions_list : :obj:`mlflow_client.model.ModelVersionList`
             Model versions list
 
@@ -1836,7 +1836,7 @@ class MLflowClient:
             Model stages to fetch
 
         Returns
-        ----------
+        -------
         model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_client.model.ModelVersion`
             Model versions iterator
 
@@ -1873,7 +1873,7 @@ class MLflowClient:
             Model stages to fetch
 
         Returns
-        ----------
+        -------
         model_versions_list : :obj:`mlflow_client.model.ModelVersionList`
             Model versions list
 
@@ -1907,7 +1907,7 @@ class MLflowClient:
             Model stages to fetch
 
         Returns
-        ----------
+        -------
         model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_client.model.ModelVersion`
             Model versions iterator
 
@@ -1973,7 +1973,7 @@ class MLflowClient:
             List of model tags
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.model.ModelVersion`
             ModelVersion
 
@@ -2021,7 +2021,7 @@ class MLflowClient:
             Version number
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.run.ModelVersion`
             ModelVersion
 
@@ -2052,7 +2052,7 @@ class MLflowClient:
             New model version description
 
         Returns
-        ----------
+        -------
         model_version: :obj:`mlflow_client.model.ModelVersion`
             Updated model version
 
@@ -2167,7 +2167,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         model_versions_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.ModelVersion`
             Model versions page
 
@@ -2225,7 +2225,7 @@ class MLflowClient:
             Previous page token, to start search from next page
 
         Returns
-        ----------
+        -------
         model_versions_iterator: :obj:`Iterator` of :obj:`mlflow_client.model.ModelVersion`
             Model versions iterator
 
@@ -2275,7 +2275,7 @@ class MLflowClient:
             Version number
 
         Returns
-        ----------
+        -------
         download_url: str
             Artifact URL
 
@@ -2313,7 +2313,7 @@ class MLflowClient:
             If `True`, previous model versions should be archived
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.model.ModelVersion`
             Updated model version
 
@@ -2356,7 +2356,7 @@ class MLflowClient:
             If `True`, previous model versions should be archived
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.model.ModelVersion`
             Updated model version
 
@@ -2386,7 +2386,7 @@ class MLflowClient:
             If `True`, previous model versions should be archived
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.model.ModelVersion`
             Updated model version
 
@@ -2413,7 +2413,7 @@ class MLflowClient:
             Version number
 
         Returns
-        ----------
+        -------
         model_version : :obj:`mlflow_client.model.ModelVersion`
             Updated model version
 

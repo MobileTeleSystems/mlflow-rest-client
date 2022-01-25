@@ -70,7 +70,7 @@ class Page:
             Additional params for item constructor
 
         Returns
-        ----------
+        -------
         page : obj:`Page` of `item_class`
             Page of items
 
@@ -109,7 +109,7 @@ class Page:
         Checks whether this page is last or not
 
         Returns
-        ----------
+        -------
         has_next_page: bool
             `True` if there is a next page, `False` if page is last one
         """
