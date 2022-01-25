@@ -27,14 +27,21 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 
 **Features:**
 
+- Minimal dependencies
+
 - Unlike `MLflow Tracking client <https://mlflow.org/docs/latest/python_api/mlflow.tracking.html>`__
-  all REST API methods are exposed to user.
+  all REST API methods and params are exposed to user.
+
+- MLflow URL is passed via constructor argument instead of env variable,
+  so multiple client instances could be created in the same Python interpreter.
+
+- Basic and Bearer auth are supported (via constructor args too).
 
 - All class fields are validated with `pydantic <https://pydantic-docs.helpmanual.io>`_.
 
-- Basic and Bearer auth are supported.
-
 - All methods and classes are documented.
+
+- Supported MLflow versions: from 1.10.0 to 1.23.0
 
 **Limitations:**
 
