@@ -11,12 +11,12 @@ with open(os.path.join(here, "README.rst")) as f:
     long_description = f.read()
 
 setup(
-    name="mlflow-client",
+    name="mlflow-rest-client",
     version_config={
         "template": "{tag}",
         "dev_template": "{tag}.dev{ccount}",
         "dirty_template": "{tag}",
-        "version_file": os.path.join(here, "mlflow_client", "VERSION"),
+        "version_file": os.path.join(here, "mlflow_rest_client", "VERSION"),
         "count_commits_from_version_file": True,
     },
     description="Python client for MLflow API",
@@ -24,7 +24,7 @@ setup(
     long_description_content_type="text/x-rst",
     license="Apache License 2.0",
     license_files=("LICENSE.txt",),
-    url="https://github.com/MobileTeleSystems/mlflow-client",
+    url="https://github.com/MobileTeleSystems/mlflow-rest-client",
     author="MTS DSX Team",
     author_email="dsx-team@mts.ru",
     classifiers=[
@@ -44,10 +44,10 @@ setup(
         "Typing :: Typed",
     ],
     project_urls={
-        "Documentation": "https://mlflow-client.readthedocs.io/en/stable/",
-        "Source": "https://github.com/MobileTeleSystems/mlflow-client",
-        "CI/CD": "https://github.com/MobileTeleSystems/mlflow-client/actions",
-        "Tracker": "https://github.com/MobileTeleSystems/mlflow-client/issues",
+        "Documentation": "https://mlflow-rest-client.readthedocs.io/en/stable/",
+        "Source": "https://github.com/MobileTeleSystems/mlflow-rest-client",
+        "CI/CD": "https://github.com/MobileTeleSystems/mlflow-rest-client/actions",
+        "Tracker": "https://github.com/MobileTeleSystems/mlflow-rest-client/issues",
     },
     keywords="MLflow REST API",
     packages=find_packages(exclude=["docs", "docs.*", "tests", "tests.*", "samples", "samples.*"]),

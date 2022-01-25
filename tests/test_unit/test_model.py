@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 from pydantic import parse_obj_as
 
-from mlflow_client.model import (
+from mlflow_rest_client.model import (
     ListableModel,
     ListableModelVersion,
     Model,

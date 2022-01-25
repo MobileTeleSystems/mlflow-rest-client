@@ -56,7 +56,7 @@ repos:
   rev: 5.10.1
   hooks:
   - id: isort
-    files: mlflow_client/.*
+    files: mlflow_rest_client/.*
   - id: isort
     files: tests/.*
 - repo: https://github.com/pre-commit/pygrep-hooks

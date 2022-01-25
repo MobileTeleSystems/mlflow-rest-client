@@ -4,7 +4,7 @@ Calls API operations on the hard-coded Python scikit-learn run in experiment 0 e
 
 
 import sys
-from mlflow_client import MLflowClient
+from mlflow_rest_client import MLflowRESTClient
 
 
 def process(client):
@@ -59,5 +59,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.stderr.write("ERROR: Expecting BASE_URL")
         sys.exit(1)
-    client = MLflowClient(sys.argv[1])
+    client = MLflowRESTClient(sys.argv[1])
     process(client)

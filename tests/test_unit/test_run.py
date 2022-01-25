@@ -7,8 +7,8 @@ from uuid import uuid4
 import pytest
 from pydantic import parse_obj_as
 
-from mlflow_client.internal import ListableTag
-from mlflow_client.run import (
+from mlflow_rest_client.internal import ListableTag
+from mlflow_rest_client.run import (
     ListableMetric,
     ListableParam,
     ListableRunInfo,

@@ -14,7 +14,7 @@
 
 # pylint: disable= wrong-import-position
 
-from .mlflow_client import MLflowClient
+from .mlflow_rest_client import MLflowRESTClient
 from .version import get_version
 
 __version__ = get_version()

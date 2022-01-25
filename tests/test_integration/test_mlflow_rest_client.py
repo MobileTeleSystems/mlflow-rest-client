@@ -7,9 +7,9 @@ from uuid import uuid4
 import pytest
 from requests import HTTPError
 
-from mlflow_client.experiment import ExperimentStage
-from mlflow_client.model import ModelVersionStage
-from mlflow_client.run import Metric, RunStage, RunStatus
+from mlflow_rest_client.experiment import ExperimentStage
+from mlflow_rest_client.model import ModelVersionStage
+from mlflow_rest_client.run import Metric, RunStage, RunStatus
 
 from .conftest import (
     DEFAULT_TIMEOUT,

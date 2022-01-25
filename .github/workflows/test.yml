@@ -86,7 +86,7 @@ jobs:
       run: pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
 
     - name: Run pylint
-      run: pylint mlflow_client
+      run: pylint mlflow_rest_client
 
     - name: Build package
       run: |

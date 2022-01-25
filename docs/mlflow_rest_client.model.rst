@@ -1,7 +1,7 @@
 Model
 =================================================================
 
-.. currentmodule:: mlflow_client.model
+.. currentmodule:: mlflow_rest_client.model
 
 .. autosummary::
     :nosignatures:
@@ -18,25 +18,25 @@ Model
     ModelVersionState
     ModelVersionStatus
 
-.. autoclass:: mlflow_client.model.Model
+.. autoclass:: mlflow_rest_client.model.Model
     :members:
 
-.. autoclass:: mlflow_client.model.ModelTag
-    :members:
-    :show-inheritance:
-
-.. autoclass:: mlflow_client.model.ModelVersion
-    :members:
-
-.. autoclass:: mlflow_client.model.ModelVersionTag
+.. autoclass:: mlflow_rest_client.model.ModelTag
     :members:
     :show-inheritance:
 
-.. autoclass:: mlflow_client.model.ModelVersionStage
+.. autoclass:: mlflow_rest_client.model.ModelVersion
     :members:
 
-.. autoclass:: mlflow_client.model.ModelVersionState
+.. autoclass:: mlflow_rest_client.model.ModelVersionTag
+    :members:
+    :show-inheritance:
+
+.. autoclass:: mlflow_rest_client.model.ModelVersionStage
     :members:
 
-.. autoclass:: mlflow_client.model.ModelVersionStatus
+.. autoclass:: mlflow_rest_client.model.ModelVersionState
+    :members:
+
+.. autoclass:: mlflow_rest_client.model.ModelVersionStatus
     :members:

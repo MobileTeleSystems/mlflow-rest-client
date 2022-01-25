@@ -18,13 +18,13 @@
     :name: mastertoc
     :hidden:
 
-    mlflow_client.client
-    mlflow_client.artifact
-    mlflow_client.experiment
-    mlflow_client.model
-    mlflow_client.page
-    mlflow_client.run
-    mlflow_client.tag
+    mlflow_rest_client.client
+    mlflow_rest_client.artifact
+    mlflow_rest_client.experiment
+    mlflow_rest_client.model
+    mlflow_rest_client.page
+    mlflow_rest_client.run
+    mlflow_rest_client.tag
 
 .. toctree::
     :maxdepth: 2
@@ -42,7 +42,7 @@
     :caption: Project Links
     :hidden:
 
-    Source Code <https://github.com/MobileTeleSystems/mlflow-client>
-    CI/CD <https://github.com/MobileTeleSystems/mlflow-client/actions>
-    Code Coverage <https://app.codecov.io/gh/MobileTeleSystems/mlflow-client>
-    Issue Tracker <https://github.com/MobileTeleSystems/mlflow-client/issues>
+    Source Code <https://github.com/MobileTeleSystems/mlflow-rest-client>
+    CI/CD <https://github.com/MobileTeleSystems/mlflow-rest-client/actions>
+    Code Coverage <https://app.codecov.io/gh/MobileTeleSystems/mlflow-rest-client>
+    Issue Tracker <https://github.com/MobileTeleSystems/mlflow-rest-client/issues>

@@ -1,12 +1,12 @@
 Artifact
 =================================================================
 
-.. currentmodule:: mlflow_client.artifact
+.. currentmodule:: mlflow_rest_client.artifact
 
 .. autosummary::
     :nosignatures:
 
     Artifact
 
-.. autoclass:: mlflow_client.artifact.Artifact
+.. autoclass:: mlflow_rest_client.artifact.Artifact
     :members:

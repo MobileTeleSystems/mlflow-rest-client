@@ -8,20 +8,20 @@ Python Client for MLflow
 
 .. |status| image:: https://www.repostatus.org/badges/latest/active.svg
     :target: https://www.repostatus.org/#active
-.. |PyPI| image:: https://badge.fury.io/py/mlflow-client.svg
-    :target: https://badge.fury.io/py/mlflow-client
-.. |PyPI License| image:: https://img.shields.io/pypi/l/mlflow-client.svg
-    :target: https://github.com/MobileTeleSystems/mlflow-client/blob/main/LICENSE.txt
-.. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/mlflow-client.svg
-    :target: https://badge.fury.io/py/mlflow-client
-.. |ReadTheDocs| image:: https://img.shields.io/readthedocs/mlflow-client.svg
-    :target: https://mlflow-client.readthedocs.io
-.. |Build| image:: https://github.com/MobileTeleSystems/mlflow-client/workflows/Tests/badge.svg
-    :target: https://github.com/MobileTeleSystems/mlflow-client/actions
-.. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/mlflow-client/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/MobileTeleSystems/mlflow-client
-.. |pre-commit.ci| image:: https://results.pre-commit.ci/badge/github/MobileTeleSystems/mlflow-client/main.svg
-    :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/mlflow-client/main
+.. |PyPI| image:: https://badge.fury.io/py/mlflow-rest-client.svg
+    :target: https://badge.fury.io/py/mlflow-rest-client
+.. |PyPI License| image:: https://img.shields.io/pypi/l/mlflow-rest-client.svg
+    :target: https://github.com/MobileTeleSystems/mlflow-rest-client/blob/main/LICENSE.txt
+.. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/mlflow-rest-client.svg
+    :target: https://badge.fury.io/py/mlflow-rest-client
+.. |ReadTheDocs| image:: https://img.shields.io/readthedocs/mlflow-rest-client.svg
+    :target: https://mlflow-rest-client.readthedocs.io
+.. |Build| image:: https://github.com/MobileTeleSystems/mlflow-rest-client/workflows/Tests/badge.svg
+    :target: https://github.com/MobileTeleSystems/mlflow-rest-client/actions
+.. |Coverage| image:: https://codecov.io/gh/MobileTeleSystems/mlflow-rest-client/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/MobileTeleSystems/mlflow-rest-client
+.. |pre-commit.ci| image:: https://results.pre-commit.ci/badge/github/MobileTeleSystems/mlflow-rest-client/main.svg
+    :target: https://results.pre-commit.ci/latest/github/MobileTeleSystems/mlflow-rest-client/main
 
 Python client for `MLflow <https://mlflow.org>`_ REST API.
 
@@ -51,7 +51,7 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 Documentation
 -------------
 
-See https://mlflow-client.readthedocs.io/
+See https://mlflow-rest-client.readthedocs.io/
 
 .. contribution
 
@@ -78,9 +78,9 @@ Version example: ``2.0.0``
 
 .. code:: bash
 
-    pip install mlflow-client==2.0.0 # exact version
+    pip install mlflow-rest-client==2.0.0 # exact version
 
-    pip install mlflow-client # latest release
+    pip install mlflow-rest-client # latest release
 
 Development release
 ~~~~~~~~~~~~~~~~~~~~
@@ -89,9 +89,9 @@ Version example: ``2.0.0.dev5``
 
 .. code:: bash
 
-    pip install mlflow-client==2.0.0.dev5 # exact dev version
+    pip install mlflow-rest-client==2.0.0.dev5 # exact dev version
 
-    pip install --pre mlflow-client # latest dev version
+    pip install --pre mlflow-rest-client # latest dev version
 
 .. develop
 
@@ -101,9 +101,9 @@ Clone repo:
 
 .. code:: bash
 
-    git clone git@github.com:MobileTeleSystems/mlflow-client.git
+    git clone git@github.com:MobileTeleSystems/mlflow-rest-client.git
 
-    cd mlflow-client
+    cd mlflow-rest-client
 
 Install dependencies for development:
 
@@ -133,11 +133,11 @@ Make sure you have an `MLflow Tracking Server <https://mlflow.org/docs/latest/tr
 
 .. code:: python
 
-    from mlflow_client import MLflowClient
+    from mlflow_rest_client import MLflowRESTClient
 
-    client = MLflowClient("https://mlflow.domain", ignore_ssl_check=True)
+    client = MLflowRESTClient("https://mlflow.domain", ignore_ssl_check=True)
 
     experiment = client.get_or_create_experiment("experiment_name")
     run = client.create_run(experiment.id)
 
-See `sample.py <https://github.com/MobileTeleSystems/mlflow-client/blob/main/samples/sample.py>`_ for more examples.
+See `sample.py <https://github.com/MobileTeleSystems/mlflow-rest-client/blob/main/samples/sample.py>`_ for more examples.

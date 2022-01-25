@@ -1,8 +1,8 @@
 import sys, time
 
-from mlflow_client import MLflowClient
-from mlflow_client.log import get_logger
-from mlflow_client.timestamp import current_timestamp
+from mlflow_rest_client import MLflowRESTClient
+from mlflow_rest_client.log import get_logger
+from mlflow_rest_client.timestamp import current_timestamp
 
 logger = get_logger()
 
@@ -68,5 +68,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.stderr.write("ERROR: Expecting BASE_URL")
         sys.exit(1)
-    client = MLflowClient(sys.argv[1])
+    client = MLflowRESTClient(sys.argv[1])
     process(client)

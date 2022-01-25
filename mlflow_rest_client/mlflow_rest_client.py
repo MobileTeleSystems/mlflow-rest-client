@@ -45,8 +45,8 @@ log = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-public-methods
-class MLflowClient:
-    """HTTP Client for MLflow API
+class MLflowRESTClient:
+    """Client for MLflow REST API
 
     Parameters
     ----------
@@ -72,15 +72,19 @@ class MLflowClient:
     --------
     .. code:: python
 
-        client = MLflowClient(url="http://some.domain:5000")
-        client_with_basic_auth = MLflowClient(
-            url="http://some.domain:5000", user="abc", password="cde"
+        client = MLflowRESTClient(url="http://some.domain:5000")
+        client_with_basic_auth = MLflowRESTClient(
+            url="http://some.domain:5000",
+            user="abc",
+            password="cde",
         )
-        client_with_token_auth = MLflowClient(
-            url="http://some.domain:5000", token="68036ad49a92d53d02cc10ddf5ec2802"
+        client_with_token_auth = MLflowRESTClient(
+            url="http://some.domain:5000",
+            token="68036ad49a92d53d02cc10ddf5ec2802",
         )
-        client_without_ssl_check = MLflowClient(
-            url="http://some.domain:5000", ignore_ssl_check=True
+        client_without_ssl_check = MLflowRESTClient(
+            url="http://some.domain:5000",
+            ignore_ssl_check=True,
         )
     """
 
@@ -115,12 +119,12 @@ class MLflowClient:
 
         Parameters
         ----------
-        view_type : :obj:`mlflow_client.run.RunViewType`, optional
+        view_type : :obj:`mlflow_rest_client.run.RunViewType`, optional
             View type
 
         Returns
         -------
-        experiments_list: :obj:`mlflow_client.experiment.ExperimentList`
+        experiments_list: :obj:`mlflow_rest_client.experiment.ExperimentList`
             Experiments list
 
         Examples
@@ -143,12 +147,12 @@ class MLflowClient:
 
         Parameters
         ----------
-        view_type : :obj:`mlflow_client.run.RunViewType`, optional
+        view_type : :obj:`mlflow_rest_client.run.RunViewType`, optional
             View type
 
         Returns
         -------
-        experiments_iterator: :obj:`Iterator` of :obj:`mlflow_client.experiment.Experiment`
+        experiments_iterator: :obj:`Iterator` of :obj:`mlflow_rest_client.experiment.Experiment`
             Experiments iterator
 
         Examples
@@ -173,7 +177,7 @@ class MLflowClient:
 
         Returns
         -------
-        experiment: :obj:`mlflow_client.experiment.Experiment`
+        experiment: :obj:`mlflow_rest_client.experiment.Experiment`
             Experiment
 
         Examples
@@ -197,7 +201,7 @@ class MLflowClient:
 
         Returns
         -------
-        experiment: :obj:`mlflow_client.experiment.Experiment` or None
+        experiment: :obj:`mlflow_rest_client.experiment.Experiment` or None
             Experiment, if exists
 
         Examples
@@ -226,7 +230,7 @@ class MLflowClient:
 
         Returns
         -------
-        experiment: :obj:`mlflow_client.experiment.Experiment`
+        experiment: :obj:`mlflow_rest_client.experiment.Experiment`
             New experiment
 
         Examples
@@ -367,7 +371,7 @@ class MLflowClient:
 
         Returns
         -------
-        experiment : :obj:`mlflow_client.experiment.Experiment`
+        experiment : :obj:`mlflow_rest_client.experiment.Experiment`
             New or existing experiment
 
         Examples
@@ -394,7 +398,7 @@ class MLflowClient:
 
         Returns
         -------
-        runs : :obj:`list` of :obj:`mlflow_client.run.Run`
+        runs : :obj:`list` of :obj:`mlflow_rest_client.run.Run`
             Runs list
 
         Examples
@@ -418,7 +422,7 @@ class MLflowClient:
 
         Returns
         -------
-        runs : :obj:`Iterator` of :obj:`mlflow_client.run.Run`
+        runs : :obj:`Iterator` of :obj:`mlflow_rest_client.run.Run`
             Runs iterator
 
         Examples
@@ -442,7 +446,7 @@ class MLflowClient:
 
         Returns
         -------
-        run : :obj:`mlflow_client.run.Run`
+        run : :obj:`mlflow_rest_client.run.Run`
             Run
 
         Examples
@@ -476,7 +480,7 @@ class MLflowClient:
 
         Returns
         -------
-        run : :obj:`mlflow_client.run.Run`
+        run : :obj:`mlflow_rest_client.run.Run`
             Run
 
         Examples
@@ -520,7 +524,7 @@ class MLflowClient:
         run_id : str
             Run ID
 
-        status : :obj:`str` or :obj:`mlflow_client.run.RunStatus`
+        status : :obj:`str` or :obj:`mlflow_rest_client.run.RunStatus`
             Run status
 
         end_time : :obj:`int` or :obj:`datetime.datetime`, optional
@@ -528,7 +532,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -559,7 +563,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -581,7 +585,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -607,7 +611,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -636,7 +640,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -665,7 +669,7 @@ class MLflowClient:
 
         Returns
         -------
-        run_info : :obj:`mlflow_client.run.Runinfo`
+        run_info : :obj:`mlflow_rest_client.run.Runinfo`
             Run info
 
         Examples
@@ -1077,7 +1081,7 @@ class MLflowClient:
 
         Returns
         -------
-        metrics: :obj:`mlflow_client.run.Metric`
+        metrics: :obj:`mlflow_rest_client.run.Metric`
             Metrics list
 
         Examples
@@ -1106,7 +1110,7 @@ class MLflowClient:
 
         Returns
         -------
-        metrics: :obj:`Iterator` of :obj:`mlflow_client.run.Metric`
+        metrics: :obj:`Iterator` of :obj:`mlflow_rest_client.run.Metric`
             Metrics iterator
 
         Examples
@@ -1136,7 +1140,7 @@ class MLflowClient:
 
         Returns
         -------
-        artifacts_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.artifact.Artifact`
+        artifacts_page: :obj:`mlflow_rest_client.page.Page` of :obj:`mlflow_rest_client.artifact.Artifact`
             Artifacts page
 
         Examples
@@ -1181,7 +1185,7 @@ class MLflowClient:
 
         Returns
         -------
-        artifacts: :obj:`Iterator` of :obj:`mlflow_client.artifact.Artifact`
+        artifacts: :obj:`Iterator` of :obj:`mlflow_rest_client.artifact.Artifact`
             Artifacts iterator
 
         Examples
@@ -1229,7 +1233,7 @@ class MLflowClient:
         query : str, optional
             Query to search
 
-        run_view_type : :obj:`mlflow_client.run.RunViewType`, optional
+        run_view_type : :obj:`mlflow_rest_client.run.RunViewType`, optional
             View type
 
         max_results : int, optional
@@ -1243,7 +1247,7 @@ class MLflowClient:
 
         Returns
         -------
-        runs_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.run.Run`
+        runs_page: :obj:`mlflow_rest_client.page.Page` of :obj:`mlflow_rest_client.run.Run`
             Runs page
 
         Examples
@@ -1304,7 +1308,7 @@ class MLflowClient:
         query : str, optional
             Query to search
 
-        run_view_type : :obj:`mlflow_client.run.RunViewType`, optional
+        run_view_type : :obj:`mlflow_rest_client.run.RunViewType`, optional
             View type
 
         max_results : int, optional
@@ -1318,7 +1322,7 @@ class MLflowClient:
 
         Returns
         -------
-        runs: :obj:`Iterator` of :obj:`mlflow_client.run.Run`
+        runs: :obj:`Iterator` of :obj:`mlflow_rest_client.run.Run`
             Runs iterator
 
         Examples
@@ -1384,7 +1388,7 @@ class MLflowClient:
 
         Returns
         -------
-        model: :obj:`mlflow_client.modelModel`
+        model: :obj:`mlflow_rest_client.modelModel`
             New model
 
         Examples
@@ -1415,7 +1419,7 @@ class MLflowClient:
 
         Returns
         -------
-        model : :obj:`mlflow_client.run.Model`
+        model : :obj:`mlflow_rest_client.run.Model`
             Model
 
         Examples
@@ -1441,7 +1445,7 @@ class MLflowClient:
 
         Returns
         -------
-        model: :obj:`mlflow_client.modelModel`
+        model: :obj:`mlflow_rest_client.modelModel`
             New or existing model
 
         Examples
@@ -1474,7 +1478,7 @@ class MLflowClient:
 
         Returns
         -------
-        model: :obj:`mlflow_client.model.Model`
+        model: :obj:`mlflow_rest_client.model.Model`
             Updated model
 
         Examples
@@ -1502,7 +1506,7 @@ class MLflowClient:
 
         Returns
         -------
-        model: :obj:`mlflow_client.model.Model`
+        model: :obj:`mlflow_rest_client.model.Model`
             Updated model
 
         Examples
@@ -1548,7 +1552,7 @@ class MLflowClient:
 
         Returns
         -------
-        models_page : :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
+        models_page : :obj:`mlflow_rest_client.page.Page` of :obj:`mlflow_rest_client.model.Model`
             Models page
 
         Examples
@@ -1585,7 +1589,7 @@ class MLflowClient:
 
         Returns
         -------
-        models : :obj:`Iterator` of :obj:`mlflow_client.model.Model`
+        models : :obj:`Iterator` of :obj:`mlflow_rest_client.model.Model`
             Models iterator
 
         Examples
@@ -1637,7 +1641,7 @@ class MLflowClient:
 
         Returns
         -------
-        models_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.Model`
+        models_page: :obj:`mlflow_rest_client.page.Page` of :obj:`mlflow_rest_client.model.Model`
             Models page
 
         Examples
@@ -1695,7 +1699,7 @@ class MLflowClient:
 
         Returns
         -------
-        models: :obj:`Iterator` of :obj:`mlflow_client.model.Model`
+        models: :obj:`Iterator` of :obj:`mlflow_rest_client.model.Model`
             Models iterator
 
         Examples
@@ -1786,12 +1790,12 @@ class MLflowClient:
         name : str
             Model name
 
-        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+        stages : :obj:`list` of :obj:`mlflow_rest_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
             Model stages to fetch
 
         Returns
         -------
-        model_versions_list : :obj:`mlflow_client.model.ModelVersionList`
+        model_versions_list : :obj:`mlflow_rest_client.model.ModelVersionList`
             Model versions list
 
         Examples
@@ -1832,12 +1836,12 @@ class MLflowClient:
         name : str
             Model name
 
-        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+        stages : :obj:`list` of :obj:`mlflow_rest_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
             Model stages to fetch
 
         Returns
         -------
-        model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_client.model.ModelVersion`
+        model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_rest_client.model.ModelVersion`
             Model versions iterator
 
         Examples
@@ -1869,12 +1873,12 @@ class MLflowClient:
         name : str
             Model name
 
-        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+        stages : :obj:`list` of :obj:`mlflow_rest_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
             Model stages to fetch
 
         Returns
         -------
-        model_versions_list : :obj:`mlflow_client.model.ModelVersionList`
+        model_versions_list : :obj:`mlflow_rest_client.model.ModelVersionList`
             Model versions list
 
         Examples
@@ -1903,12 +1907,12 @@ class MLflowClient:
         name : str
             Model name
 
-        stages : :obj:`list` of :obj:`mlflow_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
+        stages : :obj:`list` of :obj:`mlflow_rest_client.model.ModelVersionStage` or :obj:`list` of :obj:`str`, optional
             Model stages to fetch
 
         Returns
         -------
-        model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_client.model.ModelVersion`
+        model_versions_iterator : :obj:`Iterator` or :obj:`mlflow_rest_client.model.ModelVersion`
             Model versions iterator
 
         Examples
@@ -1974,7 +1978,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.model.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.model.ModelVersion`
             ModelVersion
 
         Examples
@@ -2022,7 +2026,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.run.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.run.ModelVersion`
             ModelVersion
 
         Examples
@@ -2053,7 +2057,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version: :obj:`mlflow_client.model.ModelVersion`
+        model_version: :obj:`mlflow_rest_client.model.ModelVersion`
             Updated model version
 
         Examples
@@ -2168,7 +2172,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_versions_page: :obj:`mlflow_client.page.Page` of :obj:`mlflow_client.model.ModelVersion`
+        model_versions_page: :obj:`mlflow_rest_client.page.Page` of :obj:`mlflow_rest_client.model.ModelVersion`
             Model versions page
 
         Examples
@@ -2226,7 +2230,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_versions_iterator: :obj:`Iterator` of :obj:`mlflow_client.model.ModelVersion`
+        model_versions_iterator: :obj:`Iterator` of :obj:`mlflow_rest_client.model.ModelVersion`
             Model versions iterator
 
         Examples
@@ -2306,7 +2310,7 @@ class MLflowClient:
         version: int
             Version number
 
-        stage : :obj:`str` or :obj:`mlflow_client.model.ModelVersionStage`
+        stage : :obj:`str` or :obj:`mlflow_rest_client.model.ModelVersionStage`
             Model version state
 
         archive_existing : bool, optional
@@ -2314,7 +2318,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.model.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.model.ModelVersion`
             Updated model version
 
         Examples
@@ -2357,7 +2361,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.model.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.model.ModelVersion`
             Updated model version
 
         Examples
@@ -2387,7 +2391,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.model.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.model.ModelVersion`
             Updated model version
 
         Examples
@@ -2414,7 +2418,7 @@ class MLflowClient:
 
         Returns
         -------
-        model_version : :obj:`mlflow_client.model.ModelVersion`
+        model_version : :obj:`mlflow_rest_client.model.ModelVersion`
             Updated model version
 
         Examples

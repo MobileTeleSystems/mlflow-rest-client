@@ -44,9 +44,12 @@ Changelog
 
     .. change::
         :tags: client, breaking
-        :tickets: DSX:545
+        :tickets: DSX:545, DSX:632
 
-        Rename ``MLflowApiClient`` to ``MLflowClient``
+        Rename library:
+
+            * ``mlflow-client`` -> ``mlflow-rest-client``
+            * ``MLflowApiClient`` -> ``MLflowRESTClient``
 
     .. change::
         :tags: general, feature
@@ -506,7 +509,7 @@ Changelog
         :tickets: SCRR:111
         :changeset: 77e7f798
 
-        ``mlflow-client`` package was created based on ``mlflow-python-client <https://github.com/amesar/mlflow-python-client>``__
+        ``mlflow-rest-client`` package was created based on ``mlflow-python-client <https://github.com/amesar/mlflow-python-client>``__
 
     .. change::
         :tags: artifact, feature

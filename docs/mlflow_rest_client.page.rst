@@ -1,12 +1,12 @@
 Page
 =================================================================
 
-.. currentmodule:: mlflow_client.page
+.. currentmodule:: mlflow_rest_client.page
 
 .. autosummary::
     :nosignatures:
 
     Page
 
-.. autoclass:: mlflow_client.page.Page
+.. autoclass:: mlflow_rest_client.page.Page
     :members:

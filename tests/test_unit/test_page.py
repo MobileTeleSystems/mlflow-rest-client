@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from mlflow_client.page import Page
+from mlflow_rest_client.page import Page
 
 from .conftest import DEFAULT_TIMEOUT, rand_str
 

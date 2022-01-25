@@ -28,7 +28,7 @@ ver = Version(
 
 # -- Project information -----------------------------------------------------
 
-project = "mlflow-client"
+project = "mlflow-rest-client"
 copyright = "2022, MTS (Mobile Telesystems)"
 author = "MTS DSX Team"
 
@@ -65,7 +65,7 @@ exclude_patterns = ["_build", "Thumds.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"mlflow-client {version}"
+html_title = f"mlflow-rest-client {version}"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -99,15 +99,15 @@ changelog_inner_tag_sort = ["breaking", "deprecated", "feature", "bug", "refacto
 changelog_hive_sections_from_tags = True
 
 changelog_render_ticket = {
-    "default": "https://github.com/MobileTeleSystems/mlflow-client/issues/%s",
+    "default": "https://github.com/MobileTeleSystems/mlflow-rest-client/issues/%s",
     "DSX": "https://jira.bd.msk.mts.ru/browse/DSX-%s",
     "SCRR": "https://jira.bd.msk.mts.ru/browse/SCRR-%s",
 }
 changelog_render_pullreq = {
-    "default": "https://github.com/MobileTeleSystems/mlflow-client/pull/%s",
+    "default": "https://github.com/MobileTeleSystems/mlflow-rest-client/pull/%s",
     "gitlab": "https://gitlab.services.mts.ru/bigdata/platform/dsx/mlflow-client/-/merge_requests/%s",
 }
-changelog_render_changeset = "https://github.com/MobileTeleSystems/mlflow-client/commit/%s"
+changelog_render_changeset = "https://github.com/MobileTeleSystems/mlflow-rest-client/commit/%s"
 
 language = "en"
 

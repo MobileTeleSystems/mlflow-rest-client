@@ -26,7 +26,7 @@ from pydantic import (  # pylint: disable=no-name-in-module
     validator,
 )
 
-from mlflow_client.internal import ListableBase
+from mlflow_rest_client.internal import ListableBase
 
 from .tag import Tag
 

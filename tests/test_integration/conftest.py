@@ -8,10 +8,10 @@ from datetime import datetime
 
 import pytest
 
-from mlflow_client import MLflowClient
-from mlflow_client.experiment import Experiment
-from mlflow_client.model import Model, ModelVersion
-from mlflow_client.run import Run
+from mlflow_rest_client import MLflowRESTClient
+from mlflow_rest_client.experiment import Experiment
+from mlflow_rest_client.model import Model, ModelVersion
+from mlflow_rest_client.run import Run
 
 log = logging.getLogger(__name__)
 
@@ -44,11 +44,11 @@ def now() -> datetime:
 
 
 @pytest.fixture(scope="session")
-def client() -> MLflowClient:
+def client() -> MLflowRESTClient:
     host = os.environ.get("MLFLOW_HOST", "localhost")
     port = os.environ.get("MLFLOW_PORT", "5000")
     api_url = f"http://{host}:{port}"
-    with MLflowClient(api_url) as client:
+    with MLflowRESTClient(api_url) as client:
         yield client
 
 

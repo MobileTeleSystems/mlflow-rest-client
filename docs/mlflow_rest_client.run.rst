@@ -1,7 +1,7 @@
 Run
 =================================================================
 
-.. currentmodule:: mlflow_client.run
+.. currentmodule:: mlflow_rest_client.run
 
 .. autosummary::
     :nosignatures:
@@ -24,31 +24,31 @@ Run
     Metric
     RunTag
 
-.. autoclass:: mlflow_client.run.Run
+.. autoclass:: mlflow_rest_client.run.Run
     :members:
 
-.. autoclass:: mlflow_client.run.RunStage
+.. autoclass:: mlflow_rest_client.run.RunStage
     :members:
 
-.. autoclass:: mlflow_client.run.RunStatus
+.. autoclass:: mlflow_rest_client.run.RunStatus
     :members:
 
-.. autoclass:: mlflow_client.run.RunInfo
+.. autoclass:: mlflow_rest_client.run.RunInfo
     :members:
 
-.. autoclass:: mlflow_client.run.RunViewType
+.. autoclass:: mlflow_rest_client.run.RunViewType
     :members:
 
-.. autoclass:: mlflow_client.run.RunData
+.. autoclass:: mlflow_rest_client.run.RunData
     :members:
 
-.. autoclass:: mlflow_client.run.Param
+.. autoclass:: mlflow_rest_client.run.Param
     :members:
     :show-inheritance:
 
-.. autoclass:: mlflow_client.run.Metric
+.. autoclass:: mlflow_rest_client.run.Metric
     :members:
 
-.. autoclass:: mlflow_client.run.RunTag
+.. autoclass:: mlflow_rest_client.run.RunTag
     :members:
     :show-inheritance:
