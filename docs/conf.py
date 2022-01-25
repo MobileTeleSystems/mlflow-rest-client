@@ -23,6 +23,7 @@ ver = Version(
     subprocess.check_output(  # nosec
         f"{sys.executable} {setup_py} --version",
         shell=True,
+        cwd=Path(__file__).parent.parent,
     )
     .decode("utf-8")
     .strip()
@@ -37,7 +38,7 @@ author = "MTS DSX Team"
 # The short X.Y version
 version = ver.base_version
 # The full version, including alpha/beta/rc tags
-release = ver.public
+release = str(ver)
 
 
 # -- General configuration ---------------------------------------------------
