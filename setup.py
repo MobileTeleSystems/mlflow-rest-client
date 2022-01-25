@@ -12,7 +12,8 @@ with open(os.path.join(here, "README.rst")) as f:
 
 setup(
     name="mlflow-rest-client",
-    version_config={
+    setuptools_git_versioning={
+        "enabled": True,
         "template": "{tag}",
         "dev_template": "{tag}.dev{ccount}",
         "dirty_template": "{tag}",
