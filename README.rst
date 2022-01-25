@@ -41,8 +41,6 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 
 - All methods and classes are documented.
 
-- Supported MLflow versions: from 1.10.0 to 1.23.0
-
 **Limitations:**
 
 - There is no integration with ML frameworks and libraries.
@@ -50,6 +48,9 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 
 - There is no integration with S3 or other artifact storage type.
   You should access it directly with `boto3 <https://boto3.amazonaws.com>`_ or other client.
+
+- Supported MLflow versions: from ``1.17.0`` to ``1.23.0``.
+  It is possible to use client with older MLflow versions (e.g. ``1.10.0``), but this is not guaranteed.
 
 - Only Python 3.7+ is supported. Python 3.6 and lower already reached end of life.
 
