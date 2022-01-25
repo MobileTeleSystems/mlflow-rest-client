@@ -60,9 +60,8 @@ jobs:
         - os: ubuntu-latest
           python-version: '3.10'
           mlflow-version: 1.16.0
-        - os: ubuntu-latest
-          python-version: '3.10'
-          mlflow-version: 1.15.0
+          # exclude 1.15.0 because of MLflow migration bug on Postgres
+          # https://github.com/mlflow/mlflow/pull/4211
         - os: ubuntu-latest
           python-version: '3.10'
           mlflow-version: 1.14.1
