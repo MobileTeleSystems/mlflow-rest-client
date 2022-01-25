@@ -17,9 +17,11 @@ from pathlib import Path
 from packaging.version import Version
 
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
+
+setup_py = Path(__file__).parent.parent.joinpath("setup.py").absolute()
 ver = Version(
     subprocess.check_output(  # nosec
-        f"{sys.executable} ../setup.py --version",
+        f"{sys.executable} {setup_py} --version",
         shell=True,
     )
     .decode("utf-8")
