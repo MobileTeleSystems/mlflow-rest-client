@@ -32,7 +32,7 @@ Python client for `MLflow <https://mlflow.org>`_ REST API.
 
 - All class fields are validated with `pydantic <https://pydantic-docs.helpmanual.io>`_.
 
-- Basic and Bearer auth is supported.
+- Basic and Bearer auth are supported.
 
 - All methods and classes are documented.
 

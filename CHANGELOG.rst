@@ -5,6 +5,7 @@ Changelog
 --------------------
 .. changelog::
     :version: 2.0.0
+    :released: 25.01.2021 11:45
 
     .. change::
         :tags: general
