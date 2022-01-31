@@ -32,7 +32,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         checkName: Tests done (pull_request)
-        ref: ${{ github.head_ref || github.ref }}
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
         intervalSeconds: 60
         timeoutSeconds: 3600
 
