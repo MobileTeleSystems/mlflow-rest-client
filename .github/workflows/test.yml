@@ -20,14 +20,14 @@ jobs:
       uses: fkirc/skip-duplicate-actions@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        concurrent_skipping: same_content
+        concurrent_skipping: same_content_newer
         cancel_others: true
         skip_after_successful_duplicate: false
         paths_ignore: '["**/*.rst"]'
-        do_not_skip: '["pull_request"]'
+        do_not_skip: '["push"]'
 
   tests:
-    name: Run tests (${{ github.event_name }}, ${{ matrix.python-version }} on ${{ matrix.os }}, MLflow ${{ matrix.mlflow-version }})
+    name: Run tests (${{ matrix.python-version }} on ${{ matrix.os }}, MLflow ${{ matrix.mlflow-version }})
     runs-on: ${{ matrix.os }}
     needs: [check_duplicate_runs]
     if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
@@ -155,7 +155,7 @@ jobs:
         path: reports/coverage-${{ matrix.python-version }}.xml
 
   all_done:
-    name: Tests done (${{ github.event_name }})
+    name: Tests done
     runs-on: ubuntu-latest
     needs: [tests]
 
