@@ -8,5 +8,8 @@
 # catch-all rule (this only gets matched if no rules below match)
 * @dolfinus @morgangt @antevis
 
+# pre-commit hooks
+/.pre-commit-config.yaml @MTSOnGithub
+
 # CI/code
 /.github/ @vitfsb
