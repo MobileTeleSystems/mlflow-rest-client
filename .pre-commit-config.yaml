@@ -74,7 +74,7 @@ repos:
   - id: pyupgrade
     args: [--py37-plus, --keep-runtime-typing]
 - repo: https://github.com/psf/black
-  rev: 22.1.0
+  rev: 22.3.0
   hooks:
   - id: black
     language_version: python3
@@ -88,7 +88,7 @@ repos:
   - id: mypy
     additional_dependencies: [types-requests]
 - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
-  rev: v1.0.5
+  rev: v1.0.6
   hooks:
   - id: python-bandit-vulnerability-check
     # TODO: remove line below after https://github.com/PyCQA/bandit/issues/488
