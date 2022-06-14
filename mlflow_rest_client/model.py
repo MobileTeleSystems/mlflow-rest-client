@@ -103,7 +103,7 @@ class ModelVersionStatus(BaseModel):
         frozen = True
 
     @validator("state")
-    def valid_state(cls, val):  # pylint: disable=no-self-argument, no-self-use
+    def valid_state(cls, val):  # pylint: disable=no-self-argument
         return ModelVersionState(val) if isinstance(val, str) else ModelVersionState.PENDING
 
     def __str__(self):
