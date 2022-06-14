@@ -176,7 +176,7 @@ class ListableModelTag(ListableBase):
     __root__: List[ModelTag]
 
 
-# pylint: disable=too-many-instance-attributes, no-self-argument, no-self-use
+# pylint: disable=too-many-instance-attributes, no-self-argument
 class ModelVersion(BaseModel):
     """Model version representation
 
