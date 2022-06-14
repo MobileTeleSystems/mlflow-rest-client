@@ -48,7 +48,7 @@ class Tag(BaseModel):
         return self.key
 
     @root_validator(pre=True)
-    def to_dict(cls, values: dict) -> dict:  # pylint: disable=no-self-argument, no-self-use
+    def to_dict(cls, values: dict) -> dict:  # pylint: disable=no-self-argument
         """Bring to a single format."""
         if isinstance(values, dict) and ("key" not in values and "value" not in values):
             result = {}
