@@ -145,7 +145,7 @@ class RunInfo(BaseModel):
         allow_population_by_field_name = True
 
     @root_validator(pre=True)
-    def validate_date(cls, values):  # pylint: disable=no-self-argument, no-self-use
+    def validate_date(cls, values):  # pylint: disable=no-self-argument
         if not values.get("id"):
             values["id"] = values.get("run_id") or values.get("run_uuid")
         return values
