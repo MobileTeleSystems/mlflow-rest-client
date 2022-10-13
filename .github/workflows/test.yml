@@ -2,11 +2,13 @@ name: Tests
 
 on:
   push:
-    branches:
-    - '**'
+    branches-ignore:
+    - dependabot/**
+    - pre-commit-ci-update-config
   pull_request:
     branches:
     - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
