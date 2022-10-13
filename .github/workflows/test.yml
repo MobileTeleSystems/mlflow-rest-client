@@ -8,29 +8,14 @@ on:
     branches:
     - main
 
-jobs:
-  check_duplicate_runs:
-    name: Check for duplicate runs
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-    - id: skip_check
-      uses: fkirc/skip-duplicate-actions@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        concurrent_skipping: same_content_newer
-        cancel_others: true
-        skip_after_successful_duplicate: false
-        paths_ignore: '["**/*.rst"]'
-        do_not_skip: '["push"]'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
+jobs:
   tests:
     name: Run tests (${{ matrix.python-version }} on ${{ matrix.os }}, MLflow ${{ matrix.mlflow-version }})
     runs-on: ${{ matrix.os }}
-    needs: [check_duplicate_runs]
-    if: ${{ needs.check_duplicate_runs.outputs.should_skip != 'true' }}
     strategy:
       fail-fast: false
       matrix:
