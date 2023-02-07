@@ -343,7 +343,6 @@ def test_fail_run(create_run, client):
 
 @pytest.mark.timeout(DEFAULT_TIMEOUT)
 def test_kill_run(create_run, client):
-
     run = create_run
 
     end_time = now()
