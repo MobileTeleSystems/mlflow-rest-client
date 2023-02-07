@@ -139,7 +139,6 @@ class ModelVersionTag(Tag):
 
 
 class ListableModelVersionTag(ListableBase):
-
     __root__: List[ModelVersionTag] = []
 
 
@@ -172,7 +171,6 @@ class ModelTag(Tag):
 
 
 class ListableModelTag(ListableBase):
-
     __root__: List[ModelTag]
 
 
@@ -296,7 +294,6 @@ class ModelVersion(BaseModel):
 
     @root_validator(pre=True)
     def main_validator(cls, values):
-
         if "state_message" in values:
             values["state"]["message"] = values["state_message"]
 
@@ -307,11 +304,9 @@ class ModelVersion(BaseModel):
 
 
 class ListableModelVersion(ListableBase):
-
     __root__: List[ModelVersion]
 
     def __getitem__(self, item):
-
         if isinstance(item, ModelVersionStage):
             res = {i.stage: i for i in self.__root__}
             return res[item]
@@ -324,7 +319,6 @@ class ListableModelVersion(ListableBase):
 
     def __contains__(self, item):
         for itm in self.__root__:
-
             if isinstance(item, ModelVersionStage) and item == itm.stage:
                 return True
 
@@ -351,11 +345,9 @@ class Model(BaseModel):
 
 
 class ListableModel(ListableBase):
-
     __root__: List[Model]
 
     def __getitem__(self, item):
-
         if isinstance(item, str):
             res = {i.name: i for i in self.__root__}
             return res[item]

@@ -51,7 +51,6 @@ class ListableBase(BaseModel):
 
 
 class ListableTag(ListableBase):
-
     __root__: List[Tag]
 
     def __getitem__(self, item):

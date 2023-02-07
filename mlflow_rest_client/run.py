@@ -155,7 +155,6 @@ class RunInfo(BaseModel):
 
 
 class ListableRunInfo(ListableBase):
-
     __root__: List[RunInfo]
 
     def __getitem__(self, item):
@@ -202,7 +201,6 @@ class Param(Tag):
 
 
 class ListableParam(ListableBase):
-
     __root__: List[Param]
 
 
@@ -263,7 +261,6 @@ class Metric(BaseModel):
 
 
 class ListableMetric(ListableBase):
-
     __root__: List[Metric]
 
 

@@ -63,7 +63,6 @@ class ExperimentTag(Tag):
 
 
 class ListExperimentTags(ListableBase):
-
     __root__: List[ExperimentTag]
 
 
