@@ -14,6 +14,7 @@ setup(
     name="mlflow-rest-client",
     setuptools_git_versioning={
         "enabled": True,
+        "dev_template": "{tag}.dev{ccount}",
         "version_file": os.path.join(here, "mlflow_rest_client", "VERSION"),
         "count_commits_from_version_file": True,
     },

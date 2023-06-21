@@ -2,12 +2,9 @@ name: Tests
 
 on:
   push:
-    branches-ignore:
-    - dependabot/**
-    - pre-commit-ci-update-config
-  pull_request:
     branches:
-    - main
+    - master
+  pull_request:
   workflow_dispatch:
 
 concurrency:
