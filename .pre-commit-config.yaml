@@ -25,7 +25,7 @@ repos:
   - id: trailing-whitespace
   - id: detect-private-key
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.5.1
+  rev: v1.5.3
   hooks:
   - id: remove-tabs
     exclude: ^docs/(make.bat|Makefile)$
