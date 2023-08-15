@@ -25,7 +25,7 @@ repos:
   - id: trailing-whitespace
   - id: detect-private-key
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.5.3
+  rev: v1.5.4
   hooks:
   - id: remove-tabs
     exclude: ^docs/(make.bat|Makefile)$
@@ -83,7 +83,7 @@ repos:
   hooks:
   - id: blacken-docs
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.4.1
+  rev: v1.5.0
   hooks:
   - id: mypy
     additional_dependencies: [types-requests]
