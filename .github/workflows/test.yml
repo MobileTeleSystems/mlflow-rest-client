@@ -115,7 +115,7 @@ jobs:
         docker-compose -f ./docker/docker-compose.test.yml down
 
     - name: Upload coverage results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: code-coverage-${{ matrix.python-version }}
         path: reports/*
