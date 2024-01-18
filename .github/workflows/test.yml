@@ -45,7 +45,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
@@ -71,7 +71,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Cache Docker layers
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /tmp/.buildx-cache
         key: buildx-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version }}-${{ hashFiles('docker/Dockerfile') }}
@@ -135,7 +135,7 @@ jobs:
         python-version: ${{ env.DEFAULT_PYTHON }}
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
