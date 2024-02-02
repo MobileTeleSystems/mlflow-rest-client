@@ -1,4 +1,5 @@
-import sys, time
+import sys
+import time
 
 from mlflow_rest_client import MLflowRESTClient
 from mlflow_rest_client.log import get_logger

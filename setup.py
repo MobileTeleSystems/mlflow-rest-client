@@ -21,10 +21,10 @@ setup(
     description="Python client for MLflow REST API",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    license="Apache License 2.0",
+    license="Apache-2.0",
     license_files=("LICENSE.txt",),
     url="https://github.com/MobileTeleSystems/mlflow-rest-client",
-    author="MTS DSX Team",
+    author="DSX Team",
     author_email="dsx-team@mts.ru",
     classifiers=[
         "Development Status :: 4 - Beta",

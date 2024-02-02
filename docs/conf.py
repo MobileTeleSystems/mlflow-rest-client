@@ -10,8 +10,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 from packaging.version import Version
@@ -32,8 +32,8 @@ ver = Version(
 # -- Project information -----------------------------------------------------
 
 project = "mlflow-rest-client"
-copyright = "2022, MTS (Mobile Telesystems)"
-author = "MTS DSX Team"
+copyright = "2021-2024, MTS (Mobile Telesystems)"
+author = "DSX Team"
 
 # The short X.Y version
 version = ver.base_version
