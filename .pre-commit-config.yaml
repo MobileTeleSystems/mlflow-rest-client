@@ -1,103 +1,116 @@
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
-  hooks:
-  - id: check-ast
-  - id: check-case-conflict
-  - id: check-docstring-first
-  - id: check-executables-have-shebangs
-  - id: check-merge-conflict
-  - id: check-toml
-  - id: check-vcs-permalinks
-  - id: check-yaml
-  - id: file-contents-sorter
-    files: ^(docker\/\.env.*)$
-  - id: requirements-txt-fixer
-    files: ^(requirements.*\.txt)$
-  - id: end-of-file-fixer
-    exclude: ^.*/VERSION$
-  - id: fix-byte-order-marker
-  - id: fix-encoding-pragma
-    args: [--remove]
-  - id: name-tests-test
-    files: ^tests/(test_integration|test_unit)/.*\.py$
-    args: [--django]
-  - id: trailing-whitespace
-  - id: detect-private-key
-- repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.5.4
-  hooks:
-  - id: remove-tabs
-    exclude: ^docs/(make.bat|Makefile)$
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.2.6
-  hooks:
-  - id: codespell
-    args: [-w]
-- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.12.0
-  hooks:
-  - id: pretty-format-yaml
-    args: [--autofix, --indent, '2']
-- repo: https://github.com/lovesegfault/beautysh
-  rev: v6.2.1
-  hooks:
-  - id: beautysh
-- repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
-  rev: v0.1.0
-  hooks:
-  - id: dockerfilelint
-- repo: https://github.com/IamTheFij/docker-pre-commit
-  rev: v3.0.1
-  hooks:
-  - id: docker-compose-check
-    files: ^docker\/docker-compose.*\.(yaml|yml)$
-- repo: https://github.com/pycqa/isort
-  rev: 5.13.2
-  hooks:
-  - id: isort
-    files: mlflow_rest_client/.*
-  - id: isort
-    files: tests/.*
-- repo: https://github.com/pre-commit/pygrep-hooks
-  rev: v1.10.0
-  hooks:
-  - id: python-no-log-warn
-  - id: python-no-eval
-  - id: rst-backticks
-  - id: rst-directive-colons
-  - id: rst-inline-touching-normal
-  - id: text-unicode-replacement-char
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.15.0
-  hooks:
-  - id: pyupgrade
-    args: [--py37-plus, --keep-runtime-typing]
-- repo: https://github.com/psf/black
-  rev: 24.1.1
-  hooks:
-  - id: black
-    language_version: python3
-- repo: https://github.com/asottile/blacken-docs
-  rev: 1.16.0
-  hooks:
-  - id: blacken-docs
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.8.0
-  hooks:
-  - id: mypy
-    additional_dependencies: [types-requests]
-- repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
-  rev: v1.0.6
-  hooks:
-  - id: python-bandit-vulnerability-check
-    # TODO: remove line below after https://github.com/PyCQA/bandit/issues/488
-    args: [-lll, --recursive, -x, './venv/*,./tests/*,./.pytest_cache/*', .]
-- repo: meta
-  hooks:
-  - id: check-hooks-apply
-  - id: check-useless-excludes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-yaml
+      - id: file-contents-sorter
+        files: ^(docker\/\.env.*)$
+      - id: requirements-txt-fixer
+        files: ^(requirements.*\.txt)$
+      - id: end-of-file-fixer
+        exclude: ^.*/VERSION$
+      - id: fix-byte-order-marker
+      - id: fix-encoding-pragma
+        args: [--remove]
+      - id: name-tests-test
+        files: ^tests/(test_integration|test_unit)/.*\.py$
+        args: [--django]
+      - id: trailing-whitespace
+      - id: detect-private-key
 
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: remove-tabs
+        exclude: ^docs/(make.bat|Makefile)$
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args: [-w]
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.12.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', --offset, '2']
+
+  - repo: https://github.com/lovesegfault/beautysh
+    rev: v6.2.1
+    hooks:
+      - id: beautysh
+
+  - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
+    rev: v0.1.0
+    hooks:
+      - id: dockerfilelint
+
+  - repo: https://github.com/IamTheFij/docker-pre-commit
+    rev: v3.0.1
+    hooks:
+      - id: docker-compose-check
+        files: ^docker\/docker-compose.*\.(yaml|yml)$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-no-log-warn
+      - id: python-no-eval
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
+      - id: text-unicode-replacement-char
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus, --keep-runtime-typing]
+
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/asottile/blacken-docs
+    rev: 1.16.0
+    hooks:
+      - id: blacken-docs
+        additional_dependencies:
+          - black==24.1.1
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+    rev: v1.0.6
+    hooks:
+      - id: python-bandit-vulnerability-check
+    # TODO: remove line below after https://github.com/PyCQA/bandit/issues/488
+        args: [-lll, --recursive, -x, './venv/*,./tests/*,./.pytest_cache/*', .]
+
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
 
 ci:
-  skip: [docker-compose-check]
+  skip:
+    - docker-compose-check

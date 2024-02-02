@@ -3,7 +3,7 @@ name: Tests
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
   workflow_dispatch:
 
@@ -22,103 +22,103 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-latest
-          python-version: '3.11'
-          mlflow-version: 1.23.0
-        - os: ubuntu-latest
-          python-version: '3.7'
-          mlflow-version: 1.17.0
+          - os: ubuntu-latest
+            python-version: '3.11'
+            mlflow-version: 1.23.0
+          - os: ubuntu-latest
+            python-version: '3.7'
+            mlflow-version: 1.17.0
 
     env:
       MLFLOW_HOST: localhost
       MLFLOW_PORT: 5000
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
-        restore-keys: |
-          pip-${{ runner.os }}-${{ matrix.python-version }}-
-          pip-${{ runner.os }}-
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ matrix.python-version }}-
+            pip-${{ runner.os }}-
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip setuptools wheel
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-test.txt -r requirements-dev.txt
 
-    - name: Run pylint
-      run: pylint mlflow_rest_client
+      - name: Run pylint
+        run: pylint mlflow_rest_client
 
-    - name: Build package
-      run: |
-        python setup.py --version
-        python setup.py bdist_wheel sdist
+      - name: Build package
+        run: |
+          python setup.py --version
+          python setup.py bdist_wheel sdist
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Cache Docker layers
-      uses: actions/cache@v4
-      with:
-        path: /tmp/.buildx-cache
-        key: buildx-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version }}-${{ hashFiles('docker/Dockerfile') }}
-        restore-keys: |
-          buildx-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version }}-
-          buildx-${{ runner.os }}-${{ matrix.python-version }}-
-          buildx-${{ runner.os }}-
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: buildx-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version }}-${{ hashFiles('docker/Dockerfile') }}
+          restore-keys: |
+            buildx-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version }}-
+            buildx-${{ runner.os }}-${{ matrix.python-version }}-
+            buildx-${{ runner.os }}-
 
-    - name: Build MLflow image
-      uses: docker/build-push-action@v5
-      with:
-        context: docker
-        build-args: MLFLOW_VERSION=${{ matrix.mlflow-version }}
-        push: false
-        load: true
-        tags: mlflow-test:${{ matrix.mlflow-version }}
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new
+      - name: Build MLflow image
+        uses: docker/build-push-action@v5
+        with:
+          context: docker
+          build-args: MLFLOW_VERSION=${{ matrix.mlflow-version }}
+          push: false
+          load: true
+          tags: mlflow-test:${{ matrix.mlflow-version }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-    - name: Move cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-    - name: Run MLflow container
-      env:
-        MLFLOW_VERSION: ${{ matrix.mlflow-version }}
-      run: |
-        docker-compose -f ./docker/docker-compose.test.yml up -d
+      - name: Run MLflow container
+        env:
+          MLFLOW_VERSION: ${{ matrix.mlflow-version }}
+        run: |
+          docker-compose -f ./docker/docker-compose.test.yml up -d
 
-    - name: Run tests
-      run: |
-        mkdir reports/
-        pip install -e .
-        ./docker/wait-for-it.sh -h $MLFLOW_HOST -p $MLFLOW_PORT -t 0
-        coverage run -m pytest --reruns 5
+      - name: Run tests
+        run: |
+          mkdir reports/
+          pip install -e .
+          ./docker/wait-for-it.sh -h $MLFLOW_HOST -p $MLFLOW_PORT -t 0
+          coverage run -m pytest --reruns 5
 
-    - name: Stop MLflow container
-      if: always()
-      run: |
-        docker-compose -f ./docker/docker-compose.test.yml down
+      - name: Stop MLflow container
+        if: always()
+        run: |
+          docker-compose -f ./docker/docker-compose.test.yml down
 
-    - name: Upload coverage results
-      uses: actions/upload-artifact@v4
-      with:
-        name: code-coverage-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version}}
-        path: reports/*
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.mlflow-version}}
+          path: reports/*
 
   all_done:
     name: Tests done
@@ -126,45 +126,45 @@ jobs:
     needs: [tests]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
 
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ env.DEFAULT_PYTHON }}-coverage
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip setuptools wheel
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
 
-    - name: Install dependencies
-      run: pip install -I coverage pytest
+      - name: Install dependencies
+        run: pip install -I coverage pytest
 
-    - name: Download all coverage reports
-      uses: actions/download-artifact@v4
-      with:
-        path: reports
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
 
-    - name: Move coverage data to the root folder
-      run: find reports -type f -exec mv '{}' reports \;
+      - name: Move coverage data to the root folder
+        run: find reports -type f -exec mv '{}' reports \;
 
-    - name: Generate coverate reports
-      run: |
-        coverage combine
-        coverage xml -o reports/coverage.xml -i
+      - name: Generate coverate reports
+        run: |
+          coverage combine
+          coverage xml -o reports/coverage.xml -i
 
-    - name: Check coverage
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./reports
-        fail_ci_if_error: true
+      - name: Check coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./reports
+          fail_ci_if_error: true
 
-    - name: All done
-      run: echo 1
+      - name: All done
+        run: echo 1

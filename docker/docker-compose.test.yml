@@ -9,19 +9,19 @@ services:
     env_file: .env.test
     restart: unless-stopped
     ports:
-    - 127.0.0.1:5000:5000
+      - 127.0.0.1:5000:5000
     depends_on:
-    - mlflow-db
+      - mlflow-db
     networks:
-    - default
-    - db
+      - default
+      - db
 
   mlflow-db:
     image: postgres:11.8
     env_file: .env.test
     restart: unless-stopped
     networks:
-    - db
+      - db
 networks:
   db:
     internal: true

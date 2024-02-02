@@ -3,8 +3,8 @@ name: Dev release
 on:
   push:
     branches-ignore:
-    - dependabot/**
-    - pre-commit-ci-update-config
+      - dependabot/**
+      - pre-commit-ci-update-config
   workflow_dispatch:
 
 env:
@@ -27,24 +27,24 @@ jobs:
       id-token: write # to auth in Test PyPI
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-      id: python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        id: python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip setuptools wheel
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip setuptools wheel
 
-    - name: Build package
-      run: python setup.py sdist bdist_wheel
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
 
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
