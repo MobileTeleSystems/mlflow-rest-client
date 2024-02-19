@@ -7,4 +7,9 @@ updates:
     schedule:
       interval: daily
     labels:
-      - ci
+      - type:ci
+    # https://til.simonwillison.net/github/dependabot-python-setup
+    groups:
+      github-actions:
+        patterns:
+          - '*'
